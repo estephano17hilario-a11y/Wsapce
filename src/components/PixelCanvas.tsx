@@ -98,11 +98,17 @@ export default function PixelCanvas({ width = 420, height = 300 }: PixelCanvasPr
       ctx.fillRect(0, 0, width, height)
     }
 
+    let parallaxX = 0
+    let parallaxY = 0
+
     const drawStars = () => {
       for (const s of stars) {
         const a = 0.5 + 0.5 * Math.sin(t * 0.03 + s.p)
         ctx.fillStyle = `rgba(255,255,255,${a})`
-        ctx.fillRect(s.x, s.y, s.r, s.r)
+        // Parallax suave según puntero
+        const px = s.x + parallaxX * 0.08 * s.r
+        const py = s.y + parallaxY * 0.08 * s.r
+        ctx.fillRect(px, py, s.r, s.r)
       }
     }
 
@@ -154,20 +160,38 @@ export default function PixelCanvas({ width = 420, height = 300 }: PixelCanvasPr
     const onMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect()
       const mx = e.clientX - rect.left
+      const my = e.clientY - rect.top
       hue = (190 + (mx / width) * 120) % 360
+      parallaxX = (mx / width - 0.5) * 10
+      parallaxY = (my / height - 0.5) * 10
     }
     canvas.addEventListener('mousemove', onMove)
+
+    const onEnter = () => {
+      // Intensifica el glow en hover
+      for (let i = 0; i < 30; i++) {
+        stars.push({ x: Math.random() * width, y: Math.random() * height, r: Math.random() * 1.2 + 0.3, p: Math.random() * Math.PI * 2 })
+      }
+    }
+    const onLeave = () => {
+      parallaxX = 0
+      parallaxY = 0
+    }
+    canvas.addEventListener('mouseenter', onEnter)
+    canvas.addEventListener('mouseleave', onLeave)
 
     return () => {
       cancelAnimationFrame(raf)
       canvas.removeEventListener('mousemove', onMove)
+      canvas.removeEventListener('mouseenter', onEnter)
+      canvas.removeEventListener('mouseleave', onLeave)
     }
   }, [width, height])
 
   return (
     <canvas
       ref={canvasRef}
-      className="rounded-xl border border-cyan-900/40 shadow-md bg-black/60"
+      className="rounded-xl border border-cyan-900/40 shadow-xl bg-black/60"
       aria-label="Lienzo cósmico interactivo"
     />
   )
