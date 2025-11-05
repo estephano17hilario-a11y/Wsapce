@@ -58,6 +58,17 @@ body {
   transform: scale(1.02);
 }
 
+/* Fondo cósmico para CTA */
+.cta-radial {
+  background: radial-gradient(closest-side, rgba(34, 211, 238, 0.12), transparent);
+  filter: blur(24px);
+}
+
+.cta-aurora {
+  background: linear-gradient(to top, rgba(34, 211, 238, 0.10), rgba(168,85,247,0.12), transparent);
+  filter: blur(16px);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

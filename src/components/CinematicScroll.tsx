@@ -4,9 +4,7 @@ import { useLayoutEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Image from 'next/image';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 
 // Registrar plugins de GSAP
 if (typeof window !== 'undefined') {
@@ -128,11 +126,14 @@ export default function CinematicScroll() {
         "-=1.5"
       )
 
-      // ESCENA 6: La Oferta (83.3% - 100%)
+      // ESCENA 6: CTA (83.3% - 100%)
       .fromTo(scene6Ref.current, 
-        { opacity: 0, y: 200, scale: 0.8 }, 
-        { opacity: 1, y: 0, scale: 1, duration: 3, ease: "power3.out" }
-      );
+        { opacity: 0, y: 200, scale: 0.95 }, 
+        { opacity: 1, y: 0, scale: 1, duration: 2.2, ease: "power3.out" }
+      )
+      .fromTo('.cta-title', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 1.2, ease: 'power2.out' }, "-=1")
+      .fromTo('.cta-subtitle', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 1, ease: 'power2.out' }, "-=0.6")
+      .fromTo('.cta-button', { opacity: 0, y: 20, scale: 0.98 }, { opacity: 1, y: 0, scale: 1, duration: 0.9, ease: 'back.out(1.4)' }, "-=0.4");
 
       // Configurar ScrollTrigger con mejor control
       ScrollTrigger.create({
@@ -167,23 +168,8 @@ export default function CinematicScroll() {
         }
       });
 
-      // Animaciones adicionales para elementos individuales
-      gsap.fromTo(".pricing-card", 
-        { y: 100, opacity: 0, rotationY: 45 },
-        { 
-          y: 0, 
-          opacity: 1, 
-          rotationY: 0,
-          duration: 1.5,
-          stagger: 0.2,
-          ease: "back.out(1.7)",
-          scrollTrigger: {
-            trigger: scene6Ref.current,
-            start: "top center",
-            toggleActions: "play none none reverse"
-          }
-        }
-      );
+      // Animación ligera de glow para el CTA
+      gsap.to('.cta-button', { boxShadow: '0 0 30px rgba(34, 211, 238, 0.6)', repeat: -1, yoyo: true, duration: 2.5, ease: 'sine.inOut' });
 
     }, mainContainerRef);
 
@@ -300,95 +286,25 @@ export default function CinematicScroll() {
           </div>
         </div>
 
-        {/* ESCENA 6: La Oferta (Sección de Precios) */}
-        <div ref={scene6Ref} className="absolute inset-0 w-full h-full bg-slate-950 opacity-0">
-          <div className="flex items-center justify-center h-full p-8">
-            <div className="max-w-6xl mx-auto">
-              <div className="text-center mb-12">
-                <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-white to-cyan-400 bg-clip-text text-transparent">
-                  Wspace
-                </h1>
-                <p className="text-xl text-gray-300 mb-8">
-                  Tu plataforma para el viaje definitivo
-                </p>
-              </div>
-              
-              <div className="grid md:grid-cols-3 gap-8">
-                {/* Plan Básico */}
-                <Card className="pricing-card bg-slate-900 border-slate-700 hover:border-cyan-400 transition-colors">
-                  <CardHeader>
-                    <CardTitle className="text-white text-2xl">Explorador</CardTitle>
-                    <CardDescription className="text-gray-400">
-                      Para comenzar tu viaje
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-4xl font-bold text-white mb-4">
-                      $29<span className="text-lg text-gray-400">/mes</span>
-                    </div>
-                    <ul className="space-y-2 text-gray-300 mb-6">
-                      <li>✓ Acceso básico al cosmos</li>
-                      <li>✓ 5 viajes por mes</li>
-                      <li>✓ Soporte estándar</li>
-                    </ul>
-                    <Button className="w-full bg-cyan-600 hover:bg-cyan-700 glow-cyan">
-                      Comenzar Viaje
-                    </Button>
-                  </CardContent>
-                </Card>
+        {/* ESCENA 6: CTA final Wspace */}
+        <div ref={scene6Ref} className="absolute inset-0 w-full h-full bg-gradient-to-b from-slate-950 via-black to-black opacity-0">
+          <div className="relative h-full flex items-center justify-center p-8">
+            {/* Fondo cósmico ligero */}
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[80vw] h-[80vw] cta-radial"></div>
+              <div className="absolute bottom-0 left-0 w-full h-1/2 cta-aurora"></div>
+            </div>
 
-                {/* Plan Premium */}
-                <Card className="pricing-card bg-slate-900 border-cyan-400 hover:border-cyan-300 transition-colors relative">
-                  <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-cyan-400 text-black">
-                    Más Popular
-                  </Badge>
-                  <CardHeader>
-                    <CardTitle className="text-white text-2xl">Navegante</CardTitle>
-                    <CardDescription className="text-gray-400">
-                      Para viajeros experimentados
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-4xl font-bold text-white mb-4">
-                      $79<span className="text-lg text-gray-400">/mes</span>
-                    </div>
-                    <ul className="space-y-2 text-gray-300 mb-6">
-                      <li>✓ Acceso completo al cosmos</li>
-                      <li>✓ Viajes ilimitados</li>
-                      <li>✓ Soporte prioritario</li>
-                      <li>✓ Herramientas avanzadas</li>
-                    </ul>
-                    <Button className="w-full bg-cyan-400 hover:bg-cyan-500 text-black glow-cyan">
-                      Explorar Galaxias
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                {/* Plan Enterprise */}
-                <Card className="pricing-card bg-slate-900 border-slate-700 hover:border-purple-400 transition-colors">
-                  <CardHeader>
-                    <CardTitle className="text-white text-2xl">Comandante</CardTitle>
-                    <CardDescription className="text-gray-400">
-                      Para expediciones corporativas
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-4xl font-bold text-white mb-4">
-                      $199<span className="text-lg text-gray-400">/mes</span>
-                    </div>
-                    <ul className="space-y-2 text-gray-300 mb-6">
-                      <li>✓ Acceso a múltiples universos</li>
-                      <li>✓ Expediciones en equipo</li>
-                      <li>✓ Soporte 24/7</li>
-                      <li>✓ API personalizada</li>
-                      <li>✓ Análisis avanzado</li>
-                    </ul>
-                    <Button className="w-full bg-purple-600 hover:bg-purple-700 glow-cyan">
-                      Liderar Expedición
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
+            <div className="relative text-center max-w-3xl">
+              <h1 className="cta-title text-6xl md:text-8xl font-extrabold tracking-tight cinematic-text">
+                Wspace
+              </h1>
+              <p className="cta-subtitle mt-6 text-xl md:text-2xl text-gray-300">
+                Donde tu viaje se vuelve épico.
+              </p>
+              <Button className="cta-button mt-10 px-8 py-6 text-lg rounded-full bg-cyan-500 hover:bg-cyan-400 text-black glow-cyan">
+                Empezamos
+              </Button>
             </div>
           </div>
         </div>
