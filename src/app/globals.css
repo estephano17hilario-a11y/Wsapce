@@ -98,6 +98,7 @@ body {
   border-radius: 24px;
   background: conic-gradient(from 140deg, rgba(34, 211, 238, 0.25), rgba(168,85,247,0.25), transparent 70%);
   filter: blur(30px);
+  animation: spin 18s linear infinite;
 }
 
 .hover-tilt {
@@ -106,6 +107,37 @@ body {
 .hover-tilt:hover {
   transform: perspective(900px) rotateX(1.5deg) rotateY(-1.5deg) scale(1.02);
   box-shadow: 0 40px 80px rgba(0,0,0,0.7), 0 0 60px rgba(34, 211, 238, 0.25);
+}
+
+/* Ruido premium y subrayado de lujo para títulos */
+.premium-noise {
+  background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 3px 3px;
+  opacity: 0.25;
+  mix-blend-mode: soft-light;
+}
+
+.title-underline {
+  width: 160px;
+  height: 2px;
+  margin: 0.75rem auto 0;
+  background: linear-gradient(to right, rgba(34,211,238,0), rgba(34,211,238,0.8), rgba(168,85,247,0.8), rgba(168,85,247,0));
+  box-shadow: 0 0 20px rgba(34,211,238,0.35);
+  border-radius: 9999px;
+}
+
+/* Animaciones sutiles premium */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes floatSoft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.float-soft {
+  animation: floatSoft 7s ease-in-out infinite;
 }
 
 @theme inline {

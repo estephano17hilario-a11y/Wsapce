@@ -59,17 +59,19 @@ export default function SectionTwoOne() {
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[60vw] h-[60vw] cta-radial" />
         <div className="absolute bottom-0 left-0 w-full h-1/2 cta-aurora" />
+        <div className="absolute inset-0 premium-noise" />
       </div>
 
       <div className="max-w-7xl mx-auto">
-        <h2 ref={titleRef} className="text-center text-3xl md:text-5xl font-extrabold cinematic-text shine-text mb-16">
+        <h2 ref={titleRef} className="text-center text-3xl md:text-5xl font-extrabold cinematic-text shine-text mb-6">
           WSPACE.LIVE: TU IMPERIO, TU LIENZO CÓSMICO
         </h2>
+        <div className="title-underline mb-10" />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-14 items-center">
           {/* Columna Izquierda: Visual (Lienzo) */}
           <div ref={leftRef} className="flex justify-center">
-            <div className="relative lux-card hover-tilt">
+            <div className="relative lux-card hover-tilt float-soft">
               {/* Ring de gradiente premium */}
               <div className="absolute -inset-4 -z-10 gradient-ring" />
               {/* Canvas cósmico interactivo */}
