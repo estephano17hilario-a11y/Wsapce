@@ -35,6 +35,17 @@ export default function CinematicScroll() {
       const img3 = scene3Ref.current?.querySelector('img') as HTMLElement | null
       const img4 = scene4Ref.current?.querySelector('img') as HTMLElement | null
       const img5 = scene5Ref.current?.querySelector('img') as HTMLElement | null
+      // Títulos y subtítulos para escenas (CTA-style)
+      const title1 = text1Ref.current?.querySelector('h1') as HTMLElement | null
+      const subtitle1 = text1Ref.current?.querySelector('p') as HTMLElement | null
+      const title2 = text2Ref.current?.querySelector('h1') as HTMLElement | null
+      const subtitle2 = text2Ref.current?.querySelector('p') as HTMLElement | null
+      const title3 = text3Ref.current?.querySelector('h1') as HTMLElement | null
+      const subtitle3 = text3Ref.current?.querySelector('p') as HTMLElement | null
+      const title4 = text4Ref.current?.querySelector('h1') as HTMLElement | null
+      const subtitle4 = text4Ref.current?.querySelector('p') as HTMLElement | null
+      const title5 = text5Ref.current?.querySelector('h1') as HTMLElement | null
+      const subtitle5 = text5Ref.current?.querySelector('p') as HTMLElement | null
       // Configurar estado inicial de todas las escenas
       gsap.set([scene2Ref.current, scene3Ref.current, scene4Ref.current, scene5Ref.current, scene6Ref.current], { opacity: 0 });
       gsap.set([text1Ref.current, text2Ref.current, text3Ref.current, text4Ref.current, text5Ref.current], { opacity: 0, y: 50 });
@@ -48,15 +59,21 @@ export default function CinematicScroll() {
         { opacity: 1, scale: 4.0, yPercent: 6, transformOrigin: '50% 80%' },
         { opacity: 1, scale: 1, yPercent: 0, duration: 2.2, ease: 'none' }
       )
-      // Texto: mantener animaciones existentes
-      tl.fromTo(text1Ref.current, 
-        { opacity: 0 }, 
-        { opacity: 1, duration: 1.2, ease: "power2.out" }
+      // Texto (Escena 1): efecto CTA para título y subtítulo
+      tl.fromTo(text1Ref.current, { opacity: 0 }, { opacity: 1, duration: 0.8, ease: 'power2.out' }, "-=0.8")
+      .fromTo(
+        title1,
+        { opacity: 0, filter: 'blur(14px)', letterSpacing: '0.15em', scale: 1.2, y: 40, transformOrigin: 'center center' },
+        { opacity: 1, filter: 'blur(0px)', letterSpacing: '0em', scale: 1, y: 0, duration: 1.8, ease: 'expo.out' },
+        "-=0.8"
       )
-      .to(text1Ref.current, 
-        { opacity: 0, duration: 0.8, ease: "power2.in" }, 
-        "+=1.2"
+      .fromTo(
+        subtitle1,
+        { opacity: 0, filter: 'blur(10px)', y: 30 },
+        { opacity: 1, filter: 'blur(0px)', y: 0, duration: 1.4, ease: 'power3.out' },
+        "-=0.7"
       )
+      .to([title1, subtitle1], { opacity: 0, duration: 1.0, ease: 'power2.in' }, "+=1.2")
       // Imagen: fade out al salir de la escena
       .to(img1, { opacity: 0, duration: 0.8, ease: 'power2.in' }, "-=0.6")
       // Contenedor: solo fade out
@@ -74,16 +91,21 @@ export default function CinematicScroll() {
         { opacity: 1, scale: 1, duration: 2, ease: 'none' },
         "-=0.4"
       )
-      // Texto: solo fade in/out
-      .fromTo(text2Ref.current, 
-        { opacity: 0 }, 
-        { opacity: 1, duration: 1.2, ease: "power2.out" }, 
+      // Texto (Escena 2): efecto CTA para título y subtítulo
+      .fromTo(text2Ref.current, { opacity: 0 }, { opacity: 1, duration: 0.8, ease: 'power2.out' }, "-=0.8")
+      .fromTo(
+        title2,
+        { opacity: 0, filter: 'blur(14px)', letterSpacing: '0.15em', scale: 1.2, y: 40, transformOrigin: 'center center' },
+        { opacity: 1, filter: 'blur(0px)', letterSpacing: '0em', scale: 1, y: 0, duration: 1.8, ease: 'expo.out' },
         "-=0.8"
       )
-      .to(text2Ref.current, 
-        { opacity: 0, duration: 0.8, ease: "power2.in" }, 
-        "+=1.2"
+      .fromTo(
+        subtitle2,
+        { opacity: 0, filter: 'blur(10px)', y: 30 },
+        { opacity: 1, filter: 'blur(0px)', y: 0, duration: 1.4, ease: 'power3.out' },
+        "-=0.7"
       )
+      .to([title2, subtitle2], { opacity: 0, duration: 1.0, ease: 'power2.in' }, "+=1.2")
       // Imagen: fade out y contenedor: solo fade out
       .to(img2, { opacity: 0, duration: 0.8, ease: 'power2.in' }, "-=0.6")
       .to(scene2Ref.current, { opacity: 0, duration: 0.8, ease: 'power2.in' }, "-=0.4")
@@ -100,44 +122,63 @@ export default function CinematicScroll() {
         { opacity: 1, scale: 0.12, duration: 2.6, ease: 'none' },
         "-=0.4"
       )
-      // Texto: solo fade in/out
-      .fromTo(text3Ref.current, 
-        { opacity: 0 }, 
-        { opacity: 1, duration: 1.2, ease: "power2.out" }, 
+      // Texto (Escena 3): efecto CTA para título y subtítulo
+      .fromTo(text3Ref.current, { opacity: 0 }, { opacity: 1, duration: 0.8, ease: 'power2.out' }, "-=0.8")
+      .fromTo(
+        title3,
+        { opacity: 0, filter: 'blur(14px)', letterSpacing: '0.15em', scale: 1.2, y: 40, transformOrigin: 'center center' },
+        { opacity: 1, filter: 'blur(0px)', letterSpacing: '0em', scale: 1, y: 0, duration: 1.8, ease: 'expo.out' },
         "-=0.8"
       )
-      .to(text3Ref.current, 
-        { opacity: 0, duration: 0.8, ease: "power2.in" }, 
-        "+=1.2"
+      .fromTo(
+        subtitle3,
+        { opacity: 0, filter: 'blur(10px)', y: 30 },
+        { opacity: 1, filter: 'blur(0px)', y: 0, duration: 1.4, ease: 'power3.out' },
+        "-=0.7"
       )
+      .to([title3, subtitle3], { opacity: 0, duration: 1.0, ease: 'power2.in' }, "+=1.2")
       // Pausa breve antes de salida de Tierra (se detiene un poco)
-      .to({}, { duration: 0.5 })
+      .to({}, { duration: 0.3 })
       // Tierra se va un poco antes (sin solape con Espacio)
       .to(img3, { opacity: 0, duration: 0.7, ease: 'power2.in' })
       .to(scene3Ref.current, { opacity: 0, duration: 0.7, ease: 'power2.in' })
 
       // ESCENA 4: Viaje Cósmico (50% - 66.6%)
-      // Contenedor: fade in después de la salida de Tierra
+      // Contenedor: fade in solapado, antes de que termine de irse Tierra
       .fromTo(scene4Ref.current, 
         { opacity: 0 }, 
-        { opacity: 1, duration: 0.8, ease: "power2.out" }
+        { opacity: 1, duration: 0.6, ease: "power2.out" },
+        "-=1.6" // entra mucho antes, incluso con Tierra visible
       )
-      // Imagen del Espacio: entrada desde adentro hacia afuera (zoom-out)
+      // Imagen del Espacio: fade-in 2x y zoom-in muy agresivo ligado al scroll
+      .fromTo(img4, { opacity: 0 }, { opacity: 1, duration: 1.6, ease: 'power2.out' }, "-=1.5")
       .fromTo(img4,
-        { opacity: 0, scale: 3.0, transformOrigin: 'center center' },
-        { opacity: 1, scale: 1.0, duration: 2.4, ease: 'none' }
+        { scale: 4.2, transformOrigin: 'center center' },
+        { scale: 1.0, duration: 2.8, ease: 'none' },
+        "-=1.5"
       )
-      // Texto: solo fade in/out
-      .fromTo(text4Ref.current, 
-        { opacity: 0 }, 
-        { opacity: 1, duration: 1.2, ease: "power2.out" }, 
-        "-=0.8"
+      // Asegurar visibilidad del contenedor de texto (evita que desaparezca)
+      .fromTo(text4Ref.current,
+        { opacity: 0 },
+        { opacity: 1, duration: 0.8, ease: 'power2.out' },
+        "-=1.4"
       )
-      .to(text4Ref.current, 
-        { opacity: 0, duration: 0.8, ease: "power2.in" }, 
-        "+=1.2"
+      // Texto: igual al CTA (Wspace) para título y subtítulo
+      .fromTo(
+        title4,
+        { opacity: 0, filter: 'blur(14px)', letterSpacing: '0.15em', scale: 1.2, y: 40, transformOrigin: 'center center' },
+        { opacity: 1, filter: 'blur(0px)', letterSpacing: '0em', scale: 1, y: 0, duration: 1.8, ease: 'expo.out' },
+        "-=1.2"
       )
-      // Imagen: fade out y contenedor: solo fade out
+      .fromTo(
+        subtitle4,
+        { opacity: 0, filter: 'blur(10px)', y: 30 },
+        { opacity: 1, filter: 'blur(0px)', y: 0, duration: 1.4, ease: 'power3.out' },
+        "-=1.0"
+      )
+      .to([title4, subtitle4], { opacity: 0, duration: 1.0, ease: 'power2.in' }, "+=1.2")
+      // Imagen: salida con más zoom-out + fade out
+      .to(img4, { scale: 0.9, duration: 1.4, ease: 'none' })
       .to(img4, { opacity: 0, duration: 0.8, ease: 'power2.in' }, "-=0.6")
       .to(scene4Ref.current, { opacity: 0, duration: 0.8, ease: 'power2.in' }, "-=0.4")
 
@@ -153,16 +194,21 @@ export default function CinematicScroll() {
         { opacity: 1, scale: 1, duration: 2, ease: 'none' },
         "-=0.4"
       )
-      // Texto: solo fade in/out
-      .fromTo(text5Ref.current, 
-        { opacity: 0 }, 
-        { opacity: 1, duration: 1.2, ease: "power2.out" }, 
+      // Texto (Escena 5): efecto CTA para título y subtítulo
+      .fromTo(text5Ref.current, { opacity: 0 }, { opacity: 1, duration: 0.8, ease: 'power2.out' }, "-=0.8")
+      .fromTo(
+        title5,
+        { opacity: 0, filter: 'blur(14px)', letterSpacing: '0.15em', scale: 1.2, y: 40, transformOrigin: 'center center' },
+        { opacity: 1, filter: 'blur(0px)', letterSpacing: '0em', scale: 1, y: 0, duration: 1.8, ease: 'expo.out' },
         "-=0.8"
       )
-      .to(text5Ref.current, 
-        { opacity: 0, duration: 0.8, ease: "power2.in" }, 
-        "+=1.2"
+      .fromTo(
+        subtitle5,
+        { opacity: 0, filter: 'blur(10px)', y: 30 },
+        { opacity: 1, filter: 'blur(0px)', y: 0, duration: 1.4, ease: 'power3.out' },
+        "-=0.7"
       )
+      .to([title5, subtitle5], { opacity: 0, duration: 1.0, ease: 'power2.in' }, "+=1.2")
       // Imagen: fade out y contenedor: solo fade out
       .to(img5, { opacity: 0, duration: 0.8, ease: 'power2.in' }, "-=0.6")
       .to(scene5Ref.current, { opacity: 0, duration: 0.8, ease: 'power2.in' }, "-=0.4")
