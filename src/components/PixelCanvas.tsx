@@ -65,6 +65,8 @@ export default function PixelCanvas({ width = 420, height = 300 }: PixelCanvasPr
     let hue = 190
     let t = 0
     let raf = 0
+    let running = true
+    let isInView = true
 
     const colorFor = (ch: string) => {
       switch (ch) {
@@ -147,6 +149,7 @@ export default function PixelCanvas({ width = 420, height = 300 }: PixelCanvasPr
     }
 
     const render = () => {
+      if (!running) return
       t++
       drawBackground()
       drawStars()
@@ -157,7 +160,11 @@ export default function PixelCanvas({ width = 420, height = 300 }: PixelCanvasPr
 
     raf = requestAnimationFrame(render)
 
+    let lastMove = 0
     const onMove = (e: MouseEvent) => {
+      const now = performance.now()
+      if (now - lastMove < 16) return // ~60fps throttle
+      lastMove = now
       const rect = canvas.getBoundingClientRect()
       const mx = e.clientX - rect.left
       const my = e.clientY - rect.top
@@ -165,7 +172,7 @@ export default function PixelCanvas({ width = 420, height = 300 }: PixelCanvasPr
       parallaxX = (mx / width - 0.5) * 10
       parallaxY = (my / height - 0.5) * 10
     }
-    canvas.addEventListener('mousemove', onMove)
+    canvas.addEventListener('mousemove', onMove, { passive: true })
 
     const onEnter = () => {
       // Intensifica el glow en hover
@@ -180,11 +187,37 @@ export default function PixelCanvas({ width = 420, height = 300 }: PixelCanvasPr
     canvas.addEventListener('mouseenter', onEnter)
     canvas.addEventListener('mouseleave', onLeave)
 
+    // Pausar cuando el canvas no esté visible para ahorrar CPU
+    const io = new IntersectionObserver(([entry]) => {
+      isInView = entry.isIntersecting
+      running = isInView && !document.hidden
+      if (running && !raf) {
+        raf = requestAnimationFrame(render)
+      } else if (!running && raf) {
+        cancelAnimationFrame(raf)
+        raf = 0
+      }
+    }, { root: null, threshold: 0.1 })
+    io.observe(canvas)
+
+    const onVisibility = () => {
+      running = isInView && !document.hidden
+      if (running && !raf) {
+        raf = requestAnimationFrame(render)
+      } else if (!running && raf) {
+        cancelAnimationFrame(raf)
+        raf = 0
+      }
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+
     return () => {
       cancelAnimationFrame(raf)
       canvas.removeEventListener('mousemove', onMove)
       canvas.removeEventListener('mouseenter', onEnter)
       canvas.removeEventListener('mouseleave', onLeave)
+      io.disconnect()
+      document.removeEventListener('visibilitychange', onVisibility)
     }
   }, [width, height])
 

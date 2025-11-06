@@ -29,6 +29,18 @@ export default function CinematicScroll() {
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
+      // Cachear imágenes de escenas para evitar querySelector en cada tick
+      const img1 = scene1Ref.current?.querySelector('img') as HTMLElement | null
+      const img2 = scene2Ref.current?.querySelector('img') as HTMLElement | null
+      const img3 = scene3Ref.current?.querySelector('img') as HTMLElement | null
+      const img4 = scene4Ref.current?.querySelector('img') as HTMLElement | null
+      const img5 = scene5Ref.current?.querySelector('img') as HTMLElement | null
+
+      const setY1 = img1 ? gsap.quickSetter(img1, 'y', 'px') : null
+      const setY2 = img2 ? gsap.quickSetter(img2, 'y', 'px') : null
+      const setY3 = img3 ? gsap.quickSetter(img3, 'y', 'px') : null
+      const setY4 = img4 ? gsap.quickSetter(img4, 'y', 'px') : null
+      const setY5 = img5 ? gsap.quickSetter(img5, 'y', 'px') : null
       // Configurar estado inicial de todas las escenas
       gsap.set([scene2Ref.current, scene3Ref.current, scene4Ref.current, scene5Ref.current, scene6Ref.current], { opacity: 0 });
       gsap.set([text1Ref.current, text2Ref.current, text3Ref.current, text4Ref.current, text5Ref.current], { opacity: 0, y: 50 });
@@ -147,29 +159,21 @@ export default function CinematicScroll() {
         refreshPriority: -1,
         onUpdate: (self) => {
           // Efectos adicionales basados en el progreso
-          const progress = self.progress;
-          
-          // Efecto de paralaje sutil en las imágenes
-          if (scene1Ref.current) {
-            gsap.set(scene1Ref.current.querySelector('img'), { y: progress * -50 });
-          }
-          if (scene2Ref.current) {
-            gsap.set(scene2Ref.current.querySelector('img'), { y: progress * -30 });
-          }
-          if (scene3Ref.current) {
-            gsap.set(scene3Ref.current.querySelector('img'), { y: progress * -70 });
-          }
-          if (scene4Ref.current) {
-            gsap.set(scene4Ref.current.querySelector('img'), { y: progress * -40 });
-          }
-          if (scene5Ref.current) {
-            gsap.set(scene5Ref.current.querySelector('img'), { y: progress * -60 });
-          }
+          const progress = self.progress
+          // Paralaje sutil usando quickSetter (más eficiente que gsap.set por tick)
+          setY1 && setY1(progress * -50)
+          setY2 && setY2(progress * -30)
+          setY3 && setY3(progress * -70)
+          setY4 && setY4(progress * -40)
+          setY5 && setY5(progress * -60)
         }
       });
 
-      // Animación ligera de glow para el CTA
-      gsap.to('.cta-button', { boxShadow: '0 0 30px rgba(34, 211, 238, 0.6)', repeat: -1, yoyo: true, duration: 2.5, ease: 'sine.inOut' });
+      // Animación ligera de glow para el CTA (respeta prefers-reduced-motion)
+      const reduceMotion = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      if (!reduceMotion) {
+        gsap.to('.cta-button', { boxShadow: '0 0 30px rgba(34, 211, 238, 0.6)', repeat: -1, yoyo: true, duration: 2.5, ease: 'sine.inOut' })
+      }
 
     }, mainContainerRef);
 
@@ -189,6 +193,8 @@ export default function CinematicScroll() {
             fill
             className="object-cover scene-image"
             priority
+            sizes="100vw"
+            quality={80}
           />
           <div ref={text1Ref} className="absolute inset-0 flex items-center justify-center opacity-0">
             <div className="text-center text-white">
@@ -209,7 +215,9 @@ export default function CinematicScroll() {
             alt="Caos del Mundo"
             fill
             className="object-cover scene-image"
-            priority
+            loading="lazy"
+            sizes="100vw"
+            quality={80}
           />
           <div ref={text2Ref} className="absolute inset-0 flex items-center justify-center opacity-0">
             <div className="text-center text-white">
@@ -230,7 +238,9 @@ export default function CinematicScroll() {
             alt="Despegue de la Tierra"
             fill
             className="object-cover scene-image"
-            priority
+            loading="lazy"
+            sizes="100vw"
+            quality={80}
           />
           <div ref={text3Ref} className="absolute inset-0 flex items-center justify-center opacity-0">
             <div className="text-center text-white">
@@ -251,7 +261,9 @@ export default function CinematicScroll() {
             alt="Viaje Cósmico"
             fill
             className="object-cover scene-image"
-            priority
+            loading="lazy"
+            sizes="100vw"
+            quality={80}
           />
           <div ref={text4Ref} className="absolute inset-0 flex items-center justify-center opacity-0">
             <div className="text-center text-white">
@@ -272,7 +284,9 @@ export default function CinematicScroll() {
             alt="Destino Final - Andrómeda"
             fill
             className="object-cover scene-image"
-            priority
+            loading="lazy"
+            sizes="100vw"
+            quality={80}
           />
           <div ref={text5Ref} className="absolute inset-0 flex items-center justify-center opacity-0">
             <div className="text-center text-white">

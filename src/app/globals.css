@@ -412,3 +412,14 @@ body {
     @apply bg-background text-foreground;
   }
 }
+/* Optimización de rendering para imágenes en escenas */
+.scene-image {
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* Respeta usuarios con reduce motion: desactiva pulso del botón chat */
+@media (prefers-reduced-motion: reduce) {
+  .war-chat-send { animation: none !important; }
+}
