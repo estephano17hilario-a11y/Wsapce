@@ -140,6 +140,27 @@ body {
   animation: floatSoft 7s ease-in-out infinite;
 }
 
+/* Placeholder premium con shimmer sutil */
+.placeholder-shimmer {
+  position: relative;
+}
+.placeholder-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+  filter: blur(0.5px);
+  animation: shimmer 2.6s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(300%); }
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
