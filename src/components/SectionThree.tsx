@@ -88,13 +88,13 @@ export default function SectionThree() {
                 <span className="war-chat-status">(3/50 EN LÍNEA)</span>
               </div>
               <div className="war-chat-body">
-                <div className="war-chat-msg"><span className="war-chat-actor">[Soldado_X]:</span><span className="war-chat-text">¡Necesito fuego de cobertura en 20,45!</span></div>
+                <div className="war-chat-msg"><span className="war-chat-actor">[Soldado_X]:</span><span className="war-chat-text">Aquí en <span className="war-chat-coords">12932,2353</span></span><span className="war-chat-goto">IR A UBICACIÓN</span></div>
                 <div className="war-chat-msg"><span className="war-chat-actor you">[TÚ_Comandante]:</span><span className="war-chat-text">¡Entendido! ¡Enviando Píxel Bomba!</span></div>
                 <div className="war-chat-msg"><span className="war-chat-actor">[Soldado_Y]:</span><span className="war-chat-text">¡Joder, qué buena!</span></div>
                 <div className="war-chat-msg system"><span className="war-chat-text">[Soldado_Z]: (Se ha unido al canal)</span></div>
               </div>
               <div className="war-chat-input">
-                <div className="war-chat-inputbar">Escribe tu táctica aquí...</div>
+                <div className="war-chat-inputbar" contentEditable suppressContentEditableWarning data-placeholder="Escribe tu táctica aquí..."></div>
                 <div className="war-chat-send">ENVIAR</div>
               </div>
               <div className="absolute inset-0 premium-noise pointer-events-none" />
