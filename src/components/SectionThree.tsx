@@ -116,8 +116,23 @@ export default function SectionThree() {
                   suppressContentEditableWarning
                   data-placeholder="Escribe tu táctica aquí..."
                   onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSend(); } }}
+                  onInput={() => {
+                    const el = inputRef.current
+                    if (!el) return
+                    // Evita saltos de línea para que no crezca la altura
+                    el.innerText = el.innerText.replace(/[\r\n]+/g, ' ')
+                  }}
                 ></div>
-                <div className="war-chat-send" onClick={handleSend}>ENVIAR</div>
+                <div
+                  className="war-chat-send"
+                  onMouseEnter={() => {
+                    const el = inputRef.current
+                    if (el) el.blur()
+                  }}
+                  onClick={handleSend}
+                >
+                  ENVIAR
+                </div>
               </div>
               <div className="absolute inset-0 premium-noise pointer-events-none" />
             </div>
