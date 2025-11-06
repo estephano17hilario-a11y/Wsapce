@@ -141,17 +141,19 @@ export default function CinematicScroll() {
       // ESCENA 6: CTA (83.3% - 100%)
       .fromTo(scene6Ref.current, 
         { opacity: 0, y: 200, scale: 0.95 }, 
-        { opacity: 1, y: 0, scale: 1, duration: 2.2, ease: "power3.out" }
+        { opacity: 1, y: 0, scale: 1, duration: 2.8, ease: "power3.out" }
       )
-      .fromTo('.cta-title', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 1.2, ease: 'power2.out' }, "-=1")
-      .fromTo('.cta-subtitle', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 1, ease: 'power2.out' }, "-=0.6")
-      .fromTo('.cta-button', { opacity: 0, y: 20, scale: 0.98 }, { opacity: 1, y: 0, scale: 1, duration: 0.9, ease: 'back.out(1.4)' }, "-=0.4");
+      .fromTo('.cta-title', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 1.6, ease: 'power2.out' }, "-=1.2")
+      .fromTo('.cta-subtitle', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 1.3, ease: 'power2.out' }, "-=0.6")
+      .fromTo('.cta-button', { opacity: 0, y: 20, scale: 0.98 }, { opacity: 1, y: 0, scale: 1, duration: 1.2, ease: 'back.out(1.4)' }, "-=0.4")
+      // Mantener la sección Wspace visible por más tiempo sin cambiar visualmente
+      .to({}, { duration: 2.5 });
 
       // Configurar ScrollTrigger con mejor control
       ScrollTrigger.create({
         trigger: mainContainerRef.current,
         start: "top top",
-        end: "+=12000", // Duración más larga para mejor control
+        end: "+=13500", // Ajuste: tramo final un poco más corto
         scrub: 1.2, // Scrub más suave
         pin: true,
         animation: tl,
