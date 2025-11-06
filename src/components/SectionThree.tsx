@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
@@ -15,6 +15,18 @@ export default function SectionThree() {
   const col1Ref = useRef<HTMLDivElement>(null)
   const col2Ref = useRef<HTMLDivElement>(null)
   const col3Ref = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLDivElement>(null)
+  const [userMessages, setUserMessages] = useState<string[]>([])
+
+  const handleSend = () => {
+    const text = inputRef.current?.innerText || ''
+    const clean = text.trim()
+    if (!clean) return
+    setUserMessages((prev) => [...prev, clean])
+    if (inputRef.current) {
+      inputRef.current.innerText = ''
+    }
+  }
 
   useEffect(() => {
     const el = sectionRef.current
@@ -92,10 +104,20 @@ export default function SectionThree() {
                 <div className="war-chat-msg"><span className="war-chat-actor you">[TÚ_Comandante]:</span><span className="war-chat-text">¡Entendido! ¡Enviando Píxel Bomba!</span></div>
                 <div className="war-chat-msg"><span className="war-chat-actor">[Soldado_Y]:</span><span className="war-chat-text">¡Joder, qué buena!</span></div>
                 <div className="war-chat-msg system"><span className="war-chat-text">[Soldado_Z]: (Se ha unido al canal)</span></div>
+                {userMessages.map((msg, i) => (
+                  <div key={i} className="war-chat-msg"><span className="war-chat-actor you">[lider]:</span><span className="war-chat-text">{msg}</span></div>
+                ))}
               </div>
               <div className="war-chat-input">
-                <div className="war-chat-inputbar" contentEditable suppressContentEditableWarning data-placeholder="Escribe tu táctica aquí..."></div>
-                <div className="war-chat-send">ENVIAR</div>
+                <div
+                  ref={inputRef}
+                  className="war-chat-inputbar"
+                  contentEditable
+                  suppressContentEditableWarning
+                  data-placeholder="Escribe tu táctica aquí..."
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSend(); } }}
+                ></div>
+                <div className="war-chat-send" onClick={handleSend}>ENVIAR</div>
               </div>
               <div className="absolute inset-0 premium-noise pointer-events-none" />
             </div>

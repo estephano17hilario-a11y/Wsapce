@@ -199,6 +199,7 @@ body {
   color: #e5e7eb;
   font-size: 12px;
   line-height: 1.25;
+  overflow-y: auto;
 }
 .war-chat-msg { display: flex; gap: 6px; }
 .war-chat-actor { color: #93c5fd; font-weight: 700; }
@@ -255,6 +256,9 @@ body {
   font-weight: 700;
   font-size: 10px;
   letter-spacing: 0.4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .war-chat-coords {
   color: #22d3ee;
