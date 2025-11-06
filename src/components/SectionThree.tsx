@@ -82,8 +82,22 @@ export default function SectionThree() {
           {/* Columna 1: Comunicación */}
           <div ref={col1Ref} className="relative lux-card hover-tilt p-6">
             <div className="absolute -inset-4 -z-10 gradient-ring" />
-            <div className="relative w-[300px] h-[200px] rounded-lg bg-neutral-900/85 border border-neutral-700/40 ring-1 ring-cyan-300/10 shadow-xl overflow-hidden flex items-center justify-center text-neutral-400 text-[10px] md:text-xs uppercase tracking-widest select-none placeholder-shimmer">
-              Mockup entrante
+            <div className="war-chat w-[300px] h-[200px] rounded-lg border border-cyan-900/40 ring-1 ring-cyan-300/10 shadow-xl overflow-hidden bg-black/70">
+              <div className="war-chat-header">
+                <span className="war-chat-channel">Canal: #CLAN_ALFA</span>
+                <span className="war-chat-status">(3/50 EN LÍNEA)</span>
+              </div>
+              <div className="war-chat-body">
+                <div className="war-chat-msg"><span className="war-chat-actor">[Soldado_X]:</span><span className="war-chat-text">¡Necesito fuego de cobertura en 20,45!</span></div>
+                <div className="war-chat-msg"><span className="war-chat-actor you">[TÚ_Comandante]:</span><span className="war-chat-text">¡Entendido! ¡Enviando Píxel Bomba!</span></div>
+                <div className="war-chat-msg"><span className="war-chat-actor">[Soldado_Y]:</span><span className="war-chat-text">¡Joder, qué buena!</span></div>
+                <div className="war-chat-msg system"><span className="war-chat-text">[Soldado_Z]: (Se ha unido al canal)</span></div>
+              </div>
+              <div className="war-chat-input">
+                <div className="war-chat-inputbar">Escribe tu táctica aquí...</div>
+                <div className="war-chat-send">ENVIAR</div>
+              </div>
+              <div className="absolute inset-0 premium-noise pointer-events-none" />
             </div>
             <h3 className="mt-6 text-white text-xl font-bold">CHAT DE GUERRA TÁCTICO</h3>
             <p className="mt-3 text-gray-300 leading-relaxed text-sm">
