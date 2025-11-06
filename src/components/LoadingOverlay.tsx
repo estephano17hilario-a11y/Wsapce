@@ -70,7 +70,7 @@ export default function LoadingOverlay() {
       "/tierra para implementar - copia - copia.webp",
     ];
     let loadedPreload = 0;
-    preloadImages(preloadUrls, (loaded, total) => {
+    preloadImages(preloadUrls, (loaded) => {
       loadedPreload = loaded;
       updateActualProgress();
     }).catch(() => {
