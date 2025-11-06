@@ -97,7 +97,7 @@ export default function CinematicScroll() {
       // Imagen: fade in + zoom-out (más agresivo)
       .fromTo(img3,
         { opacity: 0, scale: 1.45, transformOrigin: 'center center' },
-        { opacity: 1, scale: 1, duration: 2, ease: 'none' },
+        { opacity: 1, scale: 0.12, duration: 2.6, ease: 'none' },
         "-=0.4"
       )
       // Texto: solo fade in/out
@@ -118,12 +118,13 @@ export default function CinematicScroll() {
       // Contenedor: solo fade in
       .fromTo(scene4Ref.current, 
         { opacity: 0 }, 
-        { opacity: 1, duration: 0.8, ease: "power2.out" }
+        { opacity: 1, duration: 0.8, ease: "power2.out" },
+        "-=0.6" // solapar con el final del fade-out de Tierra
       )
-      // Imagen: fade in + zoom-out (más agresivo)
+      // Imagen: fade in + zoom-in MUY agresivo
       .fromTo(img4,
-        { opacity: 0, scale: 1.45, transformOrigin: 'center center' },
-        { opacity: 1, scale: 1, duration: 2, ease: 'none' },
+        { opacity: 0, scale: 1.05, transformOrigin: 'center center' },
+        { opacity: 1, scale: 2.6, duration: 2.2, ease: 'none' },
         "-=0.4"
       )
       // Texto: solo fade in/out
