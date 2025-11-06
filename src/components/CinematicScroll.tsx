@@ -5,6 +5,8 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
+import { ctaTitle, ctaSubtitle, ctaFadeOut } from '@/lib/animations';
+import { trackEvent } from '@/lib/analytics';
 
 // Registrar plugins de GSAP
 if (typeof window !== 'undefined') {
@@ -26,6 +28,7 @@ export default function CinematicScroll() {
   const text3Ref = useRef<HTMLDivElement>(null);
   const text4Ref = useRef<HTMLDivElement>(null);
   const text5Ref = useRef<HTMLDivElement>(null);
+  const completionReportedRef = useRef<boolean>(false);
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
@@ -54,32 +57,25 @@ export default function CinematicScroll() {
       const tl = gsap.timeline({ smoothChildTiming: true });
 
       // ESCENA 1: Inicio Personal (0% - 16.6%)
+      tl.call(() => trackEvent('scene_enter', { id: 1 }))
       // Imagen: fade in + zoom-out con el scroll
-      tl.fromTo(img1,
+      .fromTo(img1,
         { opacity: 1, scale: 4.0, yPercent: 6, transformOrigin: '50% 80%' },
         { opacity: 1, scale: 1, yPercent: 0, duration: 2.2, ease: 'none' }
       )
       // Texto (Escena 1): efecto CTA para título y subtítulo
-      tl.fromTo(text1Ref.current, { opacity: 0 }, { opacity: 1, duration: 0.8, ease: 'power2.out' }, "-=0.8")
-      .fromTo(
-        title1,
-        { opacity: 0, filter: 'blur(14px)', letterSpacing: '0.15em', scale: 1.2, y: 40, transformOrigin: 'center center' },
-        { opacity: 1, filter: 'blur(0px)', letterSpacing: '0em', scale: 1, y: 0, duration: 1.8, ease: 'expo.out' },
-        "-=0.8"
-      )
-      .fromTo(
-        subtitle1,
-        { opacity: 0, filter: 'blur(10px)', y: 30 },
-        { opacity: 1, filter: 'blur(0px)', y: 0, duration: 1.4, ease: 'power3.out' },
-        "-=0.7"
-      )
-      .to([title1, subtitle1], { opacity: 0, duration: 1.0, ease: 'power2.in' }, "+=1.2")
+      .fromTo(text1Ref.current, { opacity: 0 }, { opacity: 1, duration: 0.8, ease: 'power2.out' }, "-=0.8")
+      .add(ctaTitle(title1), "-=0.8")
+      .add(ctaSubtitle(subtitle1), "-=0.7")
+      .add(ctaFadeOut(title1, subtitle1), "+=1.2")
       // Imagen: fade out al salir de la escena
       .to(img1, { opacity: 0, duration: 0.8, ease: 'power2.in' }, "-=0.6")
       // Contenedor: solo fade out
       .to(scene1Ref.current, { opacity: 0, duration: 0.8, ease: 'power2.in' }, "-=0.4")
+      .call(() => trackEvent('scene_exit', { id: 1 }))
 
       // ESCENA 2: Caos del Mundo (16.6% - 33.3%)
+      .call(() => trackEvent('scene_enter', { id: 2 }))
       // Contenedor: solo fade in
       .fromTo(scene2Ref.current, 
         { opacity: 0 }, 
@@ -93,24 +89,16 @@ export default function CinematicScroll() {
       )
       // Texto (Escena 2): efecto CTA para título y subtítulo
       .fromTo(text2Ref.current, { opacity: 0 }, { opacity: 1, duration: 0.8, ease: 'power2.out' }, "-=0.8")
-      .fromTo(
-        title2,
-        { opacity: 0, filter: 'blur(14px)', letterSpacing: '0.15em', scale: 1.2, y: 40, transformOrigin: 'center center' },
-        { opacity: 1, filter: 'blur(0px)', letterSpacing: '0em', scale: 1, y: 0, duration: 1.8, ease: 'expo.out' },
-        "-=0.8"
-      )
-      .fromTo(
-        subtitle2,
-        { opacity: 0, filter: 'blur(10px)', y: 30 },
-        { opacity: 1, filter: 'blur(0px)', y: 0, duration: 1.4, ease: 'power3.out' },
-        "-=0.7"
-      )
-      .to([title2, subtitle2], { opacity: 0, duration: 1.0, ease: 'power2.in' }, "+=1.2")
+      .add(ctaTitle(title2), "-=0.8")
+      .add(ctaSubtitle(subtitle2), "-=0.7")
+      .add(ctaFadeOut(title2, subtitle2), "+=1.2")
       // Imagen: fade out y contenedor: solo fade out
       .to(img2, { opacity: 0, duration: 0.8, ease: 'power2.in' }, "-=0.6")
       .to(scene2Ref.current, { opacity: 0, duration: 0.8, ease: 'power2.in' }, "-=0.4")
+      .call(() => trackEvent('scene_exit', { id: 2 }))
 
       // ESCENA 3: Despegue de la Tierra (33.3% - 50%)
+      .call(() => trackEvent('scene_enter', { id: 3 }))
       // Contenedor: solo fade in
       .fromTo(scene3Ref.current, 
         { opacity: 0 }, 
@@ -124,26 +112,18 @@ export default function CinematicScroll() {
       )
       // Texto (Escena 3): efecto CTA para título y subtítulo
       .fromTo(text3Ref.current, { opacity: 0 }, { opacity: 1, duration: 0.8, ease: 'power2.out' }, "-=0.8")
-      .fromTo(
-        title3,
-        { opacity: 0, filter: 'blur(14px)', letterSpacing: '0.15em', scale: 1.2, y: 40, transformOrigin: 'center center' },
-        { opacity: 1, filter: 'blur(0px)', letterSpacing: '0em', scale: 1, y: 0, duration: 1.8, ease: 'expo.out' },
-        "-=0.8"
-      )
-      .fromTo(
-        subtitle3,
-        { opacity: 0, filter: 'blur(10px)', y: 30 },
-        { opacity: 1, filter: 'blur(0px)', y: 0, duration: 1.4, ease: 'power3.out' },
-        "-=0.7"
-      )
-      .to([title3, subtitle3], { opacity: 0, duration: 1.0, ease: 'power2.in' }, "+=1.2")
+      .add(ctaTitle(title3), "-=0.8")
+      .add(ctaSubtitle(subtitle3), "-=0.7")
+      .add(ctaFadeOut(title3, subtitle3), "+=1.2")
       // Pausa breve antes de salida de Tierra (se detiene un poco)
       .to({}, { duration: 0.3 })
       // Tierra se va un poco antes (sin solape con Espacio)
       .to(img3, { opacity: 0, duration: 0.7, ease: 'power2.in' })
       .to(scene3Ref.current, { opacity: 0, duration: 0.7, ease: 'power2.in' })
+      .call(() => trackEvent('scene_exit', { id: 3 }))
 
       // ESCENA 4: Viaje Cósmico (50% - 66.6%)
+      .call(() => trackEvent('scene_enter', { id: 4 }))
       // Contenedor: fade in solapado, antes de que termine de irse Tierra
       .fromTo(scene4Ref.current, 
         { opacity: 0 }, 
@@ -163,26 +143,18 @@ export default function CinematicScroll() {
         { opacity: 1, duration: 0.8, ease: 'power2.out' },
         "-=1.4"
       )
-      // Texto: igual al CTA (Wspace) para título y subtítulo
-      .fromTo(
-        title4,
-        { opacity: 0, filter: 'blur(14px)', letterSpacing: '0.15em', scale: 1.2, y: 40, transformOrigin: 'center center' },
-        { opacity: 1, filter: 'blur(0px)', letterSpacing: '0em', scale: 1, y: 0, duration: 1.8, ease: 'expo.out' },
-        "-=1.2"
-      )
-      .fromTo(
-        subtitle4,
-        { opacity: 0, filter: 'blur(10px)', y: 30 },
-        { opacity: 1, filter: 'blur(0px)', y: 0, duration: 1.4, ease: 'power3.out' },
-        "-=1.0"
-      )
-      .to([title4, subtitle4], { opacity: 0, duration: 1.0, ease: 'power2.in' }, "+=1.2")
+      // Texto: igual al CTA (Wspace) para título y subtítulo (centralizado)
+      .add(ctaTitle(title4), "-=1.2")
+      .add(ctaSubtitle(subtitle4), "-=1.0")
+      .add(ctaFadeOut(title4, subtitle4), "+=1.2")
       // Imagen: salida con más zoom-out + fade out
       .to(img4, { scale: 0.9, duration: 1.4, ease: 'none' })
       .to(img4, { opacity: 0, duration: 0.8, ease: 'power2.in' }, "-=0.6")
       .to(scene4Ref.current, { opacity: 0, duration: 0.8, ease: 'power2.in' }, "-=0.4")
+      .call(() => trackEvent('scene_exit', { id: 4 }))
 
       // ESCENA 5: Destino Final (66.6% - 83.3%)
+      .call(() => trackEvent('scene_enter', { id: 5 }))
       // Contenedor: solo fade in
       .fromTo(scene5Ref.current, 
         { opacity: 0 }, 
@@ -196,24 +168,16 @@ export default function CinematicScroll() {
       )
       // Texto (Escena 5): efecto CTA para título y subtítulo
       .fromTo(text5Ref.current, { opacity: 0 }, { opacity: 1, duration: 0.8, ease: 'power2.out' }, "-=0.8")
-      .fromTo(
-        title5,
-        { opacity: 0, filter: 'blur(14px)', letterSpacing: '0.15em', scale: 1.2, y: 40, transformOrigin: 'center center' },
-        { opacity: 1, filter: 'blur(0px)', letterSpacing: '0em', scale: 1, y: 0, duration: 1.8, ease: 'expo.out' },
-        "-=0.8"
-      )
-      .fromTo(
-        subtitle5,
-        { opacity: 0, filter: 'blur(10px)', y: 30 },
-        { opacity: 1, filter: 'blur(0px)', y: 0, duration: 1.4, ease: 'power3.out' },
-        "-=0.7"
-      )
-      .to([title5, subtitle5], { opacity: 0, duration: 1.0, ease: 'power2.in' }, "+=1.2")
+      .add(ctaTitle(title5), "-=0.8")
+      .add(ctaSubtitle(subtitle5), "-=0.7")
+      .add(ctaFadeOut(title5, subtitle5), "+=1.2")
       // Imagen: fade out y contenedor: solo fade out
       .to(img5, { opacity: 0, duration: 0.8, ease: 'power2.in' }, "-=0.6")
       .to(scene5Ref.current, { opacity: 0, duration: 0.8, ease: 'power2.in' }, "-=0.4")
+      .call(() => trackEvent('scene_exit', { id: 5 }))
 
       // ESCENA 6: CTA (83.3% - 100%)
+      .call(() => trackEvent('scene_enter', { id: 6 }))
       .fromTo(scene6Ref.current, 
         { opacity: 0, y: 200, scale: 0.95 }, 
         { opacity: 1, y: 0, scale: 1, duration: 2.8, ease: "power3.out" }
@@ -240,7 +204,8 @@ export default function CinematicScroll() {
       // Mantener la sección Wspace visible por más tiempo sin cambiar visualmente
       .to({}, { duration: 2.5 })
       // Salida: solo fade out para las letras/botón
-      .to(['.cta-title', '.cta-subtitle', '.cta-button'], { opacity: 0, duration: 1, ease: 'power2.in' });
+      .to(['.cta-title', '.cta-subtitle', '.cta-button'], { opacity: 0, duration: 1, ease: 'power2.in' })
+      .call(() => trackEvent('scene_exit', { id: 6 }));
 
       // Configurar ScrollTrigger con mejor control
       ScrollTrigger.create({
@@ -252,8 +217,12 @@ export default function CinematicScroll() {
         animation: tl,
         anticipatePin: 1,
         refreshPriority: -1,
-        onUpdate: () => {
+        onUpdate: (self) => {
           // Mantener las imágenes centradas; sin paralaje vertical
+          if (!completionReportedRef.current && self.progress >= 0.99) {
+            trackEvent('scroll_completion', { progress: self.progress })
+            completionReportedRef.current = true
+          }
         }
       });
 

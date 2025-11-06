@@ -27,6 +27,7 @@ body {
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  will-change: opacity, filter, transform;
 }
 
 /* Efectos de glow para elementos interactivos */
@@ -52,6 +53,7 @@ body {
 /* Mejoras para las imágenes */
 .scene-image {
   transition: transform 0.3s ease;
+  will-change: transform, opacity;
 }
 
 .scene-image:hover {
@@ -62,11 +64,13 @@ body {
 .cta-radial {
   background: radial-gradient(closest-side, rgba(34, 211, 238, 0.12), transparent);
   filter: blur(24px);
+  will-change: filter, opacity;
 }
 
 .cta-aurora {
   background: linear-gradient(to top, rgba(34, 211, 238, 0.10), rgba(168,85,247,0.12), transparent);
   filter: blur(16px);
+  will-change: filter, opacity;
 }
 
 /* Estética premium para Sección 2.1 */
@@ -103,6 +107,7 @@ body {
 
 .hover-tilt {
   transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s ease;
+  will-change: transform, box-shadow;
 }
 .hover-tilt:hover {
   transform: perspective(900px) rotateX(1.5deg) rotateY(-1.5deg) scale(1.02);
@@ -138,6 +143,7 @@ body {
 
 .float-soft {
   animation: floatSoft 7s ease-in-out infinite;
+  will-change: transform;
 }
 
 /* Placeholder premium con shimmer sutil */
@@ -154,6 +160,19 @@ body {
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
   filter: blur(0.5px);
   animation: shimmer 2.6s ease-in-out infinite;
+  will-change: transform, filter;
+}
+
+/* Respeta usuarios con reduce motion: desactiva transiciones pesadas */
+@media (prefers-reduced-motion: reduce) {
+  .scene-image,
+  .cinematic-text,
+  .hover-tilt,
+  .placeholder-shimmer::after {
+    transition: none !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }
 
 @keyframes shimmer {
