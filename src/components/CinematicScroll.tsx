@@ -110,22 +110,22 @@ export default function CinematicScroll() {
         { opacity: 0, duration: 0.8, ease: "power2.in" }, 
         "+=1.2"
       )
-      // Imagen: fade out y contenedor: solo fade out
-      .to(img3, { opacity: 0, duration: 0.8, ease: 'power2.in' }, "-=0.6")
-      .to(scene3Ref.current, { opacity: 0, duration: 0.8, ease: 'power2.in' }, "-=0.4")
+      // Pausa breve antes de salida de Tierra (se detiene un poco)
+      .to({}, { duration: 0.5 })
+      // Tierra se va un poco antes (sin solape con Espacio)
+      .to(img3, { opacity: 0, duration: 0.7, ease: 'power2.in' })
+      .to(scene3Ref.current, { opacity: 0, duration: 0.7, ease: 'power2.in' })
 
       // ESCENA 4: Viaje Cósmico (50% - 66.6%)
-      // Contenedor: solo fade in
+      // Contenedor: fade in después de la salida de Tierra
       .fromTo(scene4Ref.current, 
         { opacity: 0 }, 
-        { opacity: 1, duration: 0.8, ease: "power2.out" },
-        "-=0.6" // solapar con el final del fade-out de Tierra
+        { opacity: 1, duration: 0.8, ease: "power2.out" }
       )
-      // Imagen: fade in + zoom-in MUY agresivo
+      // Imagen del Espacio: entrada desde adentro hacia afuera (zoom-out)
       .fromTo(img4,
-        { opacity: 0, scale: 1.05, transformOrigin: 'center center' },
-        { opacity: 1, scale: 2.6, duration: 2.2, ease: 'none' },
-        "-=0.4"
+        { opacity: 0, scale: 3.0, transformOrigin: 'center center' },
+        { opacity: 1, scale: 1.0, duration: 2.4, ease: 'none' }
       )
       // Texto: solo fade in/out
       .fromTo(text4Ref.current, 
