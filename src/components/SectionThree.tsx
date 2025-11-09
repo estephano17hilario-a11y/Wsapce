@@ -70,15 +70,15 @@ export default function SectionThree() {
   }, [])
 
   return (
-    <section ref={sectionRef} className="relative w-full bg-black py-28 px-6">
-      {/* Fondo cósmico y textura premium */}
-      <div className="absolute inset-0 pointer-events-none">
+    <section ref={sectionRef} className="relative z-40 w-full bg-transparent py-28 px-6">
+      {/* Fondo cósmico y textura premium (debajo del contenido) */}
+      <div className="absolute inset-0 -z-10 pointer-events-none">
         <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[70vw] h-[70vw] cta-radial" />
         <div className="absolute bottom-0 left-0 w-full h-1/2 cta-aurora" />
         <div className="absolute inset-0 premium-noise" />
       </div>
 
-      <div className="max-w-7xl mx-auto">
+      <div className="relative z-40 max-w-7xl mx-auto">
         <h2
           ref={titleRef}
           className="text-center text-3xl md:text-6xl font-black tracking-tight cinematic-text shine-text mb-4"

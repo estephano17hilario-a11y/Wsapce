@@ -54,15 +54,15 @@ export default function SectionTwoOne() {
   }, [])
 
   return (
-    <section ref={sectionRef} className="relative w-full bg-black py-28 px-6">
-      {/* Decoración premium sutil */}
-      <div className="absolute inset-0 pointer-events-none">
+    <section id="wspace-start" ref={sectionRef} className="relative z-40 w-full bg-transparent py-28 px-6">
+      {/* Decoración premium sutil (debajo del contenido) */}
+      <div className="absolute inset-0 -z-10 pointer-events-none">
         <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[60vw] h-[60vw] cta-radial" />
         <div className="absolute bottom-0 left-0 w-full h-1/2 cta-aurora" />
         <div className="absolute inset-0 premium-noise" />
       </div>
 
-      <div className="max-w-7xl mx-auto">
+      <div className="relative z-40 max-w-7xl mx-auto">
         <h2 ref={titleRef} className="text-center text-3xl md:text-5xl font-extrabold cinematic-text shine-text mb-6">
           WSPACE.LIVE: TU IMPERIO, TU LIENZO CÓSMICO
         </h2>
