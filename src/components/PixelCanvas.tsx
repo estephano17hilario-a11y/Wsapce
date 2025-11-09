@@ -91,8 +91,11 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
     let syncAnim: { startFrame: number; duration: number; progress: number } | null = null
     const totalSyncFrames = Math.max(1, Math.floor(60 * 3.5)) // 3.5s @ ~60fps
     let sceneScale = 1 // escala global para zoom out
+    let sceneScaleFinal = 1 // valor final persistente tras la animación
     const gridAlphaStart = 0.025
     const gridAlphaEnd = 0.10
+    // Control para permitir la animación solo una vez
+    let flagAnimPlayedOnce = false
 
     const colorFor = (ch: string) => {
       switch (ch) {
@@ -225,10 +228,8 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
       }
       // líneas de rejilla sutiles para guiar el pintado
       if (paintable) {
-        // Opacidad de rejilla animada hacia 10% (0.10) durante la animación sincronizada
-        const p = syncAnim ? syncAnim.progress : 0
-        const e = 1 - Math.pow(1 - p, 3)
-        const gridAlpha = p > 0 ? (gridAlphaStart + (gridAlphaEnd - gridAlphaStart) * e) : 0.025
+        // Opacidad constante para las líneas divisorias (rejilla)
+    const gridAlpha = 0.07
         ctx.strokeStyle = `rgba(255,255,255,${gridAlpha})`
         ctx.lineWidth = 1
         for (let c = 1; c < cols; c++) {
@@ -284,22 +285,35 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
       return pxlY >= yTop && pxlY <= yBottom
     }
     const spawnStaticFlag = () => {
-      // más pequeña y centrada
+      // tamaño de paño de bandera
       const w = Math.max(6, Math.floor(cols * 0.24))
       const h = Math.max(4, Math.floor(rows * 0.22))
-      const x = Math.floor(cols / 2 - w / 2)
-      const y = Math.floor(rows / 2 - h / 2)
       staticFlags.length = 0
 
-      // métricas en píxeles
+      // métricas base
       const poleW = Math.max(2, Math.floor(px * 0.30))
-      const clothX = (x * px) + Math.floor(px * 0.55) + poleW
-      const clothY = y * px
       const clothW = w * px
       const clothH = h * px
-      const poleX = clothX - poleW - Math.floor(px * 0.15)
       const extraH = Math.floor(clothH * 0.80)
-      const poleH = clothH + extraH // mástil mucho más largo
+
+      // Queremos que la PUNTA INFERIOR (base) del mástil quede centrada en (width/2, height/2)
+      // baseY = poleY + poleH = centerY
+      // poleY = clothY - floor(extraH*0.35), poleH = clothH + extraH
+      // => clothY = centerY - clothH - floor(extraH*0.65)
+      const centerX = Math.floor(width / 2)
+      const centerY = Math.floor(height / 2)
+      const clothY = centerY - clothH - Math.floor(extraH * 0.65)
+      // poleX = clothX - poleW - floor(px*0.15) y queremos poleX + poleW/2 = centerX
+      const offsetX = Math.floor(px * 0.55) - Math.floor(px * 0.15)
+      const poleXMidTarget = centerX
+      const xPixels = poleXMidTarget - Math.floor(poleW * 0.5) - offsetX
+      const x = Math.max(0, Math.min(cols - w, Math.floor(xPixels / px)))
+      const y = Math.max(0, Math.min(rows - h, Math.floor(clothY / px)))
+
+      // Recalcular posiciones a partir de x,y cuantizados a la rejilla
+      const clothX = (x * px) + Math.floor(px * 0.55) + poleW
+      const poleX = clothX - poleW - Math.floor(px * 0.15)
+      const poleH = clothH + extraH
       const poleY = clothY - Math.floor(extraH * 0.35)
 
       // estrellas internas del paño
@@ -332,7 +346,8 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
         const clothX = (f.x * px) + Math.floor(px * 0.55) + poleW
         const clothY = f.y * px
         // Reducir progresivamente el tamaño del paño de la bandera durante la animación sincronizada
-        const p = syncAnim ? syncAnim.progress : 0
+        // Mantener el tamaño final permanente: si la animación terminó, usar progreso 1
+        const p = syncAnim ? syncAnim.progress : 1
         const e = 1 - Math.pow(1 - p, 3)
         const flagScale = p > 0 ? (1 - 0.18 * e) : 1
         const clothW = Math.max(4, Math.floor(f.w * px * flagScale))
@@ -345,9 +360,9 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
         const poleY = clothY - Math.floor(extraH * 0.35)
         ctx.save()
         const poleGrad = ctx.createLinearGradient(poleX, poleY, poleX, poleY + poleH)
-        poleGrad.addColorStop(0, 'rgba(200,200,210,0.95)')
-        poleGrad.addColorStop(0.5, 'rgba(240,240,245,0.95)')
-        poleGrad.addColorStop(1, 'rgba(160,160,170,0.95)')
+        poleGrad.addColorStop(0, 'rgba(200,200,210,1)')
+        poleGrad.addColorStop(0.5, 'rgba(240,240,245,1)')
+        poleGrad.addColorStop(1, 'rgba(160,160,170,1)')
         ctx.fillStyle = poleGrad
         ctx.fillRect(poleX, poleY, poleW, poleH)
         ctx.restore()
@@ -360,15 +375,15 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
         for (let i = 1; i < shape.pts.length; i++) ctx.lineTo(shape.pts[i].x, shape.pts[i].y)
         ctx.closePath()
         const flagGrad = ctx.createLinearGradient(clothX, clothY, clothX + clothW, clothY + clothH)
-        flagGrad.addColorStop(0, 'rgba(14,165,233,0.90)')
-        flagGrad.addColorStop(0.5, 'rgba(29,78,216,0.95)')
-        flagGrad.addColorStop(1, 'rgba(2,6,23,0.95)')
+        flagGrad.addColorStop(0, 'rgba(14,165,233,1)')
+        flagGrad.addColorStop(0.5, 'rgba(29,78,216,1)')
+        flagGrad.addColorStop(1, 'rgba(2,6,23,1)')
         ctx.fillStyle = flagGrad
         ctx.fill()
         // borde holográfico
         const borderGrad = ctx.createLinearGradient(clothX, clothY, clothX + clothW, clothY)
-        borderGrad.addColorStop(0, 'rgba(56,189,248,0.9)')
-        borderGrad.addColorStop(1, 'rgba(99,102,241,0.9)')
+        borderGrad.addColorStop(0, 'rgba(56,189,248,1)')
+        borderGrad.addColorStop(1, 'rgba(99,102,241,1)')
         ctx.strokeStyle = borderGrad
         ctx.lineWidth = Math.max(1, Math.floor(px * 0.08))
         ctx.stroke()
@@ -397,9 +412,9 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
       // mástil revelado progresivamente (más largo que la bandera)
       ctx.save()
       const poleGrad = ctx.createLinearGradient(ef.poleX, ef.poleY, ef.poleX, ef.poleY + ef.poleH)
-      poleGrad.addColorStop(0, 'rgba(200,200,210,0.95)')
-      poleGrad.addColorStop(0.5, 'rgba(240,240,245,0.95)')
-      poleGrad.addColorStop(1, 'rgba(160,160,170,0.95)')
+      poleGrad.addColorStop(0, 'rgba(200,200,210,1)')
+      poleGrad.addColorStop(0.5, 'rgba(240,240,245,1)')
+      poleGrad.addColorStop(1, 'rgba(160,160,170,1)')
       const poleRevealH = Math.floor(ef.poleH * e)
       ctx.fillStyle = poleGrad
       ctx.fillRect(ef.poleX, ef.poleY, ef.poleW, poleRevealH)
@@ -408,9 +423,9 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
       // paño: revelado pixelado suave (bloques del tamaño px)
       const revealW = Math.floor(ef.clothW * e)
       const flagGrad = ctx.createLinearGradient(ef.clothX, ef.clothY, ef.clothX + ef.clothW, ef.clothY + ef.clothH)
-      flagGrad.addColorStop(0, 'rgba(14,165,233,0.90)')
-      flagGrad.addColorStop(0.5, 'rgba(29,78,216,0.95)')
-      flagGrad.addColorStop(1, 'rgba(2,6,23,0.95)')
+      flagGrad.addColorStop(0, 'rgba(14,165,233,1)')
+      flagGrad.addColorStop(0.5, 'rgba(29,78,216,1)')
+      flagGrad.addColorStop(1, 'rgba(2,6,23,1)')
       const step = Math.max(2, Math.floor(px))
       ctx.save()
       // iterar en grilla, rellenando bloques cuando su centro cae dentro de la forma
@@ -422,8 +437,8 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
           // revelar cuando el bloque está dentro del ancho revelado; suavizar cerca del borde
           const dist = (ef.clothX + revealW) - cxMid
           if (dist <= -step) continue
-          const alpha = clamp((dist + step) / (step * 2), 0, 1)
-          ctx.globalAlpha = 0.15 + alpha * 0.85
+          // opacidad 100% para el paño durante la revelación
+          ctx.globalAlpha = 1
           ctx.fillStyle = flagGrad
           ctx.fillRect(xx, yy, step, step)
         }
@@ -451,15 +466,19 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
         // Si ya existe una onda bloqueada (persistente), no la reiniciamos
         if (!captureWave || !captureWave.locked) {
           const r0 = Math.max(6, Math.floor(px * 0.9))
-          const cx = ef.poleX + ef.poleW * 0.5
+          // origen EXACTO en la punta INFERIOR del mástil (base)
+          const cx = ef.poleX + Math.floor(ef.poleW * 0.5)
           const cy = ef.poleY + ef.poleH
-          const maxBounds = Math.min(cx, width - cx, cy, height - cy) - 2 // sin sobrepasar límites visuales
+          const farX = Math.max(cx, width - cx)
+          const farY = Math.max(cy, height - cy)
+          // reducir 4% adicional sobre 0.57 ≈ factor 0.547
+          const maxBounds = Math.hypot(farX, farY) * 0.97 * 0.547
           captureWave = {
             x: cx,
             y: cy,
             r: r0,
             r0,
-            max: Math.max(r0 + 4, maxBounds),
+            max: Math.max(r0 + 12, maxBounds),
             frame: 0,
             frames: totalSyncFrames, // sincronizada con zoom out y bandera
             locked: false,
@@ -582,14 +601,18 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
         captureWave.frame++
         const p = clamp(captureWave.frame / captureWave.frames, 0, 1)
         const e = 1 - Math.pow(1 - p, 4) // easeOutQuart para expansión suave
-        // Limitar el radio para no sobrepasar los bordes, considerando el zoom out
+        // Permitir radio grande hacia el rincón más lejano, compensando zoom y grosor de borde
         const s = sceneScale
-        const maxByBounds = Math.min(x, width - x, y, height - y) / Math.max(s, 0.0001) - 2
+        const strokeComp = (1.0 / Math.max(s, 0.0001)) * 0.5
+        const farX = Math.max(x, width - x)
+        const farY = Math.max(y, height - y)
+        // aplicar factor ≈0.547 para otra reducción del 4%
+        const maxByBounds = (Math.hypot(farX, farY) / Math.max(s, 0.0001)) * 0.547 - strokeComp
         const targetMax = Math.max(captureWave.r0, Math.min(captureWave.max, maxByBounds))
         captureWave.r = captureWave.r0 + (targetMax - captureWave.r0) * e
         if (p >= 1) captureWave.locked = true
       }
-      const grad = ctx.createRadialGradient(x, y, captureWave.r * 0.3, x, y, captureWave.r)
+      const grad = ctx.createRadialGradient(x, y, captureWave.r * 0.28, x, y, captureWave.r)
       grad.addColorStop(0, 'rgba(59,130,246,0.60)')
       grad.addColorStop(0.75, 'rgba(59,130,246,0.22)')
       grad.addColorStop(1, 'rgba(59,130,246,0)')
@@ -599,7 +622,7 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
       ctx.beginPath()
       ctx.arc(x, y, captureWave.r, 0, Math.PI * 2)
       ctx.fill()
-      ctx.strokeStyle = 'rgba(59,130,246,0.55)'
+      ctx.strokeStyle = 'rgba(59,130,246,0.65)'
       // Mantener grosor definido pese al zoom; compensar la escala
       ctx.lineWidth = 1.0 / Math.max(sceneScale, 0.0001)
       ctx.stroke()
@@ -615,13 +638,13 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
         const elapsed = t - syncAnim.startFrame
         syncAnim.progress = clamp(elapsed / syncAnim.duration, 0, 1)
         const e = 1 - Math.pow(1 - syncAnim.progress, 3)
-        sceneScale = 1 - 0.08 * e // zoom out suave
+        sceneScale = 1 - 0.10 * e // zoom out más notorio
         if (syncAnim.progress >= 1) {
-          sceneScale = 1 - 0.08
+          sceneScaleFinal = sceneScale
           syncAnim = null // fin de animación sincronizada
         }
       } else {
-        sceneScale = 1
+        sceneScale = sceneScaleFinal // mantener el zoom final permanente
       }
 
       // Aplicar zoom out al mockup completo durante la animación
@@ -643,12 +666,12 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
       drawPaintLayer()
       // Banderas de clan encima de la pintura
       drawFlagsLayer()
-      // Animación de entrada primero
-      drawEnteringFlag()
-      // Bandera estática centrada
-      drawStaticFlags()
-      // Efecto de captura (onda azul alrededor de la base del mástil)
+      // Efecto de captura (onda azul alrededor de la base del mástil) primero
       drawCaptureWave()
+      // Animación de entrada de la bandera después del círculo
+      drawEnteringFlag()
+      // Bandera estática y mástil al final, nada los tapa
+      drawStaticFlags()
 
       ctx.restore()
       raf = requestAnimationFrame(render)
@@ -719,7 +742,11 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
     }
     canvas.addEventListener('mouseenter', onEnter)
     canvas.addEventListener('mouseleave', onLeave)
-    const onSpawnFlag = () => { spawnStaticFlag() }
+    const onSpawnFlag = () => {
+      if (flagAnimPlayedOnce) return
+      flagAnimPlayedOnce = true
+      spawnStaticFlag()
+    }
     canvas.addEventListener('spawn-waving-flag', onSpawnFlag as EventListener)
 
     // Pausar cuando el canvas no esté visible para ahorrar CPU

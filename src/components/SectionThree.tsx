@@ -20,6 +20,10 @@ export default function SectionThree() {
   const [userMessages, setUserMessages] = useState<string[]>([])
   const [explodeTick, setExplodeTick] = useState(0)
   const [flagSpawnTick, setFlagSpawnTick] = useState(0)
+  const [explosionFxPlayed, setExplosionFxPlayed] = useState(false)
+  const [explosionFxActive, setExplosionFxActive] = useState(false)
+  const [flagFxPlayed, setFlagFxPlayed] = useState(false)
+  const [flagFxActive, setFlagFxActive] = useState(false)
 
   const handleSend = () => {
     const text = inputRef.current?.innerText || ''
@@ -157,10 +161,18 @@ export default function SectionThree() {
             </div>
             <div className="mt-4 flex justify-center">
               <button
-                className="px-4 py-2 text-xs md:text-sm uppercase tracking-widest rounded-md border border-purple-500/40 ring-1 ring-purple-300/20 bg-neutral-900/80 hover:bg-neutral-800 text-white shadow-sm"
-                onClick={() => setExplodeTick((x) => x + 1)}
+                className={`btn-glow-once ${explosionFxActive ? 'btn-glow-once-active' : ''} px-4 py-2 text-xs md:text-sm uppercase tracking-widest rounded-md border border-purple-500/40 ring-1 ring-purple-300/20 bg-neutral-900/80 hover:bg-neutral-800 text-white shadow-sm`}
+                onClick={() => {
+                  setExplodeTick((x) => x + 1)
+                  if (!explosionFxPlayed) {
+                    setExplosionFxPlayed(true)
+                    setExplosionFxActive(true)
+                    setTimeout(() => setExplosionFxActive(false), 1000)
+                  }
+                }}
               >
                 EXPLOTAR
+                {explosionFxActive && <span aria-hidden className="once-burst once-burst--purple" />}
               </button>
             </div>
             <h3 className="mt-6 text-white text-2xl md:text-3xl font-extrabold">ARSENAL DE CONQUISTA</h3>
@@ -178,10 +190,18 @@ export default function SectionThree() {
             </div>
             <div className="mt-4 flex justify-center">
               <button
-                className="px-4 py-2 text-xs md:text-sm uppercase tracking-widest rounded-md border border-cyan-500/40 ring-1 ring-cyan-300/20 bg-neutral-900/80 hover:bg-neutral-800 text-white shadow-sm"
-                onClick={() => setFlagSpawnTick((x) => x + 1)}
+                className={`btn-glow-once ${flagFxActive ? 'btn-glow-once-active' : ''} px-4 py-2 text-xs md:text-sm uppercase tracking-widest rounded-md border border-cyan-500/40 ring-1 ring-cyan-300/20 bg-neutral-900/80 hover:bg-neutral-800 text-white shadow-sm`}
+                onClick={() => {
+                  setFlagSpawnTick((x) => x + 1)
+                  if (!flagFxPlayed) {
+                    setFlagFxPlayed(true)
+                    setFlagFxActive(true)
+                    setTimeout(() => setFlagFxActive(false), 1000)
+                  }
+                }}
               >
                 PONER LA BANDERA
+                {flagFxActive && <span aria-hidden className="once-burst once-burst--cyan" />}
               </button>
             </div>
             <h3 className="mt-6 text-white text-2xl md:text-3xl font-extrabold">GUERRA DE GUERRILLAS 24/7</h3>

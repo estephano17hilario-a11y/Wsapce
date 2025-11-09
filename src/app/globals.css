@@ -518,3 +518,41 @@ body {
   .loading-spin { animation: none; }
   .loading-progress-bar { transition: none; }
 }
+/* Efectos espectaculares de un solo clic para botones EXPLOTAR y BANDERA */
+@keyframes oncePulse {
+  0% { opacity: 0; transform: scale(0.2); filter: saturate(120%); }
+  12% { opacity: 1; transform: scale(1); filter: saturate(180%); }
+  55% { opacity: 0.85; transform: scale(1.8); }
+  100% { opacity: 0; transform: scale(2.6); }
+}
+@keyframes rays {
+  0% { transform: rotate(0deg) scale(0.6); opacity: 0.9; }
+  100% { transform: rotate(120deg) scale(1.8); opacity: 0; }
+}
+.btn-glow-once {
+  position: relative;
+  overflow: hidden;
+  will-change: transform, box-shadow;
+}
+.btn-glow-once-active {
+  box-shadow: 0 0 0 2px rgba(99,102,241,0.35), 0 0 24px rgba(99,102,241,0.55);
+}
+.once-burst {
+  position: absolute;
+  inset: -30%;
+  pointer-events: none;
+  border-radius: 9999px;
+  mix-blend-mode: screen;
+  animation: oncePulse 900ms ease-out both, rays 900ms ease-out both;
+  filter: drop-shadow(0 0 12px rgba(99,102,241,0.8)) hue-rotate(24deg);
+}
+.once-burst--purple {
+  background:
+    radial-gradient(closest-side, rgba(255,255,255,0.95), rgba(255,255,255,0) 60%),
+    conic-gradient(from 0deg at 50% 50%, #a78bfa, #60a5fa, #22d3ee, #e879f9, #a78bfa);
+}
+.once-burst--cyan {
+  background:
+    radial-gradient(closest-side, rgba(255,255,255,0.95), rgba(255,255,255,0) 60%),
+    conic-gradient(from 0deg at 50% 50%, #22d3ee, #60a5fa, #a78bfa, #06b6d4, #22d3ee);
+}
