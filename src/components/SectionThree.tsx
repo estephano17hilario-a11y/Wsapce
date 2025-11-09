@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import PixelCanvas from '@/components/PixelCanvas'
@@ -24,6 +25,10 @@ export default function SectionThree() {
   const [explosionFxActive, setExplosionFxActive] = useState(false)
   const [flagFxPlayed, setFlagFxPlayed] = useState(false)
   const [flagFxActive, setFlagFxActive] = useState(false)
+  const [webExplosionFxPlayed, setWebExplosionFxPlayed] = useState(false)
+  const [webExplosionFxActive, setWebExplosionFxActive] = useState(false)
+  const [webCaptureFxPlayed, setWebCaptureFxPlayed] = useState(false)
+  const [webCaptureFxActive, setWebCaptureFxActive] = useState(false)
 
   const handleSend = () => {
     const text = inputRef.current?.innerText || ''
@@ -169,6 +174,11 @@ export default function SectionThree() {
                     setExplosionFxActive(true)
                     setTimeout(() => setExplosionFxActive(false), 1000)
                   }
+                  if (!webExplosionFxPlayed) {
+                    setWebExplosionFxPlayed(true)
+                    setWebExplosionFxActive(true)
+                    setTimeout(() => setWebExplosionFxActive(false), 1000)
+                  }
                 }}
               >
                 EXPLOTAR
@@ -198,11 +208,19 @@ export default function SectionThree() {
                     setFlagFxActive(true)
                     setTimeout(() => setFlagFxActive(false), 1000)
                   }
+                  if (!webCaptureFxPlayed) {
+                    setWebCaptureFxPlayed(true)
+                    setWebCaptureFxActive(true)
+                    setTimeout(() => setWebCaptureFxActive(false), 1100)
+                  }
                 }}
               >
                 PONER LA BANDERA
                 {flagFxActive && <span aria-hidden className="once-burst once-burst--cyan" />}
               </button>
+              {/* Overlays globales que traspasan barreras, solo primer clic */}
+              {webExplosionFxActive && createPortal(<div aria-hidden className="web-burst web-burst--red" />, document.body)}
+              {webCaptureFxActive && createPortal(<div aria-hidden className="web-burst web-burst--blue" />, document.body)}
             </div>
             <h3 className="mt-6 text-white text-2xl md:text-3xl font-extrabold">GUERRA DE GUERRILLAS 24/7</h3>
             <p className="mt-3 text-gray-300 leading-relaxed text-base md:text-lg">

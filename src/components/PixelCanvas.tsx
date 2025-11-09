@@ -555,11 +555,12 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
       // destello inicial fuerte con gradiente y modo aditivo
       ctx.save()
       ctx.globalCompositeOperation = 'lighter'
-      if (explosionFrame < 14) {
-        const grad = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, Math.max(width, height) * 0.4)
-        grad.addColorStop(0, `rgba(255,255,255,${0.45})`)
-        grad.addColorStop(0.25, `rgba(255,255,255,${0.20})`)
-        grad.addColorStop(1, 'rgba(255,255,255,0)')
+      if (explosionFrame < 16) {
+        // destello rojo intenso que "traspasa" visualmente
+        const grad = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, Math.max(width, height) * 0.45)
+        grad.addColorStop(0, 'rgba(239,68,68,0.55)') // rojo centro
+        grad.addColorStop(0.28, 'rgba(220,38,38,0.28)')
+        grad.addColorStop(1, 'rgba(255,0,0,0)')
         ctx.fillStyle = grad
         ctx.fillRect(0, 0, width, height)
       }
@@ -567,7 +568,7 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
       shockwaveR += 3.2
       ctx.beginPath()
       ctx.lineWidth = 2 + Math.max(0, 12 - explosionFrame * 0.15)
-      ctx.strokeStyle = `rgba(255,255,255,${Math.max(0, 0.35 - explosionFrame * 0.005)})`
+      ctx.strokeStyle = `rgba(239,68,68,${Math.max(0, 0.38 - explosionFrame * 0.0055)})`
       ctx.arc(centerX, centerY, shockwaveR, 0, Math.PI * 2)
       ctx.stroke()
       ctx.restore()
