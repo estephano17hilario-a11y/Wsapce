@@ -85,6 +85,14 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
     let shockwaveR = 0
     let centerX = shipPos.x + shipW / 2
     let centerY = shipPos.y + shipH / 2
+    // Efecto de captura: onda expansiva azul desde la base del mástil
+    let captureWave: { x: number; y: number; r: number; r0: number; max: number; frame: number; frames: number; locked: boolean } | null = null
+    // Animación sincronizada (zoom out + bandera + rejilla + círculo)
+    let syncAnim: { startFrame: number; duration: number; progress: number } | null = null
+    const totalSyncFrames = Math.max(1, Math.floor(60 * 3.5)) // 3.5s @ ~60fps
+    let sceneScale = 1 // escala global para zoom out
+    const gridAlphaStart = 0.025
+    const gridAlphaEnd = 0.10
 
     const colorFor = (ch: string) => {
       switch (ch) {
@@ -217,7 +225,11 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
       }
       // líneas de rejilla sutiles para guiar el pintado
       if (paintable) {
-        ctx.strokeStyle = 'rgba(255,255,255,0.025)'
+        // Opacidad de rejilla animada hacia 10% (0.10) durante la animación sincronizada
+        const p = syncAnim ? syncAnim.progress : 0
+        const e = 1 - Math.pow(1 - p, 3)
+        const gridAlpha = p > 0 ? (gridAlphaStart + (gridAlphaEnd - gridAlphaStart) * e) : 0.025
+        ctx.strokeStyle = `rgba(255,255,255,${gridAlpha})`
         ctx.lineWidth = 1
         for (let c = 1; c < cols; c++) {
           ctx.beginPath()
@@ -319,8 +331,12 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
         const poleW = Math.max(2, Math.floor(px * 0.30))
         const clothX = (f.x * px) + Math.floor(px * 0.55) + poleW
         const clothY = f.y * px
-        const clothW = f.w * px
-        const clothH = f.h * px
+        // Reducir progresivamente el tamaño del paño de la bandera durante la animación sincronizada
+        const p = syncAnim ? syncAnim.progress : 0
+        const e = 1 - Math.pow(1 - p, 3)
+        const flagScale = p > 0 ? (1 - 0.18 * e) : 1
+        const clothW = Math.max(4, Math.floor(f.w * px * flagScale))
+        const clothH = Math.max(4, Math.floor(f.h * px * flagScale))
 
         // mástil mucho más largo que la bandera
         const poleX = clothX - poleW - Math.floor(px * 0.15)
@@ -431,6 +447,28 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
         staticFlags.length = 0
         staticFlags.push({ x: ef.x, y: ef.y, w: ef.w, h: ef.h, colorIndex: 1, stars: ef.stars })
         enteringFlag = null
+        // Inicializa la onda de captura en la base del mástil tras la entrada de la bandera
+        // Si ya existe una onda bloqueada (persistente), no la reiniciamos
+        if (!captureWave || !captureWave.locked) {
+          const r0 = Math.max(6, Math.floor(px * 0.9))
+          const cx = ef.poleX + ef.poleW * 0.5
+          const cy = ef.poleY + ef.poleH
+          const maxBounds = Math.min(cx, width - cx, cy, height - cy) - 2 // sin sobrepasar límites visuales
+          captureWave = {
+            x: cx,
+            y: cy,
+            r: r0,
+            r0,
+            max: Math.max(r0 + 4, maxBounds),
+            frame: 0,
+            frames: totalSyncFrames, // sincronizada con zoom out y bandera
+            locked: false,
+          }
+        }
+        // Arranca la animación sincronizada (zoom out + bandera + rejilla)
+        if (!syncAnim) {
+          syncAnim = { startFrame: t, duration: totalSyncFrames, progress: 0 }
+        }
       }
     }
 
@@ -537,9 +575,61 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
       }
     }
 
+    const drawCaptureWave = () => {
+      if (!captureWave) return
+      const { x, y } = captureWave
+      if (!captureWave.locked) {
+        captureWave.frame++
+        const p = clamp(captureWave.frame / captureWave.frames, 0, 1)
+        const e = 1 - Math.pow(1 - p, 4) // easeOutQuart para expansión suave
+        // Limitar el radio para no sobrepasar los bordes, considerando el zoom out
+        const s = sceneScale
+        const maxByBounds = Math.min(x, width - x, y, height - y) / Math.max(s, 0.0001) - 2
+        const targetMax = Math.max(captureWave.r0, Math.min(captureWave.max, maxByBounds))
+        captureWave.r = captureWave.r0 + (targetMax - captureWave.r0) * e
+        if (p >= 1) captureWave.locked = true
+      }
+      const grad = ctx.createRadialGradient(x, y, captureWave.r * 0.3, x, y, captureWave.r)
+      grad.addColorStop(0, 'rgba(59,130,246,0.60)')
+      grad.addColorStop(0.75, 'rgba(59,130,246,0.22)')
+      grad.addColorStop(1, 'rgba(59,130,246,0)')
+      ctx.save()
+      ctx.globalCompositeOperation = 'screen'
+      ctx.fillStyle = grad
+      ctx.beginPath()
+      ctx.arc(x, y, captureWave.r, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.strokeStyle = 'rgba(59,130,246,0.55)'
+      // Mantener grosor definido pese al zoom; compensar la escala
+      ctx.lineWidth = 1.0 / Math.max(sceneScale, 0.0001)
+      ctx.stroke()
+      ctx.restore()
+    }
+
     const render = () => {
       if (!running) return
       t++
+
+      // Actualiza progreso de animación sincronizada y escala global
+      if (syncAnim) {
+        const elapsed = t - syncAnim.startFrame
+        syncAnim.progress = clamp(elapsed / syncAnim.duration, 0, 1)
+        const e = 1 - Math.pow(1 - syncAnim.progress, 3)
+        sceneScale = 1 - 0.08 * e // zoom out suave
+        if (syncAnim.progress >= 1) {
+          sceneScale = 1 - 0.08
+          syncAnim = null // fin de animación sincronizada
+        }
+      } else {
+        sceneScale = 1
+      }
+
+      // Aplicar zoom out al mockup completo durante la animación
+      ctx.save()
+      ctx.translate(width / 2, height / 2)
+      ctx.scale(sceneScale, sceneScale)
+      ctx.translate(-width / 2, -height / 2)
+
       drawBackground()
       drawStars()
       drawShootingStar()
@@ -557,6 +647,10 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
       drawEnteringFlag()
       // Bandera estática centrada
       drawStaticFlags()
+      // Efecto de captura (onda azul alrededor de la base del mástil)
+      drawCaptureWave()
+
+      ctx.restore()
       raf = requestAnimationFrame(render)
     }
 

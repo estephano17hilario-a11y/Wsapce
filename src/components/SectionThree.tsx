@@ -71,7 +71,7 @@ export default function SectionThree() {
   }, [])
 
   return (
-    <section ref={sectionRef} className="relative z-40 w-full bg-transparent py-28 px-6">
+    <section id="wspace-start" ref={sectionRef} className="relative z-40 w-full bg-transparent py-28 px-6">
       {/* Fondo cósmico y textura premium (debajo del contenido) */}
       <div className="absolute inset-0 -z-10 pointer-events-none">
         {/* vmin para que el radial grande quede perfectamente centrado sin depender de vw */}
@@ -85,20 +85,21 @@ export default function SectionThree() {
           ref={titleRef}
           className="text-center text-3xl md:text-6xl font-black tracking-tight cinematic-text shine-text mb-4"
         >
-          BIENVENIDO A LA PUTA GUERRA.
+          DE PÍXELES... A PUTOS IMPERIOS.
         </h2>
         <p
           ref={subtitleRef}
           className="text-center text-lg md:text-xl text-gray-300 italic mb-16"
         >
-          En Wplace pintabas. En Wspace CONQUISTAS.
+          COMUNICA, DESTRUYE Y CREA. Bienvenido a la puta guerra.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-14 md:gap-16 items-start">
           {/* Columna 1: Comunicación */}
           <div ref={col1Ref} className="relative lux-card hover-tilt p-6">
             <div className="absolute -inset-4 -z-10 gradient-ring" />
-            <div className="war-chat w-[300px] h-[200px] rounded-lg border border-cyan-900/40 ring-1 ring-cyan-300/10 shadow-xl overflow-hidden bg-black/70">
+            <div className="flex items-center justify-center">
+              <div className="war-chat w-[420px] h-[280px] rounded-lg border border-cyan-900/40 ring-1 ring-cyan-300/10 shadow-xl overflow-hidden bg-black/70">
               <div className="war-chat-header">
                 <span className="war-chat-channel">Canal: #CLAN_ALFA</span>
                 <span className="war-chat-status">(3/50 EN LÍNEA)</span>
@@ -139,9 +140,10 @@ export default function SectionThree() {
                 </div>
               </div>
               <div className="absolute inset-0 premium-noise pointer-events-none" />
+              </div>
             </div>
-            <h3 className="mt-6 text-white text-xl font-bold">CHAT DE GUERRA TÁCTICO</h3>
-            <p className="mt-3 text-gray-300 leading-relaxed text-sm">
+            <h3 className="mt-6 text-white text-2xl md:text-3xl font-extrabold">CHAT DE GUERRA TÁCTICO</h3>
+            <p className="mt-3 text-gray-300 leading-relaxed text-base md:text-lg">
               Coordina ataques en tiempo real. Forma clanes. Identifica aliados. Aquí no estás solo, estás en un puto ejército.
             </p>
           </div>
@@ -151,18 +153,18 @@ export default function SectionThree() {
             <div className="absolute -inset-4 -z-10 gradient-ring" />
             {/* Lienzo cósmico interactivo (Canvas API, no HTML grid) */}
             <div className="flex items-center justify-center">
-              <PixelCanvas width={300} height={200} explodeSignal={explodeTick} />
+              <PixelCanvas width={360} height={240} explodeSignal={explodeTick} />
             </div>
-            <div className="mt-3 flex justify-center">
+            <div className="mt-4 flex justify-center">
               <button
-                className="px-3 py-1 text-[10px] md:text-xs uppercase tracking-widest rounded-md border border-purple-500/40 ring-1 ring-purple-300/20 bg-neutral-900/80 hover:bg-neutral-800 text-white shadow-sm"
+                className="px-4 py-2 text-xs md:text-sm uppercase tracking-widest rounded-md border border-purple-500/40 ring-1 ring-purple-300/20 bg-neutral-900/80 hover:bg-neutral-800 text-white shadow-sm"
                 onClick={() => setExplodeTick((x) => x + 1)}
               >
                 EXPLOTAR
               </button>
             </div>
-            <h3 className="mt-6 text-white text-xl font-bold">ARSENAL DE CONQUISTA</h3>
-            <p className="mt-3 text-gray-300 leading-relaxed text-sm">
+            <h3 className="mt-6 text-white text-2xl md:text-3xl font-extrabold">ARSENAL DE CONQUISTA</h3>
+            <p className="mt-3 text-gray-300 leading-relaxed text-base md:text-lg">
               ¿Píxeles normales? ¡No me jodas! Despliega Píxeles Bomba para reventar sus defensas. Usa Caballos de Troya para infiltrarte. Esto no es arte, es dominio.
             </p>
           </div>
@@ -172,18 +174,18 @@ export default function SectionThree() {
             <div className="absolute -inset-4 -z-10 gradient-ring" />
             {/* Lienzo cósmico pintable por celdas (mockup 2 sin destrucción) */}
             <div className="flex items-center justify-center">
-              <PixelCanvas width={300} height={200} paintable showShip={false} spawnFlagSignal={flagSpawnTick} />
+              <PixelCanvas width={360} height={240} paintable showShip={false} spawnFlagSignal={flagSpawnTick} />
             </div>
-            <div className="mt-3 flex justify-center">
+            <div className="mt-4 flex justify-center">
               <button
-                className="px-3 py-1 text-[10px] md:text-xs uppercase tracking-widest rounded-md border border-cyan-500/40 ring-1 ring-cyan-300/20 bg-neutral-900/80 hover:bg-neutral-800 text-white shadow-sm"
+                className="px-4 py-2 text-xs md:text-sm uppercase tracking-widest rounded-md border border-cyan-500/40 ring-1 ring-cyan-300/20 bg-neutral-900/80 hover:bg-neutral-800 text-white shadow-sm"
                 onClick={() => setFlagSpawnTick((x) => x + 1)}
               >
                 PONER LA BANDERA
               </button>
             </div>
-            <h3 className="mt-6 text-white text-xl font-bold">GUERRA DE GUERRILLAS 24/7</h3>
-            <p className="mt-3 text-gray-300 leading-relaxed text-sm">
+            <h3 className="mt-6 text-white text-2xl md:text-3xl font-extrabold">GUERRA DE GUERRILLAS 24/7</h3>
+            <p className="mt-3 text-gray-300 leading-relaxed text-base md:text-lg">
               Forma bandos de guerrilla. Libra una guerra constante. En Wspace, el imperio nunca duerme. ¿Crees que puedes descansar?
             </p>
           </div>
