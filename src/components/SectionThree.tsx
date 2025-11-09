@@ -165,11 +165,12 @@ export default function SectionThree() {
             </p>
           </div>
 
-          {/* Columna 3: Estrategia */}
-          <div ref={col3Ref} className="relative lux-card hover-tilt p-6">
+          {/* Columna 3: Estrategia (Mockup 2 sin destrucción) */}
+          <div ref={col3Ref} className="relative lux-card hover-tilt float-soft p-6">
             <div className="absolute -inset-4 -z-10 gradient-ring" />
-            <div className="relative w-[300px] h-[200px] rounded-lg bg-neutral-900/85 border border-neutral-700/40 ring-1 ring-amber-300/10 shadow-xl overflow-hidden flex items-center justify-center text-neutral-400 text-[10px] md:text-xs uppercase tracking-widest select-none placeholder-shimmer">
-              Mockup entrante
+            {/* Lienzo cósmico pintable por celdas (mockup 2 sin destrucción) */}
+            <div className="flex items-center justify-center">
+              <PixelCanvas width={300} height={200} paintable />
             </div>
             <h3 className="mt-6 text-white text-xl font-bold">GUERRA DE GUERRILLAS 24/7</h3>
             <p className="mt-3 text-gray-300 leading-relaxed text-sm">

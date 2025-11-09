@@ -7,10 +7,12 @@ type PixelCanvasProps = {
   height?: number
   // Señal incremental para disparar la explosión desde el exterior
   explodeSignal?: number
+  // Modo pintura por celdas tipo pixel
+  paintable?: boolean
 }
 
 // Canvas cósmico con estrellas, estrella fugaz y pixel art de nave
-export default function PixelCanvas({ width = 420, height = 300, explodeSignal = 0 }: PixelCanvasProps) {
+export default function PixelCanvas({ width = 420, height = 300, explodeSignal = 0, paintable = false }: PixelCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const startExplosionRef = useRef<(() => void) | null>(null)
 
@@ -60,7 +62,7 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
       '.........g........',
     ]
 
-    const px = 12 // tamaño del píxel
+    const px = 12 // tamaño del píxel (proporción del mockup 2)
     const shipW = shipMap[0].length * px
     const shipH = shipMap.length * px
     const shipPos = { x: width / 2 - shipW / 2, y: height / 2 - shipH / 2 }
@@ -160,6 +162,59 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
       }
     }
 
+    // ======== CAPA DE PINTURA POR CELDAS ========
+    const cols = Math.floor(width / px)
+    const rows = Math.floor(height / px)
+    const painted: (string | null)[][] = Array.from({ length: rows }, () => Array(cols).fill(null))
+    let isPainting = false
+    let eraseMode = false
+    let paintColor = `hsl(${(hue + 40) % 360} 90% 65%)`
+
+    const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(max, v))
+    const pickCell = (mx: number, my: number) => {
+      const c = clamp(Math.floor(mx / px), 0, cols - 1)
+      const r = clamp(Math.floor(my / px), 0, rows - 1)
+      return { c, r }
+    }
+
+    const applyPaint = (mx: number, my: number) => {
+      const { c, r } = pickCell(mx, my)
+      if (eraseMode) {
+        painted[r][c] = null
+      } else {
+        painted[r][c] = paintColor
+      }
+    }
+
+    const drawPaintLayer = () => {
+      // pinta las celdas coloreadas
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const color = painted[r][c]
+          if (!color) continue
+          ctx.fillStyle = color
+          ctx.fillRect(c * px, r * px, px, px)
+        }
+      }
+      // líneas de rejilla sutiles para guiar el pintado
+      if (paintable) {
+        ctx.strokeStyle = 'rgba(255,255,255,0.08)'
+        ctx.lineWidth = 1
+        for (let c = 1; c < cols; c++) {
+          ctx.beginPath()
+          ctx.moveTo(c * px + 0.5, 0)
+          ctx.lineTo(c * px + 0.5, height)
+          ctx.stroke()
+        }
+        for (let r = 1; r < rows; r++) {
+          ctx.beginPath()
+          ctx.moveTo(0, r * px + 0.5)
+          ctx.lineTo(width, r * px + 0.5)
+          ctx.stroke()
+        }
+      }
+    }
+
     const startExplosion = () => {
       if (isExploding || shipDestroyed) return
       isExploding = true
@@ -245,6 +300,8 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
       if (isExploding) {
         drawExplosion()
       }
+      // Capa de pintura por encima de todo
+      drawPaintLayer()
       raf = requestAnimationFrame(render)
     }
 
@@ -261,8 +318,28 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
       hue = (190 + (mx / width) * 120) % 360
       parallaxX = (mx / width - 0.5) * 10
       parallaxY = (my / height - 0.5) * 10
+      paintColor = `hsl(${(hue + 40) % 360} 90% 65%)`
+      if (paintable && isPainting) {
+        applyPaint(mx, my)
+      }
     }
     canvas.addEventListener('mousemove', onMove, { passive: true })
+
+    const onDown = (e: MouseEvent) => {
+      if (!paintable) return
+      const rect = canvas.getBoundingClientRect()
+      const mx = e.clientX - rect.left
+      const my = e.clientY - rect.top
+      eraseMode = e.button === 2 || e.ctrlKey
+      isPainting = true
+      applyPaint(mx, my)
+    }
+    const onUp = () => { isPainting = false }
+    const onOut = () => { isPainting = false }
+    canvas.addEventListener('mousedown', onDown)
+    canvas.addEventListener('mouseup', onUp)
+    canvas.addEventListener('mouseleave', onOut)
+    canvas.addEventListener('contextmenu', (ev) => { if (paintable) ev.preventDefault() })
 
     const onEnter = () => {
       // Intensifica el glow en hover
@@ -307,12 +384,15 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
     return () => {
       cancelAnimationFrame(raf)
       canvas.removeEventListener('mousemove', onMove)
+      canvas.removeEventListener('mousedown', onDown)
+      canvas.removeEventListener('mouseup', onUp)
+      canvas.removeEventListener('mouseleave', onOut)
       canvas.removeEventListener('mouseenter', onEnter)
       canvas.removeEventListener('mouseleave', onLeave)
       io.disconnect()
       document.removeEventListener('visibilitychange', onVisibility)
     }
-  }, [width, height])
+  }, [width, height, paintable])
 
   // cuando cambia la señal externa (>0), iniciar explosión (no en el montaje)
   useEffect(() => {
@@ -324,7 +404,7 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
   return (
     <canvas
       ref={canvasRef}
-      className="rounded-xl border border-cyan-900/40 shadow-xl bg-black/60"
+      className="rounded-xl border border-cyan-900/40 shadow-xl bg-black/60 cursor-crosshair"
       aria-label="Lienzo cósmico interactivo"
     />
   )
