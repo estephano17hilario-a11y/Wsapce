@@ -574,9 +574,15 @@ body {
   will-change: transform, opacity, filter;
 }
 .web-burst--red {
+  /* burst de luz rojo en anillos circulares */
   background:
-    radial-gradient(closest-side at 50% 50%, rgba(239,68,68,0.60), rgba(239,68,68,0.0) 55%),
-    conic-gradient(from 0deg at 50% 50%, rgba(255,255,255,0.25), rgba(239,68,68,0.45), rgba(220,38,38,0.35), rgba(239,68,68,0.45), rgba(255,255,255,0.25));
+    radial-gradient(circle at 50% 50%, rgba(239,68,68,0.50), rgba(239,68,68,0.0) 58%),
+    repeating-radial-gradient(circle at 50% 50%,
+      rgba(255,120,120,0.35) 0px,
+      rgba(255,120,120,0.35) 4px,
+      rgba(255,120,120,0.0) 8px,
+      rgba(255,120,120,0.0) 12px);
+  filter: drop-shadow(0 0 22px rgba(239,68,68,0.45));
 }
 .web-burst--blue {
   /* efecto sutil y elegante */
