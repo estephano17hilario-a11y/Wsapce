@@ -170,6 +170,12 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
     let eraseMode = false
     let paintColor = `hsl(${(hue + 40) % 360} 90% 65%)`
 
+    // Banderas de clan por celda
+    const flags: (number | null)[][] = Array.from({ length: rows }, () => Array(cols).fill(null))
+    const clanColors = ['#ef4444', '#3b82f6', '#22c55e', '#f59e0b', '#a855f7']
+    let flagMode = false
+    let flagClan = 0
+
     const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(max, v))
     const pickCell = (mx: number, my: number) => {
       const c = clamp(Math.floor(mx / px), 0, cols - 1)
@@ -186,6 +192,15 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
       }
     }
 
+    const applyFlag = (mx: number, my: number) => {
+      const { c, r } = pickCell(mx, my)
+      if (eraseMode) {
+        flags[r][c] = null
+      } else {
+        flags[r][c] = flagClan
+      }
+    }
+
     const drawPaintLayer = () => {
       // pinta las celdas coloreadas
       for (let r = 0; r < rows; r++) {
@@ -198,8 +213,7 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
       }
       // líneas de rejilla sutiles para guiar el pintado
       if (paintable) {
-        // Reducimos la opacidad de las líneas en 75% (0.08 -> 0.02)
-        ctx.strokeStyle = 'rgba(255,255,255,0.02)'
+        ctx.strokeStyle = 'rgba(255,255,255,0.025)'
         ctx.lineWidth = 1
         for (let c = 1; c < cols; c++) {
           ctx.beginPath()
@@ -212,6 +226,36 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
           ctx.moveTo(0, r * px + 0.5)
           ctx.lineTo(width, r * px + 0.5)
           ctx.stroke()
+        }
+      }
+    }
+
+    const drawFlagsLayer = () => {
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const idx = flags[r][c]
+          if (idx === null || idx === undefined) continue
+          const x = c * px
+          const y = r * px
+          const color = clanColors[idx]
+          ctx.save()
+          ctx.translate(x, y)
+          // mástil
+          ctx.beginPath()
+          ctx.strokeStyle = 'rgba(255,255,255,0.35)'
+          ctx.lineWidth = 0.8
+          ctx.moveTo(px * 0.2, px * 0.2)
+          ctx.lineTo(px * 0.2, px * 0.85)
+          ctx.stroke()
+          // bandera (triángulo)
+          ctx.beginPath()
+          ctx.moveTo(px * 0.2, px * 0.28)
+          ctx.lineTo(px * 0.78, px * 0.45)
+          ctx.lineTo(px * 0.2, px * 0.62)
+          ctx.closePath()
+          ctx.fillStyle = color
+          ctx.fill()
+          ctx.restore()
         }
       }
     }
@@ -303,6 +347,8 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
       }
       // Capa de pintura por encima de todo
       drawPaintLayer()
+      // Banderas de clan encima de la pintura
+      drawFlagsLayer()
       raf = requestAnimationFrame(render)
     }
 
@@ -321,7 +367,8 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
       parallaxY = (my / height - 0.5) * 10
       paintColor = `hsl(${(hue + 40) % 360} 90% 65%)`
       if (paintable && isPainting) {
-        applyPaint(mx, my)
+        if (flagMode) applyFlag(mx, my)
+        else applyPaint(mx, my)
       }
     }
     canvas.addEventListener('mousemove', onMove, { passive: true })
@@ -333,7 +380,8 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
       const my = e.clientY - rect.top
       eraseMode = e.button === 2 || e.ctrlKey
       isPainting = true
-      applyPaint(mx, my)
+      if (flagMode) applyFlag(mx, my)
+      else applyPaint(mx, my)
     }
     const onUp = () => { isPainting = false }
     const onOut = () => { isPainting = false }
@@ -341,6 +389,21 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
     canvas.addEventListener('mouseup', onUp)
     canvas.addEventListener('mouseleave', onOut)
     canvas.addEventListener('contextmenu', (ev) => { if (paintable) ev.preventDefault() })
+
+    // Atajos de banderas: B para alternar modo bandera, 1-5 para clan
+    const onKey = (e: KeyboardEvent) => {
+      const k = e.key.toLowerCase()
+      if (k === 'b') {
+        flagMode = !flagMode
+        e.preventDefault()
+      } else if (k === 'escape') {
+        flagMode = false
+      } else if (/^[1-5]$/.test(k)) {
+        flagClan = parseInt(k) - 1
+        e.preventDefault()
+      }
+    }
+    canvas.addEventListener('keydown', onKey)
 
     const onEnter = () => {
       // Intensifica el glow en hover
@@ -388,6 +451,7 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
       canvas.removeEventListener('mousedown', onDown)
       canvas.removeEventListener('mouseup', onUp)
       canvas.removeEventListener('mouseleave', onOut)
+      canvas.removeEventListener('keydown', onKey)
       canvas.removeEventListener('mouseenter', onEnter)
       canvas.removeEventListener('mouseleave', onLeave)
       io.disconnect()
@@ -405,7 +469,8 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
   return (
     <canvas
       ref={canvasRef}
-      className="rounded-xl border border-cyan-900/40 shadow-xl bg-black/60 cursor-crosshair"
+      className="rounded-xl border border-cyan-900/40 shadow-xl bg-black/60 cursor-crosshair focus:outline-none"
+      tabIndex={0}
       aria-label="Lienzo cósmico interactivo"
     />
   )
