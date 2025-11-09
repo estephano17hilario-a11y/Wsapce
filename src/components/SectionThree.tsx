@@ -165,6 +165,10 @@ export default function SectionThree() {
               <PixelCanvas width={360} height={240} explodeSignal={explodeTick} />
             </div>
             <div className="mt-4 flex justify-center">
+              {/* Overlay local de explosión (se monta dentro de la tarjeta) */}
+              {webExplosionFxActive && (
+                <div aria-hidden className="web-burst-local web-burst-local--red" />
+              )}
               <button
                 className={`btn-glow-once ${explosionFxActive ? 'btn-glow-once-active' : ''} px-4 py-2 text-xs md:text-sm uppercase tracking-widest rounded-md border border-purple-500/40 ring-1 ring-purple-300/20 bg-neutral-900/80 hover:bg-neutral-800 text-white shadow-sm`}
                 onClick={() => {
@@ -218,8 +222,7 @@ export default function SectionThree() {
                 PONER LA BANDERA
                 {flagFxActive && <span aria-hidden className="once-ripple-subtle once-ripple-subtle--blue" />}
               </button>
-              {/* Overlays globales que traspasan barreras, solo primer clic */}
-              {webExplosionFxActive && createPortal(<div aria-hidden className="web-burst web-burst--red" />, document.body)}
+              {/* Overlay global azul (logro captura) se mantiene */}
               {webCaptureFxActive && createPortal(<div aria-hidden className="web-burst web-burst--blue" />, document.body)}
             </div>
             <h3 className="mt-6 text-white text-2xl md:text-3xl font-extrabold">GUERRA DE GUERRILLAS 24/7</h3>
