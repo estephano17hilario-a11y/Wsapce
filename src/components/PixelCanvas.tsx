@@ -5,11 +5,14 @@ import { useEffect, useRef } from 'react'
 type PixelCanvasProps = {
   width?: number
   height?: number
+  // Señal incremental para disparar la explosión desde el exterior
+  explodeSignal?: number
 }
 
 // Canvas cósmico con estrellas, estrella fugaz y pixel art de nave
-export default function PixelCanvas({ width = 420, height = 300 }: PixelCanvasProps) {
+export default function PixelCanvas({ width = 420, height = 300, explodeSignal = 0 }: PixelCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const startExplosionRef = useRef<(() => void) | null>(null)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -67,6 +70,15 @@ export default function PixelCanvas({ width = 420, height = 300 }: PixelCanvasPr
     let raf = 0
     let running = true
     let isInView = true
+    let shipDestroyed = false
+    let isExploding = false
+    let explosionFrame = 0
+    const explosionMax = 90
+    let particles: Array<{ x: number, y: number, vx: number, vy: number, color: string, size: number }> = []
+    // onda de choque y centro de explosión
+    let shockwaveR = 0
+    let centerX = shipPos.x + shipW / 2
+    let centerY = shipPos.y + shipH / 2
 
     const colorFor = (ch: string) => {
       switch (ch) {
@@ -148,13 +160,91 @@ export default function PixelCanvas({ width = 420, height = 300 }: PixelCanvasPr
       }
     }
 
+    const startExplosion = () => {
+      if (isExploding || shipDestroyed) return
+      isExploding = true
+      explosionFrame = 0
+      particles = []
+      centerX = shipPos.x + shipW / 2
+      centerY = shipPos.y + shipH / 2
+      shockwaveR = 0
+      for (let row = 0; row < shipMap.length; row++) {
+        const line = shipMap[row]
+        for (let col = 0; col < line.length; col++) {
+          const ch = line[col]
+          if (ch === '.') continue
+          const color = colorFor(ch)
+          if (!color) continue
+          const x = shipPos.x + col * px
+          const y = shipPos.y + row * px
+          // dirección radial desde el centro con ruido
+          const dx = x + px / 2 - centerX
+          const dy = y + px / 2 - centerY
+          const len = Math.max(0.5, Math.hypot(dx, dy))
+          const speed = 1.6 + Math.random() * 2.8
+          const vx = (dx / len) * speed + (Math.random() - 0.5) * 0.8
+          const vy = (dy / len) * speed + (Math.random() - 0.5) * 0.8
+          const size = px * (0.7 + Math.random() * 0.9)
+          particles.push({ x, y, vx, vy, color, size })
+        }
+      }
+    }
+
+    const drawExplosion = () => {
+      // destello inicial fuerte con gradiente y modo aditivo
+      ctx.save()
+      ctx.globalCompositeOperation = 'lighter'
+      if (explosionFrame < 14) {
+        const grad = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, Math.max(width, height) * 0.4)
+        grad.addColorStop(0, `rgba(255,255,255,${0.45})`)
+        grad.addColorStop(0.25, `rgba(255,255,255,${0.20})`)
+        grad.addColorStop(1, 'rgba(255,255,255,0)')
+        ctx.fillStyle = grad
+        ctx.fillRect(0, 0, width, height)
+      }
+      // onda de choque (anillo expansivo)
+      shockwaveR += 3.2
+      ctx.beginPath()
+      ctx.lineWidth = 2 + Math.max(0, 12 - explosionFrame * 0.15)
+      ctx.strokeStyle = `rgba(255,255,255,${Math.max(0, 0.35 - explosionFrame * 0.005)})`
+      ctx.arc(centerX, centerY, shockwaveR, 0, Math.PI * 2)
+      ctx.stroke()
+      ctx.restore()
+
+      // partículas con desvanecido temporal
+      const alpha = Math.max(0, 1 - explosionFrame / explosionMax)
+      ctx.save()
+      ctx.globalAlpha = alpha
+      for (const p of particles) {
+        p.x += p.vx
+        p.y += p.vy
+        p.vx *= 0.982
+        p.vy = p.vy * 0.982 + 0.035 // leve gravedad
+        ctx.fillStyle = p.color
+        ctx.fillRect(p.x, p.y, p.size, p.size)
+      }
+      ctx.restore()
+
+      explosionFrame++
+      if (explosionFrame >= explosionMax) {
+        isExploding = false
+        shipDestroyed = true
+        particles = []
+      }
+    }
+
     const render = () => {
       if (!running) return
       t++
       drawBackground()
       drawStars()
       drawShootingStar()
-      drawShip()
+      if (!shipDestroyed && !isExploding) {
+        drawShip()
+      }
+      if (isExploding) {
+        drawExplosion()
+      }
       raf = requestAnimationFrame(render)
     }
 
@@ -211,6 +301,9 @@ export default function PixelCanvas({ width = 420, height = 300 }: PixelCanvasPr
     }
     document.addEventListener('visibilitychange', onVisibility)
 
+    // expone el disparador de explosión a otro efecto
+    startExplosionRef.current = startExplosion
+
     return () => {
       cancelAnimationFrame(raf)
       canvas.removeEventListener('mousemove', onMove)
@@ -220,6 +313,13 @@ export default function PixelCanvas({ width = 420, height = 300 }: PixelCanvasPr
       document.removeEventListener('visibilitychange', onVisibility)
     }
   }, [width, height])
+
+  // cuando cambia la señal externa (>0), iniciar explosión (no en el montaje)
+  useEffect(() => {
+    if (explodeSignal <= 0) return
+    if (!startExplosionRef.current) return
+    startExplosionRef.current()
+  }, [explodeSignal])
 
   return (
     <canvas

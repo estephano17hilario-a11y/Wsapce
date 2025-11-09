@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import PixelCanvas from '@/components/PixelCanvas'
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger)
@@ -17,6 +18,7 @@ export default function SectionThree() {
   const col3Ref = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLDivElement>(null)
   const [userMessages, setUserMessages] = useState<string[]>([])
+  const [explodeTick, setExplodeTick] = useState(0)
 
   const handleSend = () => {
     const text = inputRef.current?.innerText || ''
@@ -143,10 +145,19 @@ export default function SectionThree() {
           </div>
 
           {/* Columna 2: Armamento */}
-          <div ref={col2Ref} className="relative lux-card hover-tilt p-6">
+          <div ref={col2Ref} className="relative lux-card hover-tilt float-soft p-6">
             <div className="absolute -inset-4 -z-10 gradient-ring" />
-            <div className="relative w-[300px] h-[200px] rounded-lg bg-neutral-900/85 border border-neutral-700/40 ring-1 ring-purple-300/10 shadow-xl overflow-hidden flex items-center justify-center text-neutral-400 text-[10px] md:text-xs uppercase tracking-widest select-none placeholder-shimmer">
-              Mockup entrante
+            {/* Lienzo cósmico interactivo (Canvas API, no HTML grid) */}
+            <div className="flex items-center justify-center">
+              <PixelCanvas width={300} height={200} explodeSignal={explodeTick} />
+            </div>
+            <div className="mt-3 flex justify-center">
+              <button
+                className="px-3 py-1 text-[10px] md:text-xs uppercase tracking-widest rounded-md border border-purple-500/40 ring-1 ring-purple-300/20 bg-neutral-900/80 hover:bg-neutral-800 text-white shadow-sm"
+                onClick={() => setExplodeTick((x) => x + 1)}
+              >
+                EXPLOTAR
+              </button>
             </div>
             <h3 className="mt-6 text-white text-xl font-bold">ARSENAL DE CONQUISTA</h3>
             <p className="mt-3 text-gray-300 leading-relaxed text-sm">
