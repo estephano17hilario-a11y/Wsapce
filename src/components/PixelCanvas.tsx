@@ -198,7 +198,8 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
       }
       // líneas de rejilla sutiles para guiar el pintado
       if (paintable) {
-        ctx.strokeStyle = 'rgba(255,255,255,0.08)'
+        // Reducimos la opacidad de las líneas en 75% (0.08 -> 0.02)
+        ctx.strokeStyle = 'rgba(255,255,255,0.02)'
         ctx.lineWidth = 1
         for (let c = 1; c < cols; c++) {
           ctx.beginPath()
