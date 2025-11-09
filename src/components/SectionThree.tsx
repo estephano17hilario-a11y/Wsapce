@@ -200,7 +200,7 @@ export default function SectionThree() {
             </div>
             <div className="mt-4 flex justify-center">
               <button
-                className={`btn-glow-once ${flagFxActive ? 'btn-glow-once-active' : ''} px-4 py-2 text-xs md:text-sm uppercase tracking-widest rounded-md border border-cyan-500/40 ring-1 ring-cyan-300/20 bg-neutral-900/80 hover:bg-neutral-800 text-white shadow-sm`}
+                className={`btn-glow-once btn-glow-once--subtle ${flagFxActive ? 'btn-glow-once--subtle-active' : ''} px-4 py-2 text-xs md:text-sm uppercase tracking-widest rounded-md border border-cyan-500/30 ring-1 ring-cyan-300/10 bg-neutral-900/80 hover:bg-neutral-800 text-white shadow-sm`}
                 onClick={() => {
                   setFlagSpawnTick((x) => x + 1)
                   if (!flagFxPlayed) {
@@ -216,7 +216,7 @@ export default function SectionThree() {
                 }}
               >
                 PONER LA BANDERA
-                {flagFxActive && <span aria-hidden className="once-burst once-burst--cyan" />}
+                {flagFxActive && <span aria-hidden className="once-ripple-subtle once-ripple-subtle--blue" />}
               </button>
               {/* Overlays globales que traspasan barreras, solo primer clic */}
               {webExplosionFxActive && createPortal(<div aria-hidden className="web-burst web-burst--red" />, document.body)}
