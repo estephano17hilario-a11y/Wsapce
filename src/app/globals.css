@@ -62,13 +62,13 @@ body {
 
 /* Fondo cósmico para CTA */
 .cta-radial {
-  background: radial-gradient(closest-side, rgba(34, 211, 238, 0.12), transparent);
+  background: radial-gradient(closest-side, rgba(34, 211, 238, 0.09), transparent);
   filter: blur(24px);
   will-change: filter, opacity;
 }
 
 .cta-aurora {
-  background: linear-gradient(to top, rgba(34, 211, 238, 0.10), rgba(168,85,247,0.12), transparent);
+  background: linear-gradient(to top, rgba(34, 211, 238, 0.075), rgba(168,85,247,0.09), transparent);
   filter: blur(16px);
   will-change: filter, opacity;
 }
@@ -118,7 +118,7 @@ body {
 .premium-noise {
   background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
   background-size: 3px 3px;
-  opacity: 0.25;
+  opacity: 0.19;
   mix-blend-mode: soft-light;
 }
 

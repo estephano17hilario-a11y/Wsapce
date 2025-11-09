@@ -58,26 +58,34 @@ export default function CosmicBackground() {
     let started = false
 
     const drawBackground = () => {
-      ctx.fillStyle = 'black'
+      // Base igual a la escena 6: gradiente vertical suave
+      const linear = ctx.createLinearGradient(0, 0, 0, height)
+      // slate-950 en top, negro al resto para continuidad
+      linear.addColorStop(0, 'rgba(15,23,42,1)')
+      linear.addColorStop(0.45, 'rgba(0,0,0,1)')
+      linear.addColorStop(1, 'rgba(0,0,0,1)')
+      ctx.fillStyle = linear
       ctx.fillRect(0, 0, width, height)
-      const grad = ctx.createRadialGradient(
+
+      // Aurora/radial muy sutil para mantener el carácter cósmico
+      const aurora = ctx.createRadialGradient(
         width * 0.5,
-        height * 0.6,
-        20,
+        height * 0.55,
+        24,
         width * 0.5,
-        height * 0.5,
+        height * 0.45,
         Math.max(width, height)
       )
-      grad.addColorStop(0, 'rgba(34, 211, 238, 0.10)')
-      grad.addColorStop(0.6, 'rgba(168, 85, 247, 0.10)')
-      grad.addColorStop(1, 'rgba(0,0,0,1)')
-      ctx.fillStyle = grad
+      aurora.addColorStop(0, 'rgba(34, 211, 238, 0.045)')
+      aurora.addColorStop(0.6, 'rgba(168, 85, 247, 0.045)')
+      aurora.addColorStop(1, 'rgba(0,0,0,0)')
+      ctx.fillStyle = aurora
       ctx.fillRect(0, 0, width, height)
     }
 
     const drawStars = () => {
       for (const s of stars) {
-        const a = 0.5 + 0.5 * Math.sin(t * 0.03 + s.p)
+        const a = 0.75 * (0.5 + 0.5 * Math.sin(t * 0.03 + s.p))
         ctx.fillStyle = `rgba(255,255,255,${a})`
         const px = s.x + parallaxX * 0.08 * s.r
         const py = s.y + parallaxY * 0.08 * s.r
@@ -123,8 +131,8 @@ export default function CosmicBackground() {
       if (isInView && !started) {
         started = true
         running = true
-        // Activar fondo con transición suave para evitar cortes entre secciones
-        canvas.style.opacity = '0.85'
+        // Activar fondo con transición suave y opacidad reducida ~25%
+        canvas.style.opacity = '0.64'
         if (!raf) raf = requestAnimationFrame(render)
       }
     }, { root: null, threshold: 0.2 })
