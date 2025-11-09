@@ -80,7 +80,7 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
     let isExploding = false
     let explosionFrame = 0
     const explosionMax = 90
-    let particles: Array<{ x: number, y: number, vx: number, vy: number, color: string, size: number }> = []
+    let particles: Array<{ x: number, y: number, vx: number, vy: number, color: string, size: number, rot: number, vr: number, life: number }> = []
     // onda de choque y centro de explosión
     let shockwaveR = 0
     let centerX = shipPos.x + shipW / 2
@@ -546,46 +546,103 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
           const vx = (dx / len) * speed + (Math.random() - 0.5) * 0.8
           const vy = (dy / len) * speed + (Math.random() - 0.5) * 0.8
           const size = px * (0.7 + Math.random() * 0.9)
-          particles.push({ x, y, vx, vy, color, size })
+          // rotación y vida para dibujar partículas más ricas y suaves
+          const rot = Math.random() * Math.PI * 2
+          const vr = (Math.random() - 0.5) * 0.12
+          const life = 1
+          particles.push({ x, y, vx, vy, color, size, rot, vr, life })
         }
       }
     }
 
     const drawExplosion = () => {
+      // progreso normalizado y easing cúbico para suavidad
+      const p = Math.min(1, explosionFrame / explosionMax)
+      const easeOut = 1 - Math.pow(1 - p, 3)
+
       // destello inicial fuerte con gradiente y modo aditivo
       ctx.save()
       ctx.globalCompositeOperation = 'lighter'
-      if (explosionFrame < 16) {
-        // destello rojo intenso que "traspasa" visualmente
-        const grad = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, Math.max(width, height) * 0.45)
-        grad.addColorStop(0, 'rgba(239,68,68,0.55)') // rojo centro
-        grad.addColorStop(0.28, 'rgba(220,38,38,0.28)')
+      if (explosionFrame < 24) {
+        const baseR = Math.max(width, height) * (0.38 + 0.12 * easeOut)
+        const grad = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, baseR)
+        grad.addColorStop(0, `rgba(255,255,255,${0.75 - 0.25 * p})`)
+        grad.addColorStop(0.12, 'rgba(255,199,199,0.55)')
+        grad.addColorStop(0.32, 'rgba(239,68,68,0.40)')
         grad.addColorStop(1, 'rgba(255,0,0,0)')
         ctx.fillStyle = grad
         ctx.fillRect(0, 0, width, height)
       }
-      // onda de choque (anillo expansivo)
-      shockwaveR += 3.2
+      // onda de choque (anillo expansivo) con glow y anillo secundario
+      const grow = 2.2 + 3.4 * (1 - easeOut)
+      shockwaveR += grow
+      ctx.shadowBlur = 14
+      ctx.shadowColor = 'rgba(239,68,68,0.6)'
       ctx.beginPath()
-      ctx.lineWidth = 2 + Math.max(0, 12 - explosionFrame * 0.15)
-      ctx.strokeStyle = `rgba(239,68,68,${Math.max(0, 0.38 - explosionFrame * 0.0055)})`
+      ctx.lineWidth = 2 + Math.max(0, 14 - explosionFrame * 0.18)
+      ctx.strokeStyle = `rgba(239,68,68,${Math.max(0, 0.45 - p * 0.42)})`
       ctx.arc(centerX, centerY, shockwaveR, 0, Math.PI * 2)
+      ctx.stroke()
+      // anillo secundario, ligeramente más grande y tenue
+      ctx.beginPath()
+      ctx.lineWidth = Math.max(0.5, 6 - explosionFrame * 0.12)
+      ctx.strokeStyle = `rgba(255,255,255,${Math.max(0, 0.22 - p * 0.20)})`
+      ctx.arc(centerX, centerY, shockwaveR * 1.05, 0, Math.PI * 2)
       ctx.stroke()
       ctx.restore()
 
-      // partículas con desvanecido temporal
-      const alpha = Math.max(0, 1 - explosionFrame / explosionMax)
+      // partículas con rotación, gravedad y mezcla aditiva al inicio
+      const alpha = Math.max(0, 1 - p)
       ctx.save()
       ctx.globalAlpha = alpha
-      for (const p of particles) {
-        p.x += p.vx
-        p.y += p.vy
-        p.vx *= 0.982
-        p.vy = p.vy * 0.982 + 0.035 // leve gravedad
-        ctx.fillStyle = p.color
-        ctx.fillRect(p.x, p.y, p.size, p.size)
+      if (explosionFrame < 30) ctx.globalCompositeOperation = 'lighter'
+      for (const pt of particles) {
+        pt.x += pt.vx
+        pt.y += pt.vy
+        pt.vx *= 0.985
+        pt.vy = pt.vy * 0.985 + 0.04 // leve gravedad
+        pt.rot += pt.vr
+        pt.life = Math.max(0, pt.life - 0.010)
+        ctx.save()
+        ctx.translate(pt.x + pt.size * 0.5, pt.y + pt.size * 0.5)
+        ctx.rotate(pt.rot)
+        ctx.fillStyle = pt.color
+        ctx.fillRect(-pt.size * 0.5, -pt.size * 0.5, pt.size, pt.size)
+        ctx.restore()
       }
       ctx.restore()
+
+      // chispas (embers) alrededor del anillo para sensación más rica
+      if (explosionFrame < 36) {
+        const emberCount = 12
+        const emberAlpha = Math.max(0, 0.35 - p * 0.28)
+        ctx.save()
+        ctx.globalAlpha = emberAlpha
+        ctx.fillStyle = 'rgba(255,200,100,1)'
+        for (let i = 0; i < emberCount; i++) {
+          const a = (i / emberCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.25
+          const r = shockwaveR * (0.96 + Math.random() * 0.06)
+          const ex = centerX + Math.cos(a) * r
+          const ey = centerY + Math.sin(a) * r
+          ctx.beginPath()
+          ctx.arc(ex, ey, 1.6 + Math.random() * 1.1, 0, Math.PI * 2)
+          ctx.fill()
+        }
+        ctx.restore()
+      }
+
+      // humo/nebla suave tras el destello
+      if (explosionFrame > 18) {
+        ctx.save()
+        ctx.globalCompositeOperation = 'source-over'
+        const smokeR = Math.max(width, height) * (0.52 + 0.10 * easeOut)
+        const smoke = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, smokeR)
+        smoke.addColorStop(0, `rgba(20,10,10,${0.28 - 0.20 * p})`)
+        smoke.addColorStop(1, 'rgba(0,0,0,0)')
+        ctx.fillStyle = smoke
+        ctx.fillRect(0, 0, width, height)
+        ctx.restore()
+      }
 
       explosionFrame++
       if (explosionFrame >= explosionMax) {
