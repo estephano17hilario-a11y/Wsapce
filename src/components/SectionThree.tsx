@@ -19,6 +19,7 @@ export default function SectionThree() {
   const inputRef = useRef<HTMLDivElement>(null)
   const [userMessages, setUserMessages] = useState<string[]>([])
   const [explodeTick, setExplodeTick] = useState(0)
+  const [flagSpawnTick, setFlagSpawnTick] = useState(0)
 
   const handleSend = () => {
     const text = inputRef.current?.innerText || ''
@@ -73,7 +74,8 @@ export default function SectionThree() {
     <section ref={sectionRef} className="relative z-40 w-full bg-transparent py-28 px-6">
       {/* Fondo cósmico y textura premium (debajo del contenido) */}
       <div className="absolute inset-0 -z-10 pointer-events-none">
-        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[70vw] h-[70vw] cta-radial" />
+        {/* vmin para que el radial grande quede perfectamente centrado sin depender de vw */}
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[70vmin] h-[70vmin] cta-radial" />
         <div className="absolute bottom-0 left-0 w-full h-1/2 cta-aurora" />
         <div className="absolute inset-0 premium-noise" />
       </div>
@@ -170,7 +172,15 @@ export default function SectionThree() {
             <div className="absolute -inset-4 -z-10 gradient-ring" />
             {/* Lienzo cósmico pintable por celdas (mockup 2 sin destrucción) */}
             <div className="flex items-center justify-center">
-              <PixelCanvas width={300} height={200} paintable />
+              <PixelCanvas width={300} height={200} paintable showShip={false} spawnFlagSignal={flagSpawnTick} />
+            </div>
+            <div className="mt-3 flex justify-center">
+              <button
+                className="px-3 py-1 text-[10px] md:text-xs uppercase tracking-widest rounded-md border border-cyan-500/40 ring-1 ring-cyan-300/20 bg-neutral-900/80 hover:bg-neutral-800 text-white shadow-sm"
+                onClick={() => setFlagSpawnTick((x) => x + 1)}
+              >
+                PONER LA BANDERA
+              </button>
             </div>
             <h3 className="mt-6 text-white text-xl font-bold">GUERRA DE GUERRILLAS 24/7</h3>
             <p className="mt-3 text-gray-300 leading-relaxed text-sm">

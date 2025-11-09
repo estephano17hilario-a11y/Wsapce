@@ -9,10 +9,14 @@ type PixelCanvasProps = {
   explodeSignal?: number
   // Modo pintura por celdas tipo pixel
   paintable?: boolean
+  // Mostrar u ocultar la nave preformada
+  showShip?: boolean
+  // Señal para generar una bandera ondeante
+  spawnFlagSignal?: number
 }
 
 // Canvas cósmico con estrellas, estrella fugaz y pixel art de nave
-export default function PixelCanvas({ width = 420, height = 300, explodeSignal = 0, paintable = false }: PixelCanvasProps) {
+export default function PixelCanvas({ width = 420, height = 300, explodeSignal = 0, paintable = false, showShip = true, spawnFlagSignal = 0 }: PixelCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const startExplosionRef = useRef<(() => void) | null>(null)
 
@@ -230,6 +234,206 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
       }
     }
 
+    // ======== BANDERA CÓSMICA + ENTRADA PIXELADA ========
+    type SF = { x: number; y: number; w: number; h: number; colorIndex: number; stars: { x: number; y: number; r: number; a: number }[] }
+    const staticFlags: SF[] = []
+    // Estado temporal para la animación de aparición (reveal suave)
+    type EnterFlag = {
+      x: number; y: number; w: number; h: number;
+      clothX: number; clothY: number; clothW: number; clothH: number;
+      poleX: number; poleY: number; poleW: number; poleH: number;
+      startFrame: number;
+      duration: number;
+      progress: number;
+      stars: { x: number; y: number; r: number; a: number }[];
+    }
+    let enteringFlag: EnterFlag | null = null
+
+    // Path y test de punto dentro de la forma entallada (swallow-tail)
+    const makeFlagShape = (clothX: number, clothY: number, clothW: number, clothH: number) => {
+      const notch = Math.max(6, Math.floor(clothW * 0.18))
+      const baseX = clothX + clothW - notch
+      const cy = clothY + clothH * 0.5
+      const pts = [
+        { x: clothX, y: clothY },
+        { x: baseX, y: clothY },
+        { x: clothX + clothW, y: cy },
+        { x: baseX, y: clothY + clothH },
+        { x: clothX, y: clothY + clothH },
+      ]
+      return { notch, baseX, cy, pts }
+    }
+    const pointInFlagShape = (pxlX: number, pxlY: number, clothX: number, clothY: number, clothW: number, clothH: number) => {
+      const { notch, baseX, cy } = makeFlagShape(clothX, clothY, clothW, clothH)
+      if (pxlX <= baseX) return pxlY >= clothY && pxlY <= clothY + clothH
+      const k = (pxlX - baseX) / notch
+      const yTop = clothY + (cy - clothY) * k
+      const yBottom = clothY + clothH - ((clothY + clothH - cy) * k)
+      return pxlY >= yTop && pxlY <= yBottom
+    }
+    const spawnStaticFlag = () => {
+      // más pequeña y centrada
+      const w = Math.max(6, Math.floor(cols * 0.24))
+      const h = Math.max(4, Math.floor(rows * 0.22))
+      const x = Math.floor(cols / 2 - w / 2)
+      const y = Math.floor(rows / 2 - h / 2)
+      staticFlags.length = 0
+
+      // métricas en píxeles
+      const poleW = Math.max(2, Math.floor(px * 0.30))
+      const clothX = (x * px) + Math.floor(px * 0.55) + poleW
+      const clothY = y * px
+      const clothW = w * px
+      const clothH = h * px
+      const poleX = clothX - poleW - Math.floor(px * 0.15)
+      const extraH = Math.floor(clothH * 0.80)
+      const poleH = clothH + extraH // mástil mucho más largo
+      const poleY = clothY - Math.floor(extraH * 0.35)
+
+      // estrellas internas del paño
+      const sc = Math.min(36, Math.max(12, Math.floor((w * h) * 0.15)))
+      const starsInFlag: { x: number; y: number; r: number; a: number }[] = []
+      for (let i = 0; i < sc; i++) {
+        const sx = Math.random() * (clothW - px) + px * 0.5
+        const sy = Math.random() * (clothH - px) + px * 0.5
+        if (!pointInFlagShape(clothX + sx, clothY + sy, clothX, clothY, clothW, clothH)) continue
+        const r = Math.max(1, Math.floor(px * (0.10 + Math.random() * 0.12)))
+        const a = 0.6 + Math.random() * 0.4
+        starsInFlag.push({ x: sx, y: sy, r, a })
+      }
+
+      // animación suave con duración fija
+      enteringFlag = {
+        x, y, w, h,
+        clothX, clothY, clothW, clothH,
+        poleX, poleY, poleW, poleH,
+        startFrame: t,
+        duration: 42,
+        progress: 0,
+        stars: starsInFlag,
+      }
+    }
+
+    const drawStaticFlags = () => {
+      for (const f of staticFlags) {
+        const poleW = Math.max(2, Math.floor(px * 0.30))
+        const clothX = (f.x * px) + Math.floor(px * 0.55) + poleW
+        const clothY = f.y * px
+        const clothW = f.w * px
+        const clothH = f.h * px
+
+        // mástil mucho más largo que la bandera
+        const poleX = clothX - poleW - Math.floor(px * 0.15)
+        const extraH = Math.floor(clothH * 0.80)
+        const poleH = clothH + extraH
+        const poleY = clothY - Math.floor(extraH * 0.35)
+        ctx.save()
+        const poleGrad = ctx.createLinearGradient(poleX, poleY, poleX, poleY + poleH)
+        poleGrad.addColorStop(0, 'rgba(200,200,210,0.95)')
+        poleGrad.addColorStop(0.5, 'rgba(240,240,245,0.95)')
+        poleGrad.addColorStop(1, 'rgba(160,160,170,0.95)')
+        ctx.fillStyle = poleGrad
+        ctx.fillRect(poleX, poleY, poleW, poleH)
+        ctx.restore()
+
+        // bandera en forma entallada cósmica
+        const shape = makeFlagShape(clothX, clothY, clothW, clothH)
+        ctx.save()
+        ctx.beginPath()
+        ctx.moveTo(shape.pts[0].x, shape.pts[0].y)
+        for (let i = 1; i < shape.pts.length; i++) ctx.lineTo(shape.pts[i].x, shape.pts[i].y)
+        ctx.closePath()
+        const flagGrad = ctx.createLinearGradient(clothX, clothY, clothX + clothW, clothY + clothH)
+        flagGrad.addColorStop(0, 'rgba(14,165,233,0.90)')
+        flagGrad.addColorStop(0.5, 'rgba(29,78,216,0.95)')
+        flagGrad.addColorStop(1, 'rgba(2,6,23,0.95)')
+        ctx.fillStyle = flagGrad
+        ctx.fill()
+        // borde holográfico
+        const borderGrad = ctx.createLinearGradient(clothX, clothY, clothX + clothW, clothY)
+        borderGrad.addColorStop(0, 'rgba(56,189,248,0.9)')
+        borderGrad.addColorStop(1, 'rgba(99,102,241,0.9)')
+        ctx.strokeStyle = borderGrad
+        ctx.lineWidth = Math.max(1, Math.floor(px * 0.08))
+        ctx.stroke()
+        // estrellas dentro del paño
+        for (const s of f.stars) {
+          const sx = clothX + Math.round(s.x)
+          const sy = clothY + Math.round(s.y)
+          if (!pointInFlagShape(sx, sy, clothX, clothY, clothW, clothH)) continue
+          ctx.globalAlpha = s.a
+          ctx.fillStyle = '#ffffff'
+          ctx.fillRect(sx, sy, Math.max(1, Math.floor(s.r)), Math.max(1, Math.floor(s.r)))
+          ctx.globalAlpha = 1
+        }
+        ctx.restore()
+      }
+    }
+
+    const drawEnteringFlag = () => {
+      if (!enteringFlag) return
+      const ef = enteringFlag
+      const easeOutCubic = (x: number) => 1 - Math.pow(1 - x, 3)
+      const elapsed = t - ef.startFrame
+      ef.progress = clamp(elapsed / ef.duration, 0, 1)
+      const e = easeOutCubic(ef.progress)
+
+      // mástil revelado progresivamente (más largo que la bandera)
+      ctx.save()
+      const poleGrad = ctx.createLinearGradient(ef.poleX, ef.poleY, ef.poleX, ef.poleY + ef.poleH)
+      poleGrad.addColorStop(0, 'rgba(200,200,210,0.95)')
+      poleGrad.addColorStop(0.5, 'rgba(240,240,245,0.95)')
+      poleGrad.addColorStop(1, 'rgba(160,160,170,0.95)')
+      const poleRevealH = Math.floor(ef.poleH * e)
+      ctx.fillStyle = poleGrad
+      ctx.fillRect(ef.poleX, ef.poleY, ef.poleW, poleRevealH)
+      ctx.restore()
+
+      // paño: revelado pixelado suave (bloques del tamaño px)
+      const revealW = Math.floor(ef.clothW * e)
+      const flagGrad = ctx.createLinearGradient(ef.clothX, ef.clothY, ef.clothX + ef.clothW, ef.clothY + ef.clothH)
+      flagGrad.addColorStop(0, 'rgba(14,165,233,0.90)')
+      flagGrad.addColorStop(0.5, 'rgba(29,78,216,0.95)')
+      flagGrad.addColorStop(1, 'rgba(2,6,23,0.95)')
+      const step = Math.max(2, Math.floor(px))
+      ctx.save()
+      // iterar en grilla, rellenando bloques cuando su centro cae dentro de la forma
+      for (let yy = ef.clothY; yy < ef.clothY + ef.clothH; yy += step) {
+        for (let xx = ef.clothX; xx < ef.clothX + ef.clothW; xx += step) {
+          const cxMid = xx + step * 0.5
+          const cyMid = yy + step * 0.5
+          if (!pointInFlagShape(cxMid, cyMid, ef.clothX, ef.clothY, ef.clothW, ef.clothH)) continue
+          // revelar cuando el bloque está dentro del ancho revelado; suavizar cerca del borde
+          const dist = (ef.clothX + revealW) - cxMid
+          if (dist <= -step) continue
+          const alpha = clamp((dist + step) / (step * 2), 0, 1)
+          ctx.globalAlpha = 0.15 + alpha * 0.85
+          ctx.fillStyle = flagGrad
+          ctx.fillRect(xx, yy, step, step)
+        }
+      }
+      ctx.globalAlpha = 1
+      ctx.restore()
+
+      // estrellas que aparecen cuando su X queda dentro del ancho revelado
+      for (const s of ef.stars) {
+        const sx = ef.clothX + Math.round(s.x)
+        const sy = ef.clothY + Math.round(s.y)
+        if (sx <= ef.clothX + revealW && pointInFlagShape(sx, sy, ef.clothX, ef.clothY, ef.clothW, ef.clothH)) {
+          ctx.globalAlpha = s.a
+          ctx.fillStyle = '#ffffff'
+          ctx.fillRect(sx, sy, Math.max(1, Math.floor(s.r)), Math.max(1, Math.floor(s.r)))
+          ctx.globalAlpha = 1
+        }
+      }
+
+      if (ef.progress >= 1) {
+        staticFlags.length = 0
+        staticFlags.push({ x: ef.x, y: ef.y, w: ef.w, h: ef.h, colorIndex: 1, stars: ef.stars })
+        enteringFlag = null
+      }
+    }
+
     const drawFlagsLayer = () => {
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
@@ -339,7 +543,7 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
       drawBackground()
       drawStars()
       drawShootingStar()
-      if (!shipDestroyed && !isExploding) {
+      if (!shipDestroyed && !isExploding && showShip) {
         drawShip()
       }
       if (isExploding) {
@@ -349,6 +553,10 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
       drawPaintLayer()
       // Banderas de clan encima de la pintura
       drawFlagsLayer()
+      // Animación de entrada primero
+      drawEnteringFlag()
+      // Bandera estática centrada
+      drawStaticFlags()
       raf = requestAnimationFrame(render)
     }
 
@@ -417,6 +625,8 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
     }
     canvas.addEventListener('mouseenter', onEnter)
     canvas.addEventListener('mouseleave', onLeave)
+    const onSpawnFlag = () => { spawnStaticFlag() }
+    canvas.addEventListener('spawn-waving-flag', onSpawnFlag as EventListener)
 
     // Pausar cuando el canvas no esté visible para ahorrar CPU
     const io = new IntersectionObserver(([entry]) => {
@@ -454,10 +664,11 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
       canvas.removeEventListener('keydown', onKey)
       canvas.removeEventListener('mouseenter', onEnter)
       canvas.removeEventListener('mouseleave', onLeave)
+      canvas.removeEventListener('spawn-waving-flag', onSpawnFlag as EventListener)
       io.disconnect()
       document.removeEventListener('visibilitychange', onVisibility)
     }
-  }, [width, height, paintable])
+  }, [width, height, paintable, showShip])
 
   // cuando cambia la señal externa (>0), iniciar explosión (no en el montaje)
   useEffect(() => {
@@ -465,6 +676,17 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
     if (!startExplosionRef.current) return
     startExplosionRef.current()
   }, [explodeSignal])
+
+  // Señal externa para generar bandera ondeante
+  useEffect(() => {
+    // la implementación de la bandera vive dentro del efecto principal; aquí no podemos acceder.
+    // usamos un atributo data y un evento personalizado para solicitar el spawn.
+    if (spawnFlagSignal <= 0) return
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ev = new CustomEvent('spawn-waving-flag')
+    canvas.dispatchEvent(ev)
+  }, [spawnFlagSignal])
 
   return (
     <canvas

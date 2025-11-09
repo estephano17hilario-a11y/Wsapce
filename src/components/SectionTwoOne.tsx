@@ -57,7 +57,8 @@ export default function SectionTwoOne() {
     <section id="wspace-start" ref={sectionRef} className="relative z-40 w-full bg-transparent py-28 px-6">
       {/* Decoración premium sutil (debajo del contenido) */}
       <div className="absolute inset-0 -z-10 pointer-events-none">
-        <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[60vw] h-[60vw] cta-radial" />
+        {/* vmin evita desplazamientos horizontales causados por vw en presencia de barra de scroll */}
+        <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[60vmin] h-[60vmin] cta-radial" />
         <div className="absolute bottom-0 left-0 w-full h-1/2 cta-aurora" />
         <div className="absolute inset-0 premium-noise" />
       </div>

@@ -238,9 +238,9 @@ export default function CinematicScroll() {
   }, []);
 
   return (
-    <section ref={mainContainerRef} className="relative w-screen h-screen overflow-hidden">
+    <section ref={mainContainerRef} className="relative w-full h-screen overflow-hidden">
       {/* Contenedor fijo para todas las escenas */}
-      <div className="fixed top-0 left-0 w-screen h-screen">
+      <div className="fixed inset-0">
         
         {/* ESCENA 1: Inicio Personal */}
         <div ref={scene1Ref} className="absolute inset-0 w-full h-full bg-black">
@@ -362,7 +362,8 @@ export default function CinematicScroll() {
           <div className="relative h-full flex items-center justify-center p-8">
             {/* Fondo cósmico ligero */}
             <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[80vw] h-[80vw] cta-radial"></div>
+              {/* Usamos vmin para evitar desplazamientos por incluir barra de scroll en vw */}
+              <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[80vmin] h-[80vmin] cta-radial"></div>
               <div className="absolute bottom-0 left-0 w-full h-1/2 cta-aurora"></div>
             </div>
 
