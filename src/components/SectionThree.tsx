@@ -10,6 +10,8 @@ if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger)
 }
 
+type ChatMsg = { actor?: string; text: string; system?: boolean; you?: boolean; server?: boolean }
+
 export default function SectionThree() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const titleRef = useRef<HTMLHeadingElement>(null)
@@ -18,7 +20,8 @@ export default function SectionThree() {
   const col2Ref = useRef<HTMLDivElement>(null)
   const col3Ref = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLDivElement>(null)
-  const [userMessages, setUserMessages] = useState<string[]>([])
+  const chatBodyRef = useRef<HTMLDivElement>(null)
+  const [chatMessages, setChatMessages] = useState<ChatMsg[]>([])
   const [explodeTick, setExplodeTick] = useState(0)
   const [flagSpawnTick, setFlagSpawnTick] = useState(0)
   const [explosionFxPlayed, setExplosionFxPlayed] = useState(false)
@@ -29,12 +32,14 @@ export default function SectionThree() {
   const [webExplosionFxActive, setWebExplosionFxActive] = useState(false)
   const [webCaptureFxPlayed, setWebCaptureFxPlayed] = useState(false)
   const [webCaptureFxActive, setWebCaptureFxActive] = useState(false)
+  const [explodeChatPlayedOnce, setExplodeChatPlayedOnce] = useState(false)
+  const [flagChatOnce, setFlagChatOnce] = useState(false)
 
   const handleSend = () => {
     const text = inputRef.current?.innerText || ''
     const clean = text.trim()
     if (!clean) return
-    setUserMessages((prev) => [...prev, clean])
+    setChatMessages((prev) => [...prev, { actor: '[lider]:', text: clean, you: true }])
     if (inputRef.current) {
       inputRef.current.innerText = ''
     }
@@ -79,6 +84,13 @@ export default function SectionThree() {
     }
   }, [])
 
+  // Auto-scroll del chat hacia abajo cuando llegan nuevos mensajes (instantáneo para rendimiento)
+  useEffect(() => {
+    const body = chatBodyRef.current
+    if (!body) return
+    body.scrollTop = body.scrollHeight
+  }, [chatMessages])
+
   return (
     <section id="wspace-start" ref={sectionRef} className="relative z-40 w-full bg-transparent py-28 px-6">
       {/* Fondo cósmico y textura premium (debajo del contenido) */}
@@ -113,13 +125,16 @@ export default function SectionThree() {
                 <span className="war-chat-channel">Canal: #CLAN_ALFA</span>
                 <span className="war-chat-status">(3/50 EN LÍNEA)</span>
               </div>
-              <div className="war-chat-body">
+              <div ref={chatBodyRef} className="war-chat-body">
                 <div className="war-chat-msg"><span className="war-chat-actor">[Soldado_X]:</span><span className="war-chat-text">Aquí en <span className="war-chat-coords">12932,2353</span></span><span className="war-chat-goto">IR A UBICACIÓN</span></div>
                 <div className="war-chat-msg"><span className="war-chat-actor you">[TÚ_Comandante]:</span><span className="war-chat-text">¡Entendido! ¡Enviando Píxel Bomba!</span></div>
-                <div className="war-chat-msg"><span className="war-chat-actor">[Soldado_Y]:</span><span className="war-chat-text">¡Joder, qué buena!</span></div>
-                <div className="war-chat-msg system"><span className="war-chat-text">[Soldado_Z]: (Se ha unido al canal)</span></div>
-                {userMessages.map((msg, i) => (
-                  <div key={i} className="war-chat-msg"><span className="war-chat-actor you">[lider]:</span><span className="war-chat-text">{msg}</span></div>
+                {chatMessages.map((m, i) => (
+                  <div key={`chat-${i}`} className={`war-chat-msg ${m.system ? 'system' : ''}`}>
+                    {m.actor && (
+                      <span className={`war-chat-actor${m.you ? ' you' : ''}${m.server ? ' server' : ''}`}>{m.actor}</span>
+                    )}
+                    <span className="war-chat-text">{m.text}</span>
+                  </div>
                 ))}
               </div>
               <div className="war-chat-input">
@@ -128,13 +143,16 @@ export default function SectionThree() {
                   className="war-chat-inputbar"
                   contentEditable
                   suppressContentEditableWarning
+                  spellCheck={false}
+                  inputMode="text"
+                  autoCapitalize="none"
                   data-placeholder="Escribe tu táctica aquí..."
                   onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSend(); } }}
                   onInput={() => {
                     const el = inputRef.current
                     if (!el) return
-                    // Evita saltos de línea para que no crezca la altura
-                    el.innerText = el.innerText.replace(/[\r\n]+/g, ' ')
+                    // Mantener caret visible al final cuando el texto se hace largo
+                    el.scrollLeft = el.scrollWidth
                   }}
                 ></div>
                 <div
@@ -171,6 +189,19 @@ export default function SectionThree() {
                 className={`btn-glow-once ${explosionFxActive ? 'btn-glow-once-active' : ''} px-4 py-2 text-xs md:text-sm uppercase tracking-widest rounded-md border border-purple-500/40 ring-1 ring-purple-300/20 bg-neutral-900/80 hover:bg-neutral-800 text-white shadow-sm`}
                 onClick={() => {
                   setExplodeTick((x) => x + 1)
+                  // Programar mensajes del Coronel 2s antes de terminar la explosión.
+                  // La explosión dura ~1500ms; 2s antes => aparece inmediatamente.
+                  if (!explodeChatPlayedOnce) {
+                    setExplodeChatPlayedOnce(true)
+                    const explosionDurationMs = 1500
+                    const delayMs = Math.max(0, explosionDurationMs - 2000)
+                    setTimeout(() => {
+                      setChatMessages((prev) => [...prev, { actor: '[Coronel]:', text: 'joder, que buena' }])
+                      setTimeout(() => {
+                        setChatMessages((prev) => [...prev, { actor: '[Coronel]:', text: 'ahora tenemos que capturar la zona' }])
+                      }, 600)
+                    }, delayMs)
+                  }
                   if (!explosionFxPlayed) {
                     setExplosionFxPlayed(true)
                     setExplosionFxActive(true)
@@ -214,6 +245,24 @@ export default function SectionThree() {
                     setWebCaptureFxPlayed(true)
                     setWebCaptureFxActive(true)
                     setTimeout(() => setWebCaptureFxActive(false), 1100)
+                  }
+                  // Mensajes tras PONER LA BANDERA
+                  if (!flagChatOnce) {
+                    setFlagChatOnce(true)
+                    // 2 segundos después del clic
+                    setTimeout(() => {
+                      setChatMessages((prev) => [...prev, { actor: '[Jugador_Y]:', text: 'Vamosss, asi se hace' }])
+                      setTimeout(() => {
+                        setChatMessages((prev) => [...prev, { actor: '[Jugador_A]:', text: 'w' }])
+                      }, 200)
+                      setTimeout(() => {
+                        setChatMessages((prev) => [...prev, { actor: '[Jugador_B]:', text: 'w' }])
+                      }, 400)
+                    }, 2000)
+                    // 3 segundos después del clic: anuncio del servidor (remitente en gris)
+                    setTimeout(() => {
+                      setChatMessages((prev) => [...prev, { actor: '[wspace_servidor]:', text: 'vuestro clan ha pasado del top 40 al top 12 del ranking global', server: true }])
+                    }, 3000)
                   }
                 }}
               >

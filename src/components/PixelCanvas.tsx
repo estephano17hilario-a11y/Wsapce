@@ -649,6 +649,11 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
         isExploding = false
         shipDestroyed = true
         particles = []
+        // Notificar globalmente el fin de la animación de explosión del mockup
+        try {
+          const ev = new CustomEvent('pixel-explosion-finished')
+          document.dispatchEvent(ev)
+        } catch {}
       }
     }
 

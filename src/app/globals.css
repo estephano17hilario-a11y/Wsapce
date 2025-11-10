@@ -223,6 +223,7 @@ body {
 .war-chat-msg { display: flex; gap: 6px; }
 .war-chat-actor { color: #93c5fd; font-weight: 700; }
 .war-chat-actor.you { color: #22d3ee; text-shadow: 0 0 8px rgba(34,211,238,0.4); }
+.war-chat-actor.server { color: #9ca3af; font-weight: 700; }
 .war-chat-msg.system { color: #fbbf24; font-style: italic; }
 .war-chat-text { color: #d1d5db; }
 .war-chat-body .war-chat-msg:hover { background: rgba(148,163,184,0.06); border-radius: 6px; }
@@ -248,8 +249,10 @@ body {
   font-size: 11px;
   line-height: 26px;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-x: auto;
+  overflow-y: hidden;
+  text-overflow: clip;
+  contain: layout paint style;
 }
 .war-chat-inputbar[contenteditable]:focus {
   outline: none;
@@ -308,9 +311,11 @@ body {
   100% { box-shadow: 0 0 18px rgba(34, 211, 238, 0.35); transform: translateY(0) scale(1); }
 }
 .war-chat-inputbar { cursor: text; }
-.war-chat-inputbar:hover + .war-chat-send,
-.war-chat-inputbar[contenteditable]:focus + .war-chat-send {
+.war-chat-inputbar:hover + .war-chat-send {
   animation: pulseGlow 1.8s ease-in-out infinite;
+  background: linear-gradient(90deg, rgba(34,211,238,0.85), rgba(168,85,247,0.85));
+}
+.war-chat-inputbar[contenteditable]:focus + .war-chat-send {
   background: linear-gradient(90deg, rgba(34,211,238,0.85), rgba(168,85,247,0.85));
 }
 
