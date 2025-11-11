@@ -119,6 +119,46 @@ export default function HypeSection() {
               </div>
             </div>
           </div>
+
+          {/* Mini sección integrada: anuncio de la app */}
+          <div className="mt-12 flex justify-center">
+            <div className="relative lux-card lux-card--soft p-8 max-w-[780px] w-full text-center">
+              <span className="nebula-soft" aria-hidden />
+              <span className="space-dust-soft" aria-hidden />
+              <span className="stars-soft" aria-hidden />
+              <span className="blue-accents-soft" aria-hidden />
+              <span className="edge-glow-soft" aria-hidden />
+
+              <h3 className="text-2xl md:text-3xl font-black tracking-tight shine-text">Wspace App — Lanzamiento 25/12</h3>
+              <div className="title-underline" />
+              <p className="mt-3 text-xs md:text-sm text-cyan-100/80">Se lanzará después de la versión web</p>
+
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-3 md:gap-5">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-emerald-400/30 bg-neutral-900/70 text-emerald-300 shadow-sm">
+                  <span className="text-sm">🤖</span>
+                  <span className="text-[11px] md:text-xs uppercase tracking-wide">Android</span>
+                </div>
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-300/30 bg-neutral-900/70 text-gray-200 shadow-sm">
+                  <span className="text-sm"></span>
+                  <span className="text-[11px] md:text-xs uppercase tracking-wide">iOS</span>
+                </div>
+
+                {/* Mini teléfonos estilizados */}
+                <div className="relative w-10 h-20 rounded-2xl border border-neutral-700/60 bg-neutral-950/60 shadow-lg overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-b from-neutral-800/30 to-neutral-900/40" />
+                  <div className="absolute top-1 left-1/2 -translate-x-1/2 w-5 h-1.5 rounded-full bg-neutral-600/70" />
+                  <div className="absolute inset-0 pointer-events-none"><span className="stars-soft" aria-hidden /></div>
+                </div>
+                <div className="relative w-10 h-20 rounded-2xl border border-neutral-700/60 bg-neutral-950/60 shadow-lg overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-b from-neutral-800/30 to-neutral-900/40" />
+                  <div className="absolute top-1 left-1/2 -translate-x-1/2 w-5 h-1.5 rounded-full bg-neutral-600/70" />
+                  <div className="absolute inset-0 pointer-events-none"><span className="space-dust-soft" aria-hidden /></div>
+                </div>
+              </div>
+
+              <p className="mt-5 text-[10px] md:text-xs text-gray-300/80">Elegante, cósmico y listo para despegar</p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
