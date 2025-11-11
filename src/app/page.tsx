@@ -1,6 +1,7 @@
 import CinematicScroll from '@/components/CinematicScroll';
 import CosmicBackground from '@/components/CosmicBackground';
 import SectionThree from '@/components/SectionThree';
+import HypeSection from '@/components/HypeSection';
 
 export default function Home() {
   return (
@@ -9,6 +10,7 @@ export default function Home() {
       {/* Fondo cósmico fullscreen: inicia al entrar la sección Wspace */}
       <CosmicBackground />
       <SectionThree />
+      <HypeSection />
     </main>
   );
 }

@@ -147,6 +147,335 @@ body {
 }
 
 /* Placeholder premium con shimmer sutil */
+.hype-secret {
+  border-color: rgba(250, 204, 21, 0.6);
+  border-width: 2px;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.6), 0 0 50px rgba(250, 204, 21, 0.14);
+  position: relative;
+  overflow: hidden;
+}
+.hype-secret::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 16px;
+  background:
+    radial-gradient(120px 120px at 20% 30%, rgba(250, 204, 21, 0.10), transparent 60%),
+    radial-gradient(140px 140px at 80% 70%, rgba(34, 211, 238, 0.15), transparent 60%);
+  filter: blur(14px);
+  opacity: 0.55;
+  pointer-events: none;
+  animation: hypeBlink 1.8s ease-in-out infinite;
+}
+.hype-secret-badge {
+  padding: 4px 8px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, rgba(250,204,21,0.9), rgba(34,211,238,0.7));
+  color: #0b1220;
+  letter-spacing: 0.08em;
+  animation: flashBadge 1.6s ease-in-out infinite;
+}
+
+@keyframes hypeBlink {
+  0%, 100% { opacity: 0.45; box-shadow: 0 0 12px rgba(250, 204, 21, 0.18); }
+  50% { opacity: 0.75; box-shadow: 0 0 24px rgba(250, 204, 21, 0.35); }
+}
+
+@keyframes flashBadge {
+  0%, 100% { transform: translateY(0); filter: saturate(1); }
+  50% { transform: translateY(-2px); filter: saturate(1.3); }
+}
+
+/* Campo de estrellas y separadores cósmicos */
+.starfield {
+  background-image: radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 3px 3px;
+  opacity: 0.14;
+  mix-blend-mode: screen;
+}
+/* Estrellas suaves y acentos azules elegantes (ligeros) */
+.stars-soft {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  pointer-events: none;
+  background-image:
+    radial-gradient(rgba(255,255,255,0.22) 1px, transparent 1.8px),
+    radial-gradient(rgba(34,211,238,0.12) 1px, transparent 1.8px);
+  background-size: 3px 3px, 6px 6px; /* más densidad */
+  opacity: 0.28; /* más visible */
+  mix-blend-mode: screen;
+}
+.blue-accents-soft {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 20% 8%, rgba(34,211,238,0.16), transparent 42%),
+    radial-gradient(circle at 82% 0%, rgba(34,211,238,0.10), transparent 32%),
+    linear-gradient(180deg, rgba(34,211,238,0.06), transparent 58%);
+  filter: blur(8px);
+  opacity: 0.34; /* más visible */
+  mix-blend-mode: screen;
+}
+
+/* Polvo estelar fino para textura (ligero) */
+.space-dust-soft {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(255,255,255,0.20) 0.8px, transparent 1.6px);
+  background-size: 2px 2px;
+  opacity: 0.12;
+  mix-blend-mode: screen;
+}
+
+/* Nebulosa suave con toques morados y cian (ligero) */
+.nebula-soft {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  pointer-events: none;
+  background:
+    radial-gradient(420px 320px at 12% 18%, rgba(167,139,250,0.20), transparent 62%),
+    radial-gradient(380px 300px at 84% 72%, rgba(34,211,238,0.18), transparent 60%);
+  filter: blur(10px);
+  opacity: 0.26;
+  mix-blend-mode: screen;
+}
+.cosmic-section { position: relative; }
+.cosmic-divider {
+  width: 220px;
+  height: 2px;
+  margin: 0.75rem auto 0;
+  background: linear-gradient(90deg, rgba(34,211,238,0), rgba(34,211,238,0.8), rgba(168,85,247,0.8), rgba(168,85,247,0));
+  box-shadow: 0 0 20px rgba(34,211,238,0.35);
+  border-radius: 9999px;
+}
+.feature-item { position: relative; overflow: visible; }
+.feature-icon {
+  background: linear-gradient(90deg, rgba(34,211,238,0.85), rgba(168,85,247,0.85));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.feature-card { position: relative; overflow: visible; contain: layout style; }
+.tilt-3d {
+  transform-style: preserve-3d;
+  transition: transform 16ms linear; /* ultra-rápido */
+  will-change: transform;
+  backface-visibility: hidden;
+  touch-action: none;
+}
+/* Tilt dinámico vivo con glare */
+.tilt-live {
+  transform-style: preserve-3d;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+  will-change: transform;
+  cursor: pointer;
+}
+.tilt-glare {
+  position: absolute;
+  inset: -2px;
+  border-radius: 18px;
+  background: radial-gradient(circle at var(--glare-x, 50%) var(--glare-y, 50%), rgba(255,255,255,0.18), rgba(250,204,21,0.18), rgba(34,211,238,0.12), transparent 52%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  opacity: var(--glare-opacity, 0);
+  transition: opacity 120ms ease;
+}
+/* Capas de profundidad para parallax dentro del tilt */
+.tilt-icon { transform: translateZ(22px); will-change: transform; }
+.tilt-title { transform: translateZ(12px); will-change: transform; }
+.tilt-badge { transform: translateZ(16px); will-change: transform; }
+
+/* Brillo sutil animado en los bordes (ligero) */
+.edge-glow-soft {
+  position: absolute;
+  inset: -2px;
+  border-radius: 20px;
+  pointer-events: none;
+  border: 1px solid rgba(250, 204, 21, 0.22);
+  box-shadow: 0 0 10px rgba(250, 204, 21, 0.24), inset 0 0 6px rgba(250, 204, 21, 0.12);
+  animation: edgeGlowPulse 3.2s ease-in-out infinite;
+  mix-blend-mode: screen;
+}
+
+@keyframes edgeGlowPulse {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(250, 204, 21, 0.20), inset 0 0 5px rgba(250, 204, 21, 0.10);
+    border-color: rgba(250, 204, 21, 0.20);
+    opacity: 0.85;
+  }
+  50% {
+    box-shadow: 0 0 14px rgba(250, 204, 21, 0.34), inset 0 0 9px rgba(250, 204, 21, 0.16);
+    border-color: rgba(250, 204, 21, 0.26);
+    opacity: 1;
+  }
+}
+/* Distintivos por categoría */
+.cat-badge {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-weight: 800;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  border: 1px solid rgba(148,163,184,0.35);
+  background: rgba(255,255,255,0.06);
+  color: #d1d5db;
+  text-transform: uppercase;
+  box-shadow: 0 0 12px rgba(34,211,238,0.15);
+}
+.cat-comunidad { border-color: rgba(168,85,247,0.6); color: #a78bfa; }
+.cat-juego { border-color: rgba(34,211,238,0.6); color: #22d3ee; }
+.cat-tecnologia { border-color: rgba(99,102,241,0.6); color: #60a5fa; }
+.cat-secreto { border-color: rgba(250,204,21,0.8); color: #fde047; }
+
+/* Mini sección de anuncio App: elegante cósmico con acentos de teléfono */
+.app-announcement {
+  position: relative;
+  overflow: hidden;
+  background: rgba(2, 8, 23, 0.55);
+  box-shadow: 0 30px 60px rgba(0,0,0,0.6), 0 0 36px rgba(34, 211, 238, 0.18);
+}
+.phone-accent {
+  position: absolute;
+  right: -40px; top: -10px;
+  width: 160px; height: 260px;
+  border-radius: 24px;
+  transform: rotate(12deg);
+  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(34,211,238,0.15), rgba(168,85,247,0.12));
+  filter: blur(16px);
+  opacity: 0.55;
+  pointer-events: none;
+}
+.date-badge {
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, rgba(34,211,238,0.9), rgba(168,85,247,0.85));
+  color: #0b1220;
+  letter-spacing: 0.08em;
+}
+.platform-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(148,163,184,0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  will-change: transform;
+}
+.platform-badge:hover { transform: translateY(-1px) scale(1.02); box-shadow: 0 0 18px rgba(34,211,238,0.22); }
+.platform-badge.android { border-color: rgba(16,185,129,0.55); color: #10b981; }
+.platform-badge.apple { border-color: rgba(156,163,175,0.6); color: #e5e7eb; }
+.feature-card::before, .feature-card::after {
+  content: attr(data-emoji);
+  position: absolute;
+  left: 14px; top: 10px;
+  font-size: 22px;
+  opacity: 0;
+  transform: translate3d(0,0,0) scale(0.95);
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.35s ease;
+  will-change: transform, opacity;
+  pointer-events: none;
+  z-index: 2;
+}
+.feature-card::after { left: 32px; top: 10px; }
+.feature-card:hover::before {
+  opacity: 1;
+  transform: translate3d(-24px, -22px, 0) rotate(-12deg) scale(1);
+}
+.feature-card:hover::after {
+  opacity: 1;
+  transform: translate3d(26px, -24px, 0) rotate(10deg) scale(1);
+}
+.emoji-burst { position: absolute; left: 22px; top: 8px; width: 1px; height: 1px; pointer-events: none; }
+.emoji-burst::before {
+  content: attr(data-emoji);
+  position: absolute;
+  left: 0; top: 0;
+  font-size: 20px;
+  opacity: 0;
+  transform: translate3d(0,0,0) scale(0.95);
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.35s ease;
+  will-change: transform, opacity;
+  z-index: 2;
+}
+.feature-card:hover .emoji-burst::before {
+  opacity: 0.95;
+  transform: translate3d(0px, -32px, 0) rotate(2deg) scale(1);
+}
+.orb {
+  position: absolute;
+  top: 10px; left: 12px;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.85), rgba(250,204,21,0.6), transparent 70%);
+  filter: blur(0.3px);
+  animation: orbPulse 3s ease-in-out infinite;
+}
+.blink-spark {
+  width: 8px; height: 8px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(250,204,21,0.9), rgba(34,211,238,0.9), transparent 70%);
+  box-shadow: 0 0 18px rgba(250,204,21,0.8);
+  animation: hypeBlink 1.8s ease-in-out infinite;
+}
+.secret-supernova::before {
+  content: "";
+  position: absolute;
+  inset: -24px;
+  border-radius: 26px;
+  background: conic-gradient(from 120deg, rgba(250,204,21,0.22), rgba(34,211,238,0.18), rgba(168,85,247,0.18), transparent 65%);
+  filter: blur(22px);
+  animation: supernovaPulse 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Modo mínimo para la sección Secreto: menos luces y animaciones */
+.lux-card--soft {
+  background: rgba(2, 8, 23, 0.55);
+  border-color: rgba(148, 163, 184, 0.28);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.45);
+}
+.hype-secret--minimal::after {
+  background: none !important;
+  animation: none !important;
+  opacity: 0 !important;
+}
+.hype-secret--minimal.secret-supernova::before {
+  background: none !important;
+  animation: none !important;
+  opacity: 0 !important;
+}
+.hype-secret--minimal .hype-secret-badge {
+  animation: none !important;
+}
+.hype-secret--minimal .gradient-ring,
+.hype-secret--minimal .orb,
+.hype-secret--minimal .emoji-burst,
+.hype-secret--minimal .blink-spark {
+  display: none !important;
+}
+
+@keyframes orbPulse {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(1.25); opacity: 1; }
+}
+
+@keyframes supernovaPulse {
+  0%, 100% { opacity: 0.6; box-shadow: 0 0 22px rgba(250,204,21,0.35); }
+  50% { opacity: 1; box-shadow: 0 0 46px rgba(250,204,21,0.7); }
+}
 .placeholder-shimmer {
   position: relative;
 }
