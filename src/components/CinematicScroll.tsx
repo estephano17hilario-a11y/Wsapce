@@ -374,9 +374,9 @@ export default function CinematicScroll() {
               <p className="cta-subtitle mt-6 text-xl md:text-2xl text-gray-300">
                 Donde tu viaje se vuelve épico.
               </p>
-              <Button className="cta-button mt-10 px-8 py-6 text-lg rounded-full bg-cyan-500 hover:bg-cyan-400 text-black glow-cyan">
-                Empezamos
-              </Button>
+            <Button className="cta-button mt-10 px-8 py-6 text-lg rounded-full glow-cyan">
+              Empezamos
+            </Button>
             </div>
           </div>
         </div>

@@ -150,7 +150,7 @@ export default function LoadingOverlay() {
         </div>
         <button
           type="button"
-          className={`loading-skip ${skipVisible ? "visible" : ""}`}
+        className={`loading-skip ${skipVisible ? "visible" : ""}`}
           onClick={() => setVisible(false)}
           aria-label="Saltar carga inicial"
         >

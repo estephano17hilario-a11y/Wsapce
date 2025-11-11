@@ -186,7 +186,7 @@ export default function SectionThree() {
               {/* Overlay global rojo (sin límites), solo primer clic */}
               {webExplosionFxActive && createPortal(<div aria-hidden className="web-burst web-burst--red" />, document.body)}
               <button
-                className={`btn-glow-once ${explosionFxActive ? 'btn-glow-once-active' : ''} px-4 py-2 text-xs md:text-sm uppercase tracking-widest rounded-md border border-purple-500/40 ring-1 ring-purple-300/20 bg-neutral-900/80 hover:bg-neutral-800 text-white shadow-sm`}
+            className={`btn-glow-once ${explosionFxActive ? 'btn-glow-once-active' : ''} px-4 py-2 text-xs md:text-sm uppercase tracking-widest rounded-md border border-purple-500/40 ring-1 ring-purple-300/20 bg-neutral-900/80 hover:bg-neutral-800 text-white shadow-sm`}
                 onClick={() => {
                   setExplodeTick((x) => x + 1)
                   // Programar mensajes del Coronel 2s antes de terminar la explosión.
@@ -233,7 +233,7 @@ export default function SectionThree() {
             </div>
             <div className="mt-4 flex justify-center">
               <button
-                className={`btn-glow-once btn-glow-once--subtle ${flagFxActive ? 'btn-glow-once--subtle-active' : ''} px-4 py-2 text-xs md:text-sm uppercase tracking-widest rounded-md border border-cyan-500/30 ring-1 ring-cyan-300/10 bg-neutral-900/80 hover:bg-neutral-800 text-white shadow-sm`}
+            className={`btn-glow-once btn-glow-once--subtle ${flagFxActive ? 'btn-glow-once--subtle-active' : ''} px-4 py-2 text-xs md:text-sm uppercase tracking-widest rounded-md border border-cyan-500/30 ring-1 ring-cyan-300/10 bg-neutral-900/80 hover:bg-neutral-800 text-white shadow-sm`}
                 onClick={() => {
                   setFlagSpawnTick((x) => x + 1)
                   if (!flagFxPlayed) {

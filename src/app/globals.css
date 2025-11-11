@@ -200,10 +200,10 @@ body {
   border-radius: 18px;
   pointer-events: none;
   background-image:
-    radial-gradient(rgba(255,255,255,0.22) 1px, transparent 1.8px),
-    radial-gradient(rgba(34,211,238,0.12) 1px, transparent 1.8px);
-  background-size: 3px 3px, 6px 6px; /* más densidad */
-  opacity: 0.28; /* más visible */
+    radial-gradient(rgba(255,255,255,0.24) 0.9px, transparent 1.6px),
+    radial-gradient(rgba(34,211,238,0.12) 0.9px, transparent 1.6px);
+  background-size: 2px 2px, 4px 4px; /* mayor densidad */
+  opacity: 0.33; /* más visible */
   mix-blend-mode: screen;
 }
 .blue-accents-soft {
@@ -962,3 +962,466 @@ body {
     conic-gradient(from 0deg at 50% 50%, #3b82f6, #38bdf8, #6366f1, #60a5fa, #3b82f6);
 }
 /* (Removido) overlay local: sustituido por overlay global sin límites */
+
+/* ===== Pricing Section (replica del diseño solicitado) ===== */
+.pricing { color: #e5e7eb; }
+.pricing-toggle {
+  display: inline-flex;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, rgba(31,41,55,0.9), rgba(17,24,39,0.9));
+  box-shadow: 0 0 10px rgba(148,163,184,0.15), inset 0 0 8px rgba(148,163,184,0.08);
+}
+.toggle-btn {
+  padding: 8px 14px;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: #cbd5e1;
+  transition: all 120ms ease;
+}
+.toggle-btn.is-active {
+  color: #0ea5e9;
+  background: linear-gradient(90deg, rgba(34,211,238,0.15), rgba(168,85,247,0.15));
+  box-shadow: 0 0 12px rgba(34,211,238,0.25);
+}
+
+.pricing-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(6,8,12,0.9), rgba(10,12,16,0.9));
+  border: 1px solid rgba(148,163,184,0.22);
+  box-shadow: 0 15px 40px rgba(0,0,0,0.35);
+  backdrop-filter: blur(6px);
+}
+/* Oro: bordes dorados elegantes */
+.pricing-card--starter {
+  border-color: rgba(253, 224, 71, 0.38);
+  box-shadow: inset 0 0 0 1px rgba(253, 224, 71, 0.16), 0 15px 40px rgba(0,0,0,0.35);
+}
+/* Bronce: un poco más oscuro */
+.pricing-card--enterprise {
+  background: linear-gradient(180deg, rgba(3,4,6,0.97), rgba(8,10,14,0.94));
+  border-color: rgba(171, 89, 33, 0.26);
+}
+/* El arte superior se eliminó; añadimos luces interiores premium */
+.pricing-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  mix-blend-mode: screen;
+  /* Nebulosa amplia para cubrir más espacio del fondo */
+  background:
+    radial-gradient(160% 120% at -10% 25%, var(--nebula-a, rgba(255,255,255,0.08)) 0%, transparent 60%),
+    radial-gradient(150% 120% at 110% 70%, var(--nebula-b, rgba(255,255,255,0.08)) 0%, transparent 62%),
+    radial-gradient(140% 110% at 50% -20%, var(--nebula-c, rgba(255,255,255,0.06)) 0%, transparent 64%),
+    radial-gradient(220px 160px at 18% 72%, var(--light-a, rgba(250,204,21,0.24)) 0%, transparent 65%),
+    radial-gradient(240px 180px at 82% 30%, var(--light-b, rgba(245,158,11,0.18)) 0%, transparent 68%),
+    /* speckles */
+    radial-gradient(4px 4px at 20% 38%, var(--speck, rgba(255,255,255,0.25)) 0%, transparent 70%),
+    radial-gradient(3px 3px at 70% 18%, var(--speck, rgba(255,255,255,0.25)) 0%, transparent 70%),
+    radial-gradient(3px 3px at 40% 80%, var(--speck, rgba(255,255,255,0.25)) 0%, transparent 70%);
+  opacity: 0.68;
+  filter: blur(10px) saturate(120%);
+  animation: innerLights 22s ease-in-out infinite alternate;
+}
+
+@keyframes innerLights {
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-4px) scale(1.02); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+/* Paletas de luces por variante */
+.pricing-card--starter { --light-a: rgba(250, 204, 21, 0.28); --light-b: rgba(245, 158, 11, 0.22); }
+.pricing-card--creator { --light-a: rgba(226, 232, 240, 0.28); --light-b: rgba(148, 163, 184, 0.22); }
+.pricing-card--enterprise { --light-a: rgba(205, 127, 50, 0.28); --light-b: rgba(171, 89, 33, 0.22); }
+
+/* Paletas de nebulosa por variante */
+.pricing-card--starter { --nebula-a: rgba(253, 224, 71, 0.12); --nebula-b: rgba(245, 158, 11, 0.12); --nebula-c: rgba(255, 236, 200, 0.08); --speck: rgba(253, 224, 71, 0.26); }
+.pricing-card--creator { --nebula-a: rgba(229, 231, 235, 0.12); --nebula-b: rgba(148, 163, 184, 0.12); --nebula-c: rgba(197, 206, 216, 0.08); --speck: rgba(226, 232, 240, 0.26); }
+.pricing-card--enterprise { --nebula-a: rgba(205, 127, 50, 0.12); --nebula-b: rgba(171, 89, 33, 0.12); --nebula-c: rgba(255, 221, 186, 0.08); --speck: rgba(205, 127, 50, 0.26); }
+
+/* Fondos cósmicos por variante: degradados y conic flow */
+.pricing-card--starter::before,
+.pricing-card--creator::before,
+.pricing-card--enterprise::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0.28;
+  transform: rotate(0deg);
+  animation: cosmicDrift 60s linear infinite;
+}
+.pricing-card--starter::before {
+  background:
+    radial-gradient(110% 80% at 10% 15%, rgba(253, 224, 71, 0.25), transparent 60%),
+    radial-gradient(100% 70% at 85% 20%, rgba(245, 158, 11, 0.20), transparent 62%),
+    conic-gradient(from 140deg at 50% 50%, rgba(255,255,255,0.08), rgba(245, 158, 11, 0.15), rgba(255,255,255,0.08), rgba(253, 224, 71, 0.18), rgba(255,255,255,0.08));
+}
+.pricing-card--creator::before {
+  background:
+    radial-gradient(110% 80% at 10% 15%, rgba(226, 232, 240, 0.25), transparent 60%),
+    radial-gradient(100% 70% at 85% 20%, rgba(148, 163, 184, 0.20), transparent 62%),
+    conic-gradient(from 140deg at 50% 50%, rgba(255,255,255,0.08), rgba(148, 163, 184, 0.15), rgba(255,255,255,0.08), rgba(226, 232, 240, 0.18), rgba(255,255,255,0.08));
+}
+.pricing-card--enterprise::before {
+  background:
+    radial-gradient(110% 80% at 10% 15%, rgba(205, 127, 50, 0.25), transparent 60%),
+    radial-gradient(100% 70% at 85% 20%, rgba(171, 89, 33, 0.20), transparent 62%),
+    conic-gradient(from 140deg at 50% 50%, rgba(255,255,255,0.08), rgba(171, 89, 33, 0.15), rgba(255,255,255,0.08), rgba(205, 127, 50, 0.18), rgba(255,255,255,0.08));
+}
+
+@keyframes cosmicDrift {
+  0%   { transform: rotate(0turn); }
+  100% { transform: rotate(1turn); }
+}
+
+.corner-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 800;
+  border-radius: 10px;
+  color: #fef3c7;
+  background: linear-gradient(90deg, rgba(250,204,21,0.75), rgba(34,211,238,0.45));
+  box-shadow: 0 0 14px rgba(250,204,21,0.45);
+}
+
+.pricing-card__inner { padding: 18px 18px 22px; position: relative; z-index: 1; }
+.pricing-card__title { margin-top: 176px; font-weight: 700; font-size: 16px; color: #e5e7eb; }
+/* Títulos por variante con gradiente y brillo */
+.pricing-card--starter .pricing-card__title {
+  background: linear-gradient(90deg, #fde047, #f59e0b);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  text-shadow: 0 0 10px rgba(250, 204, 21, 0.25);
+}
+.pricing-card--creator .pricing-card__title {
+  background: linear-gradient(90deg, #e2e8f0, #9ca3af);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  text-shadow: 0 0 10px rgba(226, 232, 240, 0.25);
+}
+.pricing-card--enterprise .pricing-card__title {
+  background: linear-gradient(90deg, #f59e0b, #b45309);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  text-shadow: 0 0 10px rgba(205, 127, 50, 0.25);
+}
+.pricing-card__price {
+  margin-top: 6px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  position: relative;
+  padding: 8px 12px;
+  border-radius: 12px;
+  overflow: hidden;
+  /* Fondo negro con tinte por variante + halo superior */
+  background:
+    radial-gradient(100% 60% at 50% 0%, var(--price-bg-tint, rgba(255,255,255,0.06)) 0%, transparent 60%),
+    linear-gradient(180deg, rgba(3,6,12,0.90), rgba(3,6,12,0.75));
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
+}
+
+/* Nebulosa detrás del precio */
+.pricing-card__price::before {
+  content: "";
+  position: absolute;
+  inset: -25% -20%;
+  background:
+    radial-gradient(140px 140px at 20% 60%, var(--price-a, rgba(253,224,71,0.35)) 0%, transparent 60%),
+    radial-gradient(180px 180px at 80% 30%, var(--price-b, rgba(245,158,11,0.28)) 0%, transparent 62%),
+    radial-gradient(220px 200px at 50% 0%, var(--price-c, rgba(255,255,255,0.18)) 0%, transparent 70%);
+  filter: blur(18px);
+  mix-blend-mode: screen;
+  opacity: .55;
+  animation: priceNebula 12s ease-in-out infinite;
+}
+
+.pricing-card__price::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 80% at 50% -20%, rgba(255,255,255,0.10) 0%, transparent 60%),
+    radial-gradient(4px 4px at 14% 35%, var(--price-speck, rgba(255,255,255,0.26)) 0%, transparent 70%),
+    radial-gradient(3px 3px at 78% 22%, var(--price-speck, rgba(255,255,255,0.26)) 0%, transparent 70%),
+    radial-gradient(3px 3px at 35% 78%, var(--price-speck, rgba(255,255,255,0.26)) 0%, transparent 70%);
+  mix-blend-mode: screen;
+}
+
+@keyframes priceNebula {
+  0% { transform: translateX(-2%) translateY(0); }
+  50% { transform: translateX(2%) translateY(-2%); }
+  100% { transform: translateX(-2%) translateY(0); }
+}
+.price-value { font-size: 32px; font-weight: 800; color: #ffffff; }
+/* Color del precio por variante */
+.pricing-card--starter .price-value { color: #fde047; }
+.pricing-card--creator .price-value { color: #e5e7eb; }
+.pricing-card--enterprise .price-value { color: #f59e0b; }
+.price-suffix { font-size: 12px; color: #94a3b8; }
+
+/* Paletas de nebulosa por variante (oro/plata/bronce) */
+.pricing-card--starter .pricing-card__price {
+  --price-a: rgba(250, 204, 21, 0.40); /* gold */
+  --price-b: rgba(245, 158, 11, 0.32); /* amber */
+  --price-c: rgba(255, 255, 255, 0.22); /* soft light */
+  --price-bg-tint: rgba(253, 224, 71, 0.10);
+  --price-speck: rgba(253, 224, 71, 0.35);
+}
+.pricing-card--creator .pricing-card__price {
+  --price-a: rgba(229, 231, 235, 0.40); /* silver */
+  --price-b: rgba(180, 198, 215, 0.30); /* cool light */
+  --price-c: rgba(255, 255, 255, 0.20);
+  --price-bg-tint: rgba(180, 198, 215, 0.12);
+  --price-speck: rgba(206, 214, 222, 0.32);
+}
+.pricing-card--enterprise .pricing-card__price {
+  --price-a: rgba(245, 158, 11, 0.40); /* bronze */
+  --price-b: rgba(180, 83, 9, 0.30); /* copper */
+  --price-c: rgba(255, 228, 181, 0.20);
+  --price-bg-tint: rgba(205, 127, 50, 0.10);
+  --price-speck: rgba(205, 127, 50, 0.35);
+}
+
+/* Recuadro Gmail */
+.pricing-email { margin-top: 10px; }
+.pricing-email__input {
+  width: 100%;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: #e5e7eb;
+  background: linear-gradient(180deg, rgba(3,6,12,0.85), rgba(3,6,12,0.72));
+  border: 1px solid rgba(148,163,184,0.25);
+  outline: none;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
+}
+.pricing-email__input::placeholder { color: #94a3b8; }
+.pricing-email__input:focus { box-shadow: 0 0 0 2px rgba(255,255,255,0.08), inset 0 0 0 1px rgba(255,255,255,0.14); }
+
+.pricing-card--starter .pricing-email__input {
+  border-color: rgba(253,224,71,0.35);
+  box-shadow: inset 0 0 0 1px rgba(253,224,71,0.14), 0 0 10px rgba(253,224,71,0.08);
+  background: linear-gradient(180deg, rgba(253,224,71,0.10), rgba(3,6,12,0.70));
+}
+.pricing-card--creator .pricing-email__input {
+  border-color: rgba(226,232,240,0.35);
+  box-shadow: inset 0 0 0 1px rgba(226,232,240,0.14), 0 0 10px rgba(226,232,240,0.08);
+  background: linear-gradient(180deg, rgba(226,232,240,0.10), rgba(3,6,12,0.70));
+}
+.pricing-card--enterprise .pricing-email__input {
+  border-color: rgba(205,127,50,0.35);
+  box-shadow: inset 0 0 0 1px rgba(205,127,50,0.14), 0 0 10px rgba(205,127,50,0.08);
+  background: linear-gradient(180deg, rgba(205,127,50,0.08), rgba(3,6,12,0.72));
+}
+
+.pricing-cta {
+  margin-top: 12px;
+  width: 100%;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  position: relative;
+  overflow: hidden;
+}
+.cta-primary {
+  background: linear-gradient(90deg, rgba(148,163,184,0.15), rgba(100,116,139,0.18));
+  border: 1px solid rgba(148,163,184,0.35);
+  color: #cbd5e1;
+}
+.cta-secondary {
+  background: linear-gradient(90deg, rgba(34,211,238,0.18), rgba(168,85,247,0.18));
+  border: 1px solid rgba(148,163,184,0.35);
+  color: #e5e7eb;
+}
+
+/* Botones cósmicos por variante */
+.pricing-card--starter .pricing-cta {
+  background: linear-gradient(90deg, rgba(250, 204, 21, 0.28), rgba(245, 158, 11, 0.24));
+  border: 1px solid rgba(250, 204, 21, 0.35);
+  color: #fff7ed;
+  box-shadow: 0 0 14px rgba(250, 204, 21, 0.30);
+}
+.pricing-card--starter .pricing-cta::before {
+  content: "";
+  position: absolute; inset: -15% -20%; pointer-events: none;
+  background: radial-gradient(120px 120px at 25% 60%, rgba(253, 224, 71, 0.35), transparent 60%),
+              radial-gradient(160px 160px at 80% 20%, rgba(245, 158, 11, 0.30), transparent 60%);
+  mix-blend-mode: screen; filter: blur(20px); opacity: .55;
+  animation: ctaLights 8s ease-in-out infinite;
+}
+.pricing-card--starter .pricing-cta:hover {
+  background: linear-gradient(90deg, rgba(250, 204, 21, 0.36), rgba(245, 158, 11, 0.32));
+  box-shadow: 0 0 18px rgba(250, 204, 21, 0.42);
+}
+
+.pricing-card--creator .pricing-cta {
+  background: linear-gradient(90deg, rgba(226, 232, 240, 0.26), rgba(148, 163, 184, 0.22));
+  border: 1px solid rgba(226, 232, 240, 0.35);
+  color: #f1f5f9;
+  box-shadow: 0 0 14px rgba(226, 232, 240, 0.28);
+}
+.pricing-card--creator .pricing-cta::before {
+  content: "";
+  position: absolute; inset: -15% -20%; pointer-events: none;
+  background: radial-gradient(120px 120px at 25% 60%, rgba(226, 232, 240, 0.35), transparent 60%),
+              radial-gradient(160px 160px at 80% 20%, rgba(148, 163, 184, 0.30), transparent 60%);
+  mix-blend-mode: screen; filter: blur(20px); opacity: .55;
+  animation: ctaLights 8s ease-in-out infinite;
+}
+.pricing-card--creator .pricing-cta:hover {
+  background: linear-gradient(90deg, rgba(226, 232, 240, 0.34), rgba(148, 163, 184, 0.30));
+  box-shadow: 0 0 18px rgba(226, 232, 240, 0.40);
+}
+
+.pricing-card--enterprise .pricing-cta {
+  background: linear-gradient(90deg, rgba(205, 127, 50, 0.26), rgba(171, 89, 33, 0.22));
+  border: 1px solid rgba(205, 127, 50, 0.35);
+  color: #fff7ed;
+  box-shadow: 0 0 14px rgba(205, 127, 50, 0.28);
+}
+.pricing-card--enterprise .pricing-cta::before {
+  content: "";
+  position: absolute; inset: -15% -20%; pointer-events: none;
+  background: radial-gradient(120px 120px at 25% 60%, rgba(205, 127, 50, 0.35), transparent 60%),
+              radial-gradient(160px 160px at 80% 20%, rgba(171, 89, 33, 0.30), transparent 60%);
+  mix-blend-mode: screen; filter: blur(20px); opacity: .55;
+  animation: ctaLights 8s ease-in-out infinite;
+}
+.pricing-card--enterprise .pricing-cta:hover {
+  background: linear-gradient(90deg, rgba(205, 127, 50, 0.34), rgba(171, 89, 33, 0.30));
+  box-shadow: 0 0 18px rgba(205, 127, 50, 0.40);
+}
+
+@keyframes ctaLights {
+  0% { transform: translateX(-2%); }
+  50% { transform: translateX(2%); }
+  100% { transform: translateX(-2%); }
+}
+
+.pricing-section { margin-top: 18px; }
+.pricing-section__title { font-size: 13px; font-weight: 700; color: #cbd5e1; margin-bottom: 10px; }
+/* Encabezado de sección por variante */
+.pricing-card--starter .pricing-section__title { color: #fef3c7; }
+.pricing-card--creator .pricing-section__title { color: #e2e8f0; }
+.pricing-card--enterprise .pricing-section__title { color: #fff7ed; }
+.pricing-list { display: grid; gap: 9px; }
+.pricing-list__item { display: flex; align-items: center; gap: 10px; color: #94a3b8; font-size: 13px; }
+.check {
+  width: 18px; height: 18px; border-radius: 9999px; flex: none;
+  background: radial-gradient(circle at 50% 50%, rgba(34,211,238,0.8), rgba(168,85,247,0.8));
+  box-shadow: 0 0 8px rgba(34,211,238,0.3);
+  position: relative;
+}
+.check::after {
+  content: "";
+  position: absolute;
+  left: 5px; top: 3px;
+  width: 6px; height: 10px;
+  border-right: 2px solid white;
+  border-bottom: 2px solid white;
+  transform: rotate(45deg);
+}
+/* -----------------------------------------------
+   Liquid Glass Nebula Buttons
+   ----------------------------------------------- */
+/* Base: vidrio líquido con overlay nebuloso animado */
+.btn-liquid {
+  position: relative;
+  overflow: visible;
+  border-radius: inherit;
+  background: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: inherit !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transition: inherit;
+}
+
+.btn-liquid::before {
+  content: none;
+  display: none;
+}
+
+.btn-liquid::after { content: none; display: none; }
+
+.btn-liquid:hover { box-shadow: none; border-color: inherit; transform: none; }
+
+.btn-liquid:hover::before { opacity: 0; }
+.btn-liquid > * { position: relative; z-index: 2; }
+
+@keyframes nebula-flow {
+  0%   { transform: translateX(-6%) rotate(0turn); }
+  50%  { transform: translateX(6%) rotate(1turn); }
+  100% { transform: translateX(-6%) rotate(2turn); }
+}
+
+/* Paletas de nebulosa: sin efecto activo (mantener por compatibilidad) */
+.nebula-cyan   { }
+.nebula-magenta{ }
+.nebula-green  { }
+.nebula-purple { }
+.nebula-gold   { }
+.nebula-silver { }
+.nebula-bronze { }
+
+/* Precio grande para el plan Oro */
+.price-big { font-size: clamp(2.8rem, 5vw, 4rem); line-height: 1; }
+
+/* Integración rápida con CTAs existentes (sin efecto) */
+.pricing-cta.btn-liquid { }
+.cta-primary.btn-liquid, .cta-secondary.btn-liquid { }
+
+/* Texto ‘liquid glass’ desactivado */
+.text-liquid { color: inherit !important; background: none !important; animation: none !important; text-shadow: none !important; -webkit-background-clip: initial; background-clip: initial; }
+.text-liquid::after { content: none; }
+/* Override: desactivar rectángulo giratorio interno */
+.pricing-card--starter::before,
+.pricing-card--creator::before,
+.pricing-card--enterprise::before {
+  content: none !important;
+  display: none !important;
+  animation: none !important;
+  background: none !important;
+}
+
+/* Listas y checks por variante (más color y degradados) */
+.pricing-card--starter .pricing-list { background: linear-gradient(180deg, rgba(250,204,21,0.07), rgba(245,158,11,0.05)); padding: 10px 12px; border-radius: 12px; box-shadow: inset 0 0 0 1px rgba(250,204,21,0.08); }
+.pricing-card--creator .pricing-list { background: linear-gradient(180deg, rgba(226,232,240,0.07), rgba(148,163,184,0.05)); padding: 10px 12px; border-radius: 12px; box-shadow: inset 0 0 0 1px rgba(226,232,240,0.08); }
+.pricing-card--enterprise .pricing-list { background: linear-gradient(180deg, rgba(205,127,50,0.07), rgba(171,89,33,0.05)); padding: 10px 12px; border-radius: 12px; box-shadow: inset 0 0 0 1px rgba(205,127,50,0.08); }
+
+.pricing-card--starter .pricing-list__item { background: linear-gradient(90deg, rgba(250,204,21,0.06), rgba(245,158,11,0.04)); border-radius: 10px; padding: 8px 10px; box-shadow: inset 0 0 0 1px rgba(250,204,21,0.08); }
+.pricing-card--creator .pricing-list__item { background: linear-gradient(90deg, rgba(226,232,240,0.06), rgba(148,163,184,0.04)); border-radius: 10px; padding: 8px 10px; box-shadow: inset 0 0 0 1px rgba(226,232,240,0.08); }
+.pricing-card--enterprise .pricing-list__item { background: linear-gradient(90deg, rgba(205,127,50,0.06), rgba(171,89,33,0.04)); border-radius: 10px; padding: 8px 10px; box-shadow: inset 0 0 0 1px rgba(205,127,50,0.08); }
+
+.pricing-card--starter .pricing-list__item:hover { background: linear-gradient(90deg, rgba(250,204,21,0.12), rgba(245,158,11,0.10)); }
+.pricing-card--creator .pricing-list__item:hover { background: linear-gradient(90deg, rgba(226,232,240,0.12), rgba(148,163,184,0.10)); }
+.pricing-card--enterprise .pricing-list__item:hover { background: linear-gradient(90deg, rgba(205,127,50,0.12), rgba(171,89,33,0.10)); }
+
+/* Checks por color del plan */
+.pricing-card--starter .check {
+  background: radial-gradient(circle at 50% 50%, rgba(253,224,71,0.85), rgba(245,158,11,0.8));
+  box-shadow: 0 0 10px rgba(250,204,21,0.45);
+}
+.pricing-card--creator .check {
+  background: radial-gradient(circle at 50% 50%, rgba(226,232,240,0.85), rgba(148,163,184,0.8));
+  box-shadow: 0 0 10px rgba(226,232,240,0.40);
+}
+.pricing-card--enterprise .check {
+  background: radial-gradient(circle at 50% 50%, rgba(205,127,50,0.85), rgba(171,89,33,0.8));
+  box-shadow: 0 0 10px rgba(205,127,50,0.40);
+}
