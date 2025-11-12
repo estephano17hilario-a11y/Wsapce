@@ -90,10 +90,8 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
     // Animación sincronizada (zoom out + bandera + rejilla + círculo)
     let syncAnim: { startFrame: number; duration: number; progress: number } | null = null
     const totalSyncFrames = Math.max(1, Math.floor(60 * 3.5)) // 3.5s @ ~60fps
-    let sceneScale = 1 // escala global para zoom out
-    let sceneScaleFinal = 1 // valor final persistente tras la animación
-    const gridAlphaStart = 0.025
-    const gridAlphaEnd = 0.10
+    let sceneScale = 1
+    let sceneScaleFinal = 1
     // Control para permitir la animación solo una vez
     let flagAnimPlayedOnce = false
 

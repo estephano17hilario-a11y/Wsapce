@@ -60,7 +60,6 @@ export default function PricingSection() {
     load()
   }, [])
 
-  const discount = 0.25 // 25% de ahorro para anual
 
   const plans: Plan[] = useMemo(
     () => [

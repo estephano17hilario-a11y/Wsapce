@@ -37,7 +37,7 @@ export default function HypeSection() {
     schedule()
   }
 
-  const handlePointerEnter = (e: React.PointerEvent<HTMLDivElement>) => {
+  const handlePointerEnter = () => {
     const el = secretRef.current
     if (!el) return
     tiltRef.current.scale = 1.03
