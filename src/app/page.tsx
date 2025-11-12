@@ -4,6 +4,7 @@ import SectionThree from '@/components/SectionThree';
 import HypeSection from '@/components/HypeSection';
 import WarmupHeroSection from '@/components/WarmupHeroSection';
 import PricingSection from '@/components/PricingSection';
+import Footer from '@/components/Footer';
 
 export default function Home() {
   return (
@@ -14,7 +15,8 @@ export default function Home() {
       <SectionThree />
       <HypeSection />
       <WarmupHeroSection />
-      <PricingSection />
-    </main>
+  <PricingSection />
+  <Footer />
+  </main>
   );
 }

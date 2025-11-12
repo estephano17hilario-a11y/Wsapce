@@ -1,76 +1,12 @@
 "use client"
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
 import { createPortal } from 'react-dom'
 
 export default function WarmupHeroSection() {
   const [ctaBtnActive, setCtaBtnActive] = useState(false)
   const [ctaOverlayActive, setCtaOverlayActive] = useState(false)
   const [ctaOverlayPlayed, setCtaOverlayPlayed] = useState(false)
-  const heroRef = useRef<HTMLElement | null>(null)
-  const holdActiveRef = useRef(false)
-  const lastHoldRef = useRef(0)
-
-  // Pausa breve del scroll cuando el CTA queda centrado
-  useEffect(() => {
-    const HOLD_MS = 800
-    const CENTER_TOLERANCE = 60 // px alrededor del centro
-
-    const blockKeys = (e: KeyboardEvent) => {
-      const keys = ['ArrowDown','ArrowUp','PageDown','PageUp','Home','End','Space']
-      if (keys.includes(e.code) || keys.includes(e.key)) {
-        e.preventDefault()
-      }
-    }
-    const blockWheel = (e: WheelEvent) => { e.preventDefault() }
-    const blockTouch = (e: TouchEvent) => { e.preventDefault() }
-
-    const enableHold = () => {
-      if (holdActiveRef.current) return
-      holdActiveRef.current = true
-      lastHoldRef.current = Date.now()
-
-      // Activa scroll-snap temporal para centrar y "parar" sutilmente
-      document.documentElement.classList.add('snap-temporary')
-
-      // Bloqueo breve de gestos de scroll
-      window.addEventListener('wheel', blockWheel, { passive: false })
-      window.addEventListener('touchmove', blockTouch, { passive: false })
-      window.addEventListener('keydown', blockKeys, { passive: false })
-
-      // Alinea exactamente al centro
-      const el = heroRef.current
-      if (el) {
-        const rect = el.getBoundingClientRect()
-        const targetTop = window.scrollY + rect.top + rect.height/2 - window.innerHeight/2
-        window.scrollTo({ top: targetTop, behavior: 'smooth' })
-      }
-
-      // Libera tras unos ms
-      window.setTimeout(() => {
-        document.documentElement.classList.remove('snap-temporary')
-        window.removeEventListener('wheel', blockWheel as EventListener)
-        window.removeEventListener('touchmove', blockTouch as EventListener)
-        window.removeEventListener('keydown', blockKeys as EventListener)
-        holdActiveRef.current = false
-      }, HOLD_MS)
-    }
-
-    const onScroll = () => {
-      const el = heroRef.current
-      if (!el) return
-      const now = Date.now()
-      if (now - lastHoldRef.current < HOLD_MS + 1200) return // cooldown
-      const rect = el.getBoundingClientRect()
-      const centerDist = Math.abs((rect.top + rect.height/2) - (window.innerHeight/2))
-      if (centerDist <= CENTER_TOLERANCE) {
-        enableHold()
-      }
-    }
-
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
 
   const handleClick = () => {
     // Brillo elegante del botón
@@ -90,9 +26,9 @@ export default function WarmupHeroSection() {
   }
 
   return (
-    <section ref={heroRef} id="cta-warmup" className="relative w-full my-40 md:my-64 px-6">
+    <section id="cta-warmup" className="relative w-full my-64 md:my-96 px-6">
       <div className="relative max-w-4xl mx-auto">
-        <div className="relative warmup-hero p-6 md:p-8 text-center">
+        <div className="relative warmup-hero p-6 md:p-8 text-center overflow-hidden">
           {/* Overlays cósmicos suaves (sin recuadro) */}
           <span className="nebula-soft" aria-hidden />
           <span className="space-dust-soft" aria-hidden />
