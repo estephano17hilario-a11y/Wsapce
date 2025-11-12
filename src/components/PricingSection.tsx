@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useMemo, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 
 type BillingCycle = "monthly" | "annually"
 
@@ -22,6 +22,42 @@ type Plan = {
 
 export default function PricingSection() {
   const [cycle, setCycle] = useState<BillingCycle>("monthly")
+  const [user, setUser] = useState<{ id: string; email: string; plan: "bronce" | "plata" | "oro" } | null>(null)
+  const [bronzeEmail, setBronzeEmail] = useState("")
+  const [bronzeRef, setBronzeRef] = useState("")
+  const [bronzeStatus, setBronzeStatus] = useState<{ ok?: boolean; error?: string } | null>(null)
+  const [bronzeLoading, setBronzeLoading] = useState(false)
+  const [plataLink, setPlataLink] = useState<string | null>(null)
+  const [plataStatus, setPlataStatus] = useState<{ ok?: boolean; error?: string } | null>(null)
+  const [plataGenerating, setPlataGenerating] = useState(false)
+  const [plataExpiresAt, setPlataExpiresAt] = useState<number | null>(null)
+
+  const msg = (code?: string) => {
+    switch (code) {
+      case 'email_invalid': return 'Email inválido'
+      case 'user_exists': return 'Ya estás registrado'
+      case 'ref_invalid_or_expired': return 'Enlace inválido o expirado'
+      case 'self_referral_not_allowed': return 'No puedes auto-referenciarte'
+      case 'invite_limit_reached': return 'Límite de invitaciones alcanzado'
+      case 'not_authenticated': return 'No autenticado'
+      case 'user_not_found': return 'Usuario no encontrado'
+      case 'must_be_bronce': return 'Debes estar en BRONCE para subir a PLATA'
+      case 'must_be_plata': return 'Debes ser PLATA para generar enlace'
+      case 'network_error': return 'Error de red'
+      default: return code || 'Error'
+    }
+  }
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch('/api/user', { cache: 'no-store' })
+        const data = await res.json()
+        if (data.user) setUser(data.user)
+      } catch {}
+    }
+    load()
+  }, [])
 
   const discount = 0.25 // 25% de ahorro para anual
 
@@ -157,7 +193,6 @@ export default function PricingSection() {
                   <span className={`price-value ${plan.id === "fundador-oro" ? "price-big" : ""}`}>{priceLabel(plan)}</span>
                   {plan.priceSuffix && <span className="price-suffix">{plan.priceSuffix}</span>}
                 </div>
-                {/* Recuadro para Gmail solo en Bronce */}
                 {plan.variant === "enterprise" && (
                   <div className="pricing-email">
                     <input
@@ -166,13 +201,99 @@ export default function PricingSection() {
                       placeholder="Tu Gmail"
                       inputMode="email"
                       aria-label="Tu Gmail"
+                      value={bronzeEmail}
+                      onChange={(e) => setBronzeEmail(e.target.value)}
                     />
+                    <input
+                      type="text"
+                      className="pricing-email__input mt-2"
+                      placeholder="Coloca enlace de invitación (opcional)"
+                      aria-label="Enlace de invitación"
+                      value={bronzeRef}
+                      onChange={(e) => setBronzeRef(e.target.value)}
+                    />
+                    <button
+                      className={`pricing-cta cta-secondary mt-3 ${bronzeLoading ? 'btn-loading' : ''}`}
+                      onClick={async () => {
+                        setBronzeStatus(null)
+                        setPlataLink(null)
+                        setBronzeLoading(true)
+                        try {
+                          const res = await fetch('/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: bronzeEmail, referralLink: bronzeRef }) })
+                          const data = await res.json()
+                          if (!res.ok) { setBronzeStatus({ error: msg(data.error) }); return }
+                          setBronzeStatus({ ok: true })
+                          setUser(data.user)
+                        } catch { setBronzeStatus({ error: msg('network_error') }) }
+                        finally { setBronzeLoading(false) }
+                      }}
+                    >
+                      {bronzeLoading ? 'Registrando…' : plan.ctaLabel}
+                    </button>
+                    {bronzeStatus?.error && <div className="alert-bad mt-2">{bronzeStatus.error}</div>}
+                    {bronzeStatus?.ok && (
+                      <div className="success-chip mt-2">Registro completado</div>
+                    )}
                   </div>
                 )}
                 {plan.variant !== "enterprise" && (
-                  <button className={`pricing-cta ${plan.variant === "creator" ? "cta-secondary" : "cta-primary"}`}>
-                    {plan.ctaLabel}
-                  </button>
+                  <div className="mt-3">
+                    <button
+                      className={`pricing-cta ${plan.variant === "creator" ? "cta-secondary" : "cta-primary"} ${plataGenerating ? 'btn-loading' : ''} ${plataLink && plan.variant === 'creator' ? 'opacity-60 cursor-not-allowed' : ''}`}
+                      disabled={plan.variant === 'creator' && !!plataLink}
+                      onClick={async () => {
+                        setPlataStatus(null)
+                        setPlataLink(null)
+                        if (plan.variant === 'creator') {
+                          if (plataLink) { return }
+                          if (!user) { setPlataStatus({ error: 'debes_registrarte_en_bronce' }); return }
+                          if (user.plan === 'bronce') {
+                            try {
+                              const res = await fetch('/api/upgrade', { method: 'POST' })
+                              const data = await res.json()
+                              if (!res.ok) { setPlataStatus({ error: msg(data.error) }); return }
+                              setUser(data.user)
+                            } catch { setPlataStatus({ error: msg('network_error') }); return }
+                          }
+                          setPlataGenerating(true)
+                          try {
+                            const res = await fetch('/api/referrals/generate', { method: 'POST' })
+                            const data = await res.json()
+                            if (!res.ok) { setPlataStatus({ error: msg(data.error) }); return }
+                            setPlataStatus({ ok: true })
+                            setPlataLink(data.link as string)
+                            setPlataExpiresAt(typeof data.expiresAt === 'number' ? data.expiresAt : null)
+                          } catch { setPlataStatus({ error: msg('network_error') }) }
+                          finally { setPlataGenerating(false) }
+                          return
+                        }
+                      }}
+                    >
+                      {plataGenerating ? 'Generando enlace…' : plan.ctaLabel}
+                    </button>
+                    {plan.variant === 'creator' && (
+                      <div className="mt-2 text-xs text-cyan-200/80">
+                        {user?.plan === 'plata' ? 'Tu plan: PLATA' : user?.plan === 'bronce' ? 'Tu plan: BRONCE (se requiere subir a PLATA para generar link)' : 'Regístrate en BRONCE para continuar'}
+                      </div>
+                    )}
+                    {plataGenerating && (
+                      <div className="mt-3 text-xs">
+                        <div className="loading-dots" />
+                        <div className="text-cyan-200/80 mt-1">Generando tu enlace único…</div>
+                      </div>
+                    )}
+                    {plataLink && (
+                      <div className="mt-3 text-xs">
+                        <div className="text-emerald-300">Enlace generado:</div>
+                        <div className="break-all text-cyan-200/90">{plataLink}</div>
+                        {plataExpiresAt && (
+                          <div className="text-cyan-200/70 mt-1">Expira: {new Date(plataExpiresAt).toLocaleDateString()}</div>
+                        )}
+                        <div className="text-cyan-200/70 mt-1">Este enlace es único de tu cuenta y queda bloqueado 90 días.</div>
+                      </div>
+                    )}
+                    {plataStatus?.error && <div className="alert-bad mt-2">{plataStatus.error}</div>}
+                  </div>
                 )}
 
                 {plan.limits.length > 0 && (

@@ -3,6 +3,7 @@ import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import LoadingOverlay from "@/components/LoadingOverlay";
+import TopGoldTicker from "@/components/TopGoldTicker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,6 +46,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black overflow-x-hidden`}
       >
         <LoadingOverlay />
+        <TopGoldTicker />
         {children}
       </body>
     </html>

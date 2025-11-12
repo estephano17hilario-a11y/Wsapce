@@ -175,6 +175,7 @@ export default function CinematicScroll() {
       .to(img5, { opacity: 0, duration: 0.8, ease: 'power2.in' }, "-=0.6")
       .to(scene5Ref.current, { opacity: 0, duration: 0.8, ease: 'power2.in' }, "-=0.4")
       .call(() => trackEvent('scene_exit', { id: 5 }))
+      .call(() => { try { window.dispatchEvent(new CustomEvent('after_andromeda')) } catch {} })
 
       // ESCENA 6: CTA (83.3% - 100%)
       .call(() => trackEvent('scene_enter', { id: 6 }))

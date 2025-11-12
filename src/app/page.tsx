@@ -5,6 +5,7 @@ import HypeSection from '@/components/HypeSection';
 import WarmupHeroSection from '@/components/WarmupHeroSection';
 import PricingSection from '@/components/PricingSection';
 import Footer from '@/components/Footer';
+import RankingsSection from '@/components/RankingsSection';
 
 export default function Home() {
   return (
@@ -15,8 +16,9 @@ export default function Home() {
       <SectionThree />
       <HypeSection />
       <WarmupHeroSection />
-  <PricingSection />
-  <Footer />
+      <PricingSection />
+      <RankingsSection />
+      <Footer />
   </main>
   );
 }
