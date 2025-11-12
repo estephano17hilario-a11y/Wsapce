@@ -12,6 +12,10 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Scroll snap temporal para detener suavemente al centrar el CTA */
+html.snap-temporary { scroll-snap-type: y mandatory; }
+#cta-warmup { scroll-snap-align: center; scroll-snap-stop: always; }
+
 body {
   margin: 0;
   padding: 0;
@@ -1009,14 +1013,17 @@ body {
 
 /* Overlays dentro del héroe: más sutiles para evitar blancos visibles */
 .warmup-hero .stars-soft { opacity: 0.18; }
-.warmup-hero .space-dust-soft { opacity: 0.08; }
-.warmup-hero .blue-accents-soft { opacity: 0.18; filter: blur(6px); }
-.warmup-hero .nebula-soft { opacity: 0.20; filter: blur(8px); }
+.warmup-hero .space-dust-soft { opacity: 0.05; }
+.warmup-hero .blue-accents-soft { opacity: 0.12; filter: blur(7px); }
+.warmup-hero .nebula-soft { opacity: 0.10; filter: blur(10px); }
 .warmup-hero .edge-glow-soft {
   opacity: 0.55;
   border-color: rgba(250, 204, 21, 0.14);
   box-shadow: 0 0 8px rgba(250, 204, 21, 0.16), inset 0 0 5px rgba(250, 204, 21, 0.08);
 }
+
+/* Aurora dentro del CTA: mucho más tenue para evitar caja visible */
+.warmup-hero .cta-aurora { opacity: 0.06; filter: blur(22px); }
 
 /* CTA premium con shimmer sutil */
 .cta-premium {
