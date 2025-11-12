@@ -110,6 +110,13 @@ export default function RankingsSection() {
           </div>
         </div>
         <div className="mt-8 grid gap-6 md:grid-cols-3 items-stretch">
+          <div className="md:col-span-2">
+            {loading && <div className="loading-dots" />}
+            {!loading && (() => {
+              const src = items.length > 0 ? items.slice(0, limit) : generateFakeItems(limit)
+              return src.map((it, idx) => renderRankItem(it, idx, src))
+            })()}
+          </div>
           <div className="self-center md:max-w-sm">
             <div className={`lux-card p-4 ${!me && !myStats ? 'card-shimmer' : ''}`}>
               <div className="flex items-center justify-between">
@@ -162,13 +169,6 @@ export default function RankingsSection() {
               </div>
               {myError && <div className="mt-3 text-sm text-red-400">{myError}</div>}
             </div>
-          </div>
-          <div className="md:col-span-2">
-            {loading && <div className="loading-dots" />}
-            {!loading && (() => {
-              const src = items.length > 0 ? items.slice(0, limit) : generateFakeItems(limit)
-              return src.map((it, idx) => renderRankItem(it, idx, src))
-            })()}
           </div>
         </div>
         

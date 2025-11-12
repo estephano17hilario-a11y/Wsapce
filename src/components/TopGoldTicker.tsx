@@ -19,6 +19,18 @@ export default function TopGoldTicker() {
       const num = Math.floor(Math.random() * 900) + 100
       return `${n}${num}`
     }
+    function abbrEmail(e?: string | null) {
+      if (!e) return '—'
+      const parts = e.split('@')
+      const name = parts[0] || ''
+      const domain = parts[1] || ''
+      const nameMask = name.length <= 3 ? `${name.slice(0, 1)}***` : `${name.slice(0, 3)}***`
+      const domParts = domain.split('.')
+      const provider = domParts[0] || ''
+      const tld = domParts.slice(1).join('.')
+      const providerMask = provider ? `${provider.slice(0, 1)}***` : ''
+      return `${nameMask}@${providerMask}${tld ? `.${tld}` : ''}`
+    }
 
     function scheduleNext(initialDelay?: number) {
       if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null }
@@ -39,8 +51,22 @@ export default function TopGoldTicker() {
       }
     }
     window.addEventListener('after_andromeda', onTrigger)
+    const onGold = (e: Event) => {
+      try {
+        const ev = e as CustomEvent<{ email?: string }>
+        const email: string | undefined = ev?.detail?.email
+        const label = email ? abbrEmail(email) : pickName()
+        setActive(true)
+        setMsg(`${label} acaba de obtener la Insignia de Oro`)
+        setShow(true)
+        if (hideRef.current) { clearTimeout(hideRef.current); hideRef.current = null }
+        hideRef.current = window.setTimeout(() => { setShow(false); scheduleNext(10_000) }, 6000)
+      } catch {}
+    }
+    window.addEventListener('gold_purchased', onGold)
     return () => {
       window.removeEventListener('after_andromeda', onTrigger)
+      window.removeEventListener('gold_purchased', onGold)
     }
   }, [])
 

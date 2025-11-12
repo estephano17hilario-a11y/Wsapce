@@ -39,7 +39,7 @@ export default function CosmicBackground() {
         p: Math.random() * Math.PI * 2,
       }))
     )
-    let STAR_COUNT = Math.round((width * height) / 14000)
+    let STAR_COUNT = Math.round((width * height) / 9000)
     let stars = makeStars(STAR_COUNT)
 
     const shoot = {
@@ -85,11 +85,52 @@ export default function CosmicBackground() {
 
     const drawStars = () => {
       for (const s of stars) {
-        const a = 0.75 * (0.5 + 0.5 * Math.sin(t * 0.03 + s.p))
+        const a = 0.95 * (0.6 + 0.4 * Math.sin(t * 0.03 + s.p))
         ctx.fillStyle = `rgba(255,255,255,${a})`
         const px = s.x + parallaxX * 0.08 * s.r
         const py = s.y + parallaxY * 0.08 * s.r
         ctx.fillRect(px, py, s.r, s.r)
+      }
+    }
+
+    const colorStars = Array.from({ length: Math.max(12, Math.round(STAR_COUNT * 0.012)) }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      r: Math.random() * 2.5 + 1.5,
+      c: ['#ffd54f','#ff8a65','#4fc3f7','#81c784','#9575cd'][Math.floor(Math.random()*5)],
+    }))
+    const drawColorStars = () => {
+      for (const s of colorStars) {
+        ctx.fillStyle = s.c
+        const px = s.x + parallaxX * 0.06
+        const py = s.y + parallaxY * 0.06
+        ctx.beginPath()
+        ctx.arc(px, py, s.r, 0, Math.PI * 2)
+        ctx.fill()
+      }
+    }
+
+    const nebulas = (() => {
+      const arr = [] as { x: number; y: number; r: number; stops: { c: string; a: number; p: number }[] }[]
+      const base = Math.max(width, height)
+      const preset = [
+        { x: width*0.18, y: height*0.25, r: base*0.18, stops: [ { c: 'rgba(168,85,247,1)', a: 0.12, p: 0 }, { c: 'rgba(34,211,238,1)', a: 0.10, p: 0.35 }, { c: 'rgba(0,0,0,1)', a: 0, p: 1 } ] },
+        { x: width*0.78, y: height*0.32, r: base*0.22, stops: [ { c: 'rgba(99,102,241,1)', a: 0.12, p: 0 }, { c: 'rgba(59,130,246,1)', a: 0.10, p: 0.4 }, { c: 'rgba(0,0,0,1)', a: 0, p: 1 } ] },
+        { x: width*0.52, y: height*0.15, r: base*0.16, stops: [ { c: 'rgba(236,72,153,1)', a: 0.10, p: 0 }, { c: 'rgba(251,191,36,1)', a: 0.08, p: 0.35 }, { c: 'rgba(0,0,0,1)', a: 0, p: 1 } ] },
+        { x: width*0.32, y: height*0.75, r: base*0.2, stops: [ { c: 'rgba(20,184,166,1)', a: 0.11, p: 0 }, { c: 'rgba(147,197,253,1)', a: 0.09, p: 0.4 }, { c: 'rgba(0,0,0,1)', a: 0, p: 1 } ] },
+        { x: width*0.88, y: height*0.72, r: base*0.15, stops: [ { c: 'rgba(234,88,12,1)', a: 0.10, p: 0 }, { c: 'rgba(245,158,11,1)', a: 0.08, p: 0.35 }, { c: 'rgba(0,0,0,1)', a: 0, p: 1 } ] },
+      ]
+      for (const n of preset) arr.push(n)
+      return arr
+    })()
+    const drawNebulas = () => {
+      for (const n of nebulas) {
+        const g = ctx.createRadialGradient(n.x, n.y, 12, n.x, n.y, n.r)
+        for (const s of n.stops) g.addColorStop(s.p, s.c.replace('1)', `${s.a})`))
+        ctx.fillStyle = g
+        ctx.globalCompositeOperation = 'lighter'
+        ctx.fillRect(n.x - n.r, n.y - n.r, n.r * 2, n.r * 2)
+        ctx.globalCompositeOperation = 'source-over'
       }
     }
 
@@ -110,7 +151,9 @@ export default function CosmicBackground() {
       if (!running) return
       t++
       drawBackground()
+      drawNebulas()
       drawStars()
+      drawColorStars()
       drawShootingStar()
       raf = requestAnimationFrame(render)
     }
@@ -132,7 +175,7 @@ export default function CosmicBackground() {
         started = true
         running = true
         // Activar fondo con transición suave y opacidad reducida ~25%
-        canvas.style.opacity = '0.64'
+        canvas.style.opacity = '0.85'
         if (!raf) raf = requestAnimationFrame(render)
       }
     }, { root: null, threshold: 0.2 })
@@ -155,7 +198,7 @@ export default function CosmicBackground() {
       width = window.innerWidth
       height = window.innerHeight
       resize()
-      STAR_COUNT = Math.round((width * height) / 14000)
+      STAR_COUNT = Math.round((width * height) / 9000)
       stars = makeStars(STAR_COUNT)
     }
     window.addEventListener('resize', onResize)

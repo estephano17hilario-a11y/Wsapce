@@ -90,6 +90,17 @@ export async function upgradeUserToPlata(userId: string): Promise<User | null> {
   return u
 }
 
+export async function upgradeUserToOro(userId: string): Promise<User | null> {
+  const db = await readDB()
+  const u = db.users.find(x => x.id === userId)
+  if (!u) return null
+  if (u.plan !== 'oro') {
+    u.plan = 'oro'
+    await writeDB(db)
+  }
+  return u
+}
+
 export async function getActiveLinkByUser(userId: string): Promise<ReferralLink | null> {
   const db = await readDB()
   const nowMs = now()

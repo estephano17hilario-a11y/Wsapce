@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useEffect, useMemo, useState } from "react"
+import { trackEvent } from '@/lib/analytics'
 
 type BillingCycle = "monthly" | "annually"
 
@@ -265,6 +266,23 @@ export default function PricingSection() {
                             setPlataExpiresAt(typeof data.expiresAt === 'number' ? data.expiresAt : null)
                           } catch { setPlataStatus({ error: msg('network_error') }) }
                           finally { setPlataGenerating(false) }
+                          return
+                        }
+                        if (plan.variant === 'starter') {
+                          try {
+                            const res = await fetch('/api/upgrade', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plan: 'oro' }) })
+                            const data = await res.json()
+                            if (!res.ok) { setPlataStatus({ error: msg(data.error) }); return }
+                            setUser(data.user)
+                            try {
+                              trackEvent('gold_purchase', { email: data.user?.email })
+                            } catch {}
+                            try {
+                              if (typeof window !== 'undefined') {
+                                window.dispatchEvent(new CustomEvent('gold_purchased', { detail: { email: data.user?.email } }))
+                              }
+                            } catch {}
+                          } catch { setPlataStatus({ error: msg('network_error') }) }
                           return
                         }
                       }}
