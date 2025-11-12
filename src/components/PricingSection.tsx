@@ -28,23 +28,6 @@ export default function PricingSection() {
   const plans: Plan[] = useMemo(
     () => [
       {
-        id: "heraldo-plata",
-        name: "HERALDO DE PLATA",
-        priceMonthly: 0,
-        priceText: "GRATIS (CON 5 RECLUTAS)",
-        priceSuffix: "",
-        limitsTitle: "",
-        featuresTitle: "TU VENTAJA",
-        limits: [],
-        features: [
-          "✅ ¡ACCESO TÁCTICO: 18 HORAS ANTES!",
-          "✅ ¡ASEGURA TU TERRITORIO!",
-          "✅ Insignia de PLATA",
-        ],
-        ctaLabel: "Pagar con Sangre (Generar mi Link)",
-        variant: "creator",
-      },
-      {
         id: "fundador-oro",
         name: "FUNDADOR DE ORO",
         priceMonthly: 4.99,
@@ -62,6 +45,23 @@ export default function PricingSection() {
         ],
         ctaLabel: "¡FORJAR MI LEGADO [ORO] ($4.99)!",
         variant: "starter",
+      },
+      {
+        id: "heraldo-plata",
+        name: "HERALDO DE PLATA",
+        priceMonthly: 0,
+        priceText: "GRATIS (CON 5 RECLUTAS)",
+        priceSuffix: "",
+        limitsTitle: "",
+        featuresTitle: "TU VENTAJA",
+        limits: [],
+        features: [
+          "✅ ¡ACCESO TÁCTICO: 18 HORAS ANTES!",
+          "✅ ¡ASEGURA TU TERRITORIO!",
+          "✅ Insignia de PLATA",
+        ],
+        ctaLabel: "Pagar con Sangre (Generar mi Link)",
+        variant: "creator",
       },
       {
         id: "recluta-bronce",
@@ -83,6 +83,19 @@ export default function PricingSection() {
     ],
     []
   )
+
+  const variantLabel = (v: Plan["variant"]) => {
+    switch (v) {
+      case "starter":
+        return "ORO"
+      case "creator":
+        return "PLATA"
+      case "enterprise":
+        return "BRONCE"
+      default:
+        return ""
+    }
+  }
 
   const priceLabel = (p: Plan) => {
     if (p.priceText) return p.priceText
@@ -127,10 +140,13 @@ export default function PricingSection() {
         {/* Cards */}
         <div className="mt-10 grid gap-6 md:grid-cols-3">
           {plans.map((plan) => (
-            <article
-              key={plan.id}
-              className={`pricing-card pricing-card--${plan.variant} lux-card`}
-            >
+            <div key={plan.id} className={`pricing-group pricing-group--${plan.variant}`} id={`section-${plan.variant}`}>
+              <div className="pricing-group__label" aria-hidden>
+                {variantLabel(plan.variant)}
+              </div>
+              <article
+                className={`pricing-card pricing-card--${plan.variant} lux-card`}
+              >
               {plan.ribbon && (
                 <div className="corner-badge">{plan.ribbon}</div>
               )}
@@ -154,7 +170,7 @@ export default function PricingSection() {
                   </div>
                 )}
                 {plan.variant !== "enterprise" && (
-                  <button className={`pricing-cta ${plan.variant === "enterprise" ? "cta-secondary" : "cta-primary"}`}>
+                  <button className={`pricing-cta ${plan.variant === "creator" ? "cta-secondary" : "cta-primary"}`}>
                     {plan.ctaLabel}
                   </button>
                 )}
@@ -185,7 +201,8 @@ export default function PricingSection() {
                   </ul>
                 </div>
               </div>
-            </article>
+              </article>
+            </div>
           ))}
         </div>
       </div>

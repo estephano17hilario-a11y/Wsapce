@@ -2,6 +2,7 @@ import CinematicScroll from '@/components/CinematicScroll';
 import CosmicBackground from '@/components/CosmicBackground';
 import SectionThree from '@/components/SectionThree';
 import HypeSection from '@/components/HypeSection';
+import WarmupHeroSection from '@/components/WarmupHeroSection';
 import PricingSection from '@/components/PricingSection';
 
 export default function Home() {
@@ -12,6 +13,7 @@ export default function Home() {
       <CosmicBackground />
       <SectionThree />
       <HypeSection />
+      <WarmupHeroSection />
       <PricingSection />
     </main>
   );

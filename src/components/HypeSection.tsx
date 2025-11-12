@@ -107,7 +107,7 @@ export default function HypeSection() {
           </div>
 
           {/* Layout lado a lado: Secreto + anuncio app */}
-          <div className="mt-12 relative group">
+  <div className="mt-12 relative group">
             {/* Conector sutil entre tarjetas (solo md+) */}
             <div aria-hidden className="pointer-events-none absolute left-1/2 top-2 bottom-2 w-px bg-gradient-to-b from-cyan-300/40 via-purple-300/30 to-cyan-300/40 blur-[1px] opacity-70 hidden md:block transition-opacity duration-700 group-hover:opacity-90" />
             <div className="grid gap-6 md:grid-cols-2">
@@ -202,7 +202,7 @@ export default function HypeSection() {
                     </div>
                   </div>
 
-                  <p className="mt-3 text-[10px] md:text-xs text-gray-300/80">Elegante, cósmico y listo para despegar</p>
+              <p className="mt-3 text-[10px] md:text-xs text-gray-300/80">Elegante, cósmico y listo para despegar</p>
                 </div>
               </div>
             </div>
