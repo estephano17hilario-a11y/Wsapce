@@ -83,7 +83,7 @@ export default function HypeSection() {
 
       <div className="relative max-w-7xl mx-auto">
         <h2 className="text-center text-3xl md:text-6xl font-black tracking-tight shine-text">
-          Y ESTO ES SOLO EL PUTO COMIENZO...
+          Y ESTO ES SOLO EL COMIENZO...
         </h2>
         <div className="title-underline" />
         <p className="mt-3 text-center text-sm md:text-base text-cyan-200/80">

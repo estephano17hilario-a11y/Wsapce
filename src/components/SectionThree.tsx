@@ -34,6 +34,8 @@ export default function SectionThree() {
   const [webCaptureFxActive, setWebCaptureFxActive] = useState(false)
   const [explodeChatPlayedOnce, setExplodeChatPlayedOnce] = useState(false)
   const [flagChatOnce, setFlagChatOnce] = useState(false)
+  const [explosionDone, setExplosionDone] = useState(false)
+  const [guardDialogOpen, setGuardDialogOpen] = useState(false)
 
   const handleSend = () => {
     const text = inputRef.current?.innerText || ''
@@ -106,13 +108,13 @@ export default function SectionThree() {
           ref={titleRef}
           className="text-center text-3xl md:text-6xl font-black tracking-tight cinematic-text shine-text mb-4"
         >
-          DE PÍXELES... A PUTOS IMPERIOS.
+          DE PÍXELES... A IMPERIOS.
         </h2>
         <p
           ref={subtitleRef}
           className="text-center text-lg md:text-xl text-gray-300 italic mb-16"
         >
-          COMUNICA, DESTRUYE Y CREA. Bienvenido a la puta guerra.
+          COMUNICA, DESTRUYE Y CREA. Bienvenido a la guerra.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-14 md:gap-16 items-start">
@@ -171,7 +173,7 @@ export default function SectionThree() {
             </div>
             <h3 className="mt-6 text-white text-2xl md:text-3xl font-extrabold">CHAT DE GUERRA TÁCTICO</h3>
             <p className="mt-3 text-gray-300 leading-relaxed text-base md:text-lg">
-              Coordina ataques en tiempo real. Forma clanes. Identifica aliados. Aquí no estás solo, estás en un puto ejército.
+              Coordina ataques en tiempo real. Forma clanes. Identifica aliados. Aquí no estás solo, estás en un gran ejército.
             </p>
           </div>
 
@@ -182,13 +184,14 @@ export default function SectionThree() {
             <div className="flex items-center justify-center">
               <PixelCanvas width={360} height={240} explodeSignal={explodeTick} />
             </div>
-            <div className="mt-4 flex justify-center">
+            <div className="mt-4 flex justify-center relative">
               {/* Overlay global rojo (sin límites), solo primer clic */}
               {webExplosionFxActive && createPortal(<div aria-hidden className="web-burst web-burst--red" />, document.body)}
               <button
             className={`btn-glow-once ${explosionFxActive ? 'btn-glow-once-active' : ''} px-4 py-2 text-xs md:text-sm uppercase tracking-widest rounded-md border border-purple-500/40 ring-1 ring-purple-300/20 bg-neutral-900/80 hover:bg-neutral-800 text-white shadow-sm`}
                 onClick={() => {
                   setExplodeTick((x) => x + 1)
+                  setExplosionDone(true)
                   // Programar mensajes del Coronel 2s antes de terminar la explosión.
                   // La explosión dura ~1500ms; 2s antes => aparece inmediatamente.
                   if (!explodeChatPlayedOnce) {
@@ -196,7 +199,7 @@ export default function SectionThree() {
                     const explosionDurationMs = 1500
                     const delayMs = Math.max(0, explosionDurationMs - 2000)
                     setTimeout(() => {
-                      setChatMessages((prev) => [...prev, { actor: '[Coronel]:', text: 'joder, que buena' }])
+                      setChatMessages((prev) => [...prev, { actor: '[Coronel]:', text: 'wow, qué buena' }])
                       setTimeout(() => {
                         setChatMessages((prev) => [...prev, { actor: '[Coronel]:', text: 'ahora tenemos que capturar la zona' }])
                       }, 600)
@@ -220,7 +223,7 @@ export default function SectionThree() {
             </div>
             <h3 className="mt-6 text-white text-2xl md:text-3xl font-extrabold">ARSENAL DE CONQUISTA</h3>
             <p className="mt-3 text-gray-300 leading-relaxed text-base md:text-lg">
-              ¿Píxeles normales? ¡No me jodas! Despliega Píxeles Bomba para reventar sus defensas. Usa Caballos de Troya para infiltrarte. Esto no es arte, es dominio.
+              ¿Píxeles normales? Ni hablar. Despliega Píxeles Bomba para reventar sus defensas. Usa Caballos de Troya para infiltrarte. Esto no es arte, es dominio.
             </p>
           </div>
 
@@ -235,6 +238,10 @@ export default function SectionThree() {
               <button
             className={`btn-glow-once btn-glow-once--subtle ${flagFxActive ? 'btn-glow-once--subtle-active' : ''} px-4 py-2 text-xs md:text-sm uppercase tracking-widest rounded-md border border-cyan-500/30 ring-1 ring-cyan-300/10 bg-neutral-900/80 hover:bg-neutral-800 text-white shadow-sm`}
                 onClick={() => {
+                  if (!explosionDone) {
+                    setGuardDialogOpen(true)
+                    return
+                  }
                   setFlagSpawnTick((x) => x + 1)
                   if (!flagFxPlayed) {
                     setFlagFxPlayed(true)
@@ -266,11 +273,19 @@ export default function SectionThree() {
                   }
                 }}
               >
-                PONER LA BANDERA
+                CAPTURAR ZONA
                 {flagFxActive && <span aria-hidden className="once-ripple-subtle once-ripple-subtle--blue" />}
               </button>
               {/* Overlay global azul (logro captura) se mantiene */}
               {webCaptureFxActive && createPortal(<div aria-hidden className="web-burst web-burst--blue" />, document.body)}
+              {guardDialogOpen && (
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 -translate-y-4 z-50 w-[92vw] max-w-md rounded-2xl border border-cyan-900/40 ring-1 ring-cyan-300/10 bg-neutral-900/90 shadow-2xl p-4 text-center">
+                  <p className="text-sm md:text-base text-cyan-100/80">primero explota el area para capturar la zona</p>
+                  <div className="mt-4">
+                    <button className="px-4 py-2 text-xs md:text-sm uppercase tracking-widest rounded-xl bg-neutral-800 text-white border border-cyan-500/30 ring-1 ring-cyan-300/10" onClick={() => setGuardDialogOpen(false)}>Entendido</button>
+                  </div>
+                </div>
+              )}
             </div>
             <h3 className="mt-6 text-white text-2xl md:text-3xl font-extrabold">GUERRA DE GUERRILLAS 24/7</h3>
             <p className="mt-3 text-gray-300 leading-relaxed text-base md:text-lg">

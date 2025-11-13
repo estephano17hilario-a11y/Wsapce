@@ -37,7 +37,7 @@ export default function WarmupHeroSection() {
           <div className="absolute bottom-0 left-0 w-full h-1/2 cta-aurora" aria-hidden />
 
           {/* Gancho emocional */}
-          <h3 className="text-3xl md:text-5xl font-black tracking-tight shine-text">LA PUTA GLORIA ES PARA LOS QUE ACTÚAN.</h3>
+          <h3 className="text-3xl md:text-5xl font-black tracking-tight shine-text">LA GLORIA ES PARA LOS QUE ACTÚAN.</h3>
           <div className="title-underline" aria-hidden />
           <p className="mt-4 text-sm md:text-lg text-cyan-100/80">
             El Lienzo Virgen espera. El Ejército se forma. El tiempo corre.
@@ -47,10 +47,10 @@ export default function WarmupHeroSection() {
           <div className="mt-7">
             <button
               className={`btn-glow-once btn-glow-once--subtle cta-premium ${ctaBtnActive ? 'btn-glow-once--subtle-active' : ''} px-6 md:px-10 py-4 md:py-6 text-base md:text-lg uppercase tracking-widest rounded-2xl bg-neutral-900/60 hover:bg-neutral-800/70 text-white shadow-xl relative`}
-              aria-label="¡SÍ, JODER! ¡QUIERO MI INSIGNIA DE FUNDADOR!"
+              aria-label="¡SÍ! ¡QUIERO MI INSIGNIA DE FUNDADOR!"
               onClick={handleClick}
             >
-              ¡SÍ, JODER! ¡QUIERO MI INSIGNIA DE FUNDADOR!
+              ¡SÍ! ¡QUIERO MI INSIGNIA DE FUNDADOR!
               {ctaBtnActive && <span aria-hidden className="once-ripple-subtle once-ripple-subtle--gold" />}
             </button>
           </div>

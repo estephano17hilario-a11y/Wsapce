@@ -589,7 +589,7 @@ export default function CinematicScroll() {
                 <span className="wspace-letter">E</span>
               </h1>
             <Button
-              className={`cta-button cta-button-premium mt-10 px-8 py-6 text-lg rounded-2xl glow-cyan relative left-3 md:left-5 ${ctaRipple ? 'btn-glow-once btn-glow-once--subtle btn-glow-once--subtle-active' : 'btn-glow-once btn-glow-once--subtle'} ${ctaAttention ? 'cta-attn-on' : ''}`}
+              className={`cta-button cta-button-premium mt-10 px-8 py-6 text-lg rounded-2xl glow-cyan ${ctaRipple ? 'btn-glow-once btn-glow-once--subtle btn-glow-once--subtle-active' : 'btn-glow-once btn-glow-once--subtle'} ${ctaAttention ? 'cta-attn-on' : ''}`}
               onClick={() => {
                 lockScroll(1000)
                 setCtaRipple(true)
