@@ -280,10 +280,9 @@ export default function CinematicScroll() {
           />
           <div ref={text1Ref} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full px-6 opacity-0 pointer-events-none">
             <div className="relative text-center text-white">
-              <h1 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-5xl sm:text-6xl md:text-8xl leading-normal font-extrabold py-2 bg-gradient-to-r from-red-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent cinematic-text text-center whitespace-pre-line">
-                forma la historia que
-                <br />
-                siempre quisistes tener
+              <h1 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-5xl sm:text-6xl md:text-8xl leading-normal font-extrabold py-2 bg-gradient-to-r from-red-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent cinematic-text text-center">
+                <span className="block whitespace-nowrap">forma la historia que</span>
+                <span className="block whitespace-nowrap">siempre quisistes tener</span>
               </h1>
               <p className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl md:text-3xl opacity-95 text-white [text-shadow:0_0_12px_rgba(255,255,255,0.8),0_0_6px_rgba(255,255,255,0.6)]">
                 una donde los límites los pongas
