@@ -46,9 +46,18 @@ export default function CinematicScroll() {
   const keyHandlerRef = useRef<((e: KeyboardEvent) => void) | null>(null)
   const gateClampYRef = useRef<number>(0)
   const gateScrollHandlerRef = useRef<((e: Event) => void) | null>(null)
+  const gateTweenRef = useRef<gsap.core.Tween | null>(null)
   const [ctaAttention, setCtaAttention] = useState(true)
 
-  const scrollToIdSlow = (id: string, duration = 2500) => {
+  const ensureCtaVisible = () => {
+    try {
+      gsap.set('.cta-title', { opacity: 1, filter: 'blur(0px)' })
+      gsap.set('.cta-button', { opacity: 1, filter: 'brightness(1) blur(0px)' })
+      if (scene6Ref.current) gsap.set(scene6Ref.current, { opacity: 1 })
+    } catch {}
+  }
+
+  const scrollToIdSlow = (id: string, duration = 4200) => {
     if (typeof window === 'undefined') return
     const el = document.getElementById(id)
     if (!el) return
@@ -56,7 +65,7 @@ export default function CinematicScroll() {
     const rect = el.getBoundingClientRect()
     const targetY = rect.top + startY
     const start = performance.now()
-    const ease = (t: number) => (t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2)
+    const ease = (t: number) => 0.5 - 0.5 * Math.cos(Math.PI * t)
     const tick = (now: number) => {
       const elapsed = now - start
       const ratio = Math.min(1, elapsed / duration)
@@ -319,8 +328,10 @@ export default function CinematicScroll() {
         { opacity: 1, scale: 1, y: 0, filter: 'brightness(1) blur(0px)', duration: 1.3, ease: 'back.out(1.7)' },
         "-=0.8"
       )
+      .add('cta_hold_start')
       // Mantener la sección Wspace visible por más tiempo sin cambiar visualmente
       .to({}, { duration: 2.5 })
+      .add('cta_hold_end')
       // Salida: solo fade out para las letras/botón
       .to(['.cta-title', '.cta-button'], { opacity: 0, duration: 1, ease: 'power2.in' })
       .call(() => trackEvent('scene_exit', { id: 6 }));
@@ -358,7 +369,17 @@ export default function CinematicScroll() {
               }
               window.addEventListener('scroll', gateScrollHandlerRef.current, { passive: true })
             }
-            try { tlRef.current?.progress(0.995) } catch {}
+            try {
+              gateTweenRef.current?.kill();
+              const tl = tlRef.current!;
+              const d = tl.duration();
+              const labels = (tl as unknown as { labels?: Record<string, number> }).labels || {};
+              const t = labels['cta_hold_start'] ?? d * 0.99;
+              const p = t / d;
+              gateTweenRef.current = gsap.to(tl, { progress: p, duration: 0.8, ease: 'power2.out' })
+              gsap.to(['.cta-title', '.cta-button'], { opacity: 1, duration: 0.6, ease: 'power2.out' })
+              gsap.set(scene6Ref.current, { opacity: 1 })
+            } catch {}
           }
           if (gateLockedRef.current) {
             const hold = Math.max(self.start, self.end - 2)
@@ -366,6 +387,18 @@ export default function CinematicScroll() {
             if (y > hold) {
               window.scrollTo({ top: hold })
             }
+            try {
+              const tl = tlRef.current!
+              const d = tl.duration();
+              const labels = (tl as unknown as { labels?: Record<string, number> }).labels || {};
+              const tStart = labels['cta_hold_start'] ?? d * 0.99;
+              const tEnd = labels['cta_hold_end'] ?? (tStart + 0.001);
+              const pStart = tStart / d;
+              const pEnd = tEnd / d;
+              const p = tl.progress();
+              if (p < pStart || p > pEnd) tl.progress(pStart)
+            } catch {}
+            ensureCtaVisible()
           }
         }
       });
@@ -390,6 +423,7 @@ export default function CinematicScroll() {
       if (unlockTimeoutRef.current) { clearTimeout(unlockTimeoutRef.current); unlockTimeoutRef.current = null }
       scrollLockCleanupRef.current?.()
       if (gateScrollHandlerRef.current) { window.removeEventListener('scroll', gateScrollHandlerRef.current) }
+      try { gateTweenRef.current?.kill(); gateTweenRef.current = null } catch {}
       gateLockedRef.current = false
       gateReleasedRef.current = false
     };
@@ -555,12 +589,12 @@ export default function CinematicScroll() {
             <Button
               className={`cta-button cta-button-premium mt-10 px-8 py-6 text-lg rounded-2xl glow-cyan relative left-3 md:left-5 ${ctaRipple ? 'btn-glow-once btn-glow-once--subtle btn-glow-once--subtle-active' : 'btn-glow-once btn-glow-once--subtle'} ${ctaAttention ? 'cta-attn-on' : ''}`}
               onClick={() => {
-                lockScroll(1000)
+                lockScroll(1200)
                 setCtaRipple(true)
-                setTimeout(() => setCtaRipple(false), 900)
+                setTimeout(() => setCtaRipple(false), 1200)
                 setCtaAttention(false)
                 try { window.dispatchEvent(new CustomEvent('start_cosmic')) } catch {}
-                setTimeout(() => scrollToIdSlow('wspace-start', 2600), 1000)
+                setTimeout(() => scrollToIdSlow('wspace-start', 4200), 1000)
               }}
             >
               Comenzamos
