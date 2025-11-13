@@ -34,6 +34,19 @@ export default function CinematicScroll() {
   const text5Ref = useRef<HTMLDivElement>(null);
   const completionReportedRef = useRef<boolean>(false);
   const [ctaRipple, setCtaRipple] = useState(false)
+  const prevHtmlOverflowRef = useRef<string>('')
+  const prevBodyOverflowRef = useRef<string>('')
+  const unlockTimeoutRef = useRef<number | null>(null)
+  const scrollLockCleanupRef = useRef<(() => void) | null>(null)
+  const gateLockedRef = useRef<boolean>(false)
+  const gateReleasedRef = useRef<boolean>(false)
+  const scrollLockedRef = useRef<boolean>(false)
+  const wheelHandlerRef = useRef<((e: Event) => void) | null>(null)
+  const touchHandlerRef = useRef<((e: Event) => void) | null>(null)
+  const keyHandlerRef = useRef<((e: KeyboardEvent) => void) | null>(null)
+  const gateClampYRef = useRef<number>(0)
+  const gateScrollHandlerRef = useRef<((e: Event) => void) | null>(null)
+  const [ctaAttention, setCtaAttention] = useState(true)
 
   const scrollToIdSlow = (id: string, duration = 2500) => {
     if (typeof window === 'undefined') return
@@ -53,6 +66,45 @@ export default function CinematicScroll() {
       if (ratio < 1) requestAnimationFrame(tick)
     }
     requestAnimationFrame(tick)
+  }
+
+  const lockScroll = (ms?: number) => {
+    if (typeof window === 'undefined') return
+    prevHtmlOverflowRef.current = document.documentElement.style.overflow
+    prevBodyOverflowRef.current = document.body.style.overflow
+    document.documentElement.classList.add('scroll-locked')
+    document.body.classList.add('scroll-locked')
+    if (!wheelHandlerRef.current) wheelHandlerRef.current = (e: Event) => { e.preventDefault() }
+    if (!touchHandlerRef.current) touchHandlerRef.current = (e: Event) => { e.preventDefault() }
+    if (!keyHandlerRef.current) keyHandlerRef.current = (e: KeyboardEvent) => { e.preventDefault() }
+    if (!scrollLockedRef.current) {
+      window.addEventListener('wheel', wheelHandlerRef.current!, { passive: false })
+      window.addEventListener('touchmove', touchHandlerRef.current!, { passive: false })
+      window.addEventListener('keydown', keyHandlerRef.current!)
+      scrollLockedRef.current = true
+    }
+    scrollLockCleanupRef.current = () => {
+      if (wheelHandlerRef.current) window.removeEventListener('wheel', wheelHandlerRef.current)
+      if (touchHandlerRef.current) window.removeEventListener('touchmove', touchHandlerRef.current)
+      if (keyHandlerRef.current) window.removeEventListener('keydown', keyHandlerRef.current)
+      document.documentElement.classList.remove('scroll-locked')
+      document.body.classList.remove('scroll-locked')
+      scrollLockedRef.current = false
+    }
+    if (typeof ms === 'number' && ms > 0) {
+      if (unlockTimeoutRef.current) { clearTimeout(unlockTimeoutRef.current); unlockTimeoutRef.current = null }
+      unlockTimeoutRef.current = window.setTimeout(() => {
+        unlockScroll()
+        unlockTimeoutRef.current = null
+      }, ms)
+    }
+  }
+
+  const unlockScroll = () => {
+    if (unlockTimeoutRef.current) { clearTimeout(unlockTimeoutRef.current); unlockTimeoutRef.current = null }
+    scrollLockCleanupRef.current?.()
+    gateLockedRef.current = false
+    gateReleasedRef.current = true
   }
 
   useLayoutEffect(() => {
@@ -118,7 +170,7 @@ export default function CinematicScroll() {
       // Fade out del título principal ANTES de que aparezca la segunda frase
       .to(title1, { opacity: 0, y: -12, scale: 0.98, duration: 0.6, ease: 'power2.in' })
       // Pequeña pausa para separar visualmente
-      .to({}, { duration: 0.6 })
+      .to({}, { duration: 0.4 })
       // Ahora sí entra la segunda frase y luego "TÚ"
       .add(ctaSubtitle(subtitle1))
       .add(ctaTitle(tu1), "-=0")
@@ -210,12 +262,12 @@ export default function CinematicScroll() {
         duration: 2.6,
         from: { filter: 'blur(32px) brightness(0.82)', letterSpacing: '0.26em', scale: 1.28, y: 60 },
         to:   { filter: 'blur(0px) brightness(1.05)', y: title4TargetY }
-      }), "+=0.3")
+      }), "+=0.15")
       .add(ctaSubtitle(subtitle4, {
         duration: 2.2,
         from: { filter: 'blur(22px) brightness(0.85)', y: 42 },
         to:   { filter: 'blur(0px) brightness(1)', y: subtitle4TargetY }
-      }), "+=0.2")
+      }), "+=0.1")
       .add(ctaFadeOut(title4, subtitle4), "+=1.2")
       // Imagen: salida solo con fade out
       .to(img4, { opacity: 0, duration: 0.8, ease: 'power2.in' }, "-=0.6")
@@ -235,10 +287,10 @@ export default function CinematicScroll() {
         { opacity: 1, scale: 1.0, duration: 3.0, ease: 'none' },
         "-=0.4"
       )
-      .to({}, { duration: 0.5 })
-      .fromTo(text5Ref.current, { opacity: 0 }, { opacity: 1, duration: 1.1, ease: 'power2.out' }, "+=0.2")
-      .add(ctaTitle(title5, { duration: 2.4 }), "+=0.2")
-      .add(ctaSubtitle(subtitle5, { duration: 2.0 }), "+=0.1")
+      .to({}, { duration: 0.35 })
+      .fromTo(text5Ref.current, { opacity: 0 }, { opacity: 1, duration: 1.1, ease: 'power2.out' }, "+=0.1")
+      .add(ctaTitle(title5, { duration: 2.4 }), "+=0.1")
+      .add(ctaSubtitle(subtitle5, { duration: 2.0 }), "+=0.05")
       .add(ctaFadeOut(title5, subtitle5), "+=1.2")
       // Imagen: fade out y contenedor: solo fade out
       
@@ -292,6 +344,28 @@ export default function CinematicScroll() {
             hintHiddenRef.current = true
             setShowScrollHint(false)
           }
+          if (self.progress > 0.92 && !gateLockedRef.current && !gateReleasedRef.current) {
+            gateLockedRef.current = true
+            lockScroll()
+            gateClampYRef.current = Math.max(self.start, self.end - 2)
+            if (!gateScrollHandlerRef.current) {
+              gateScrollHandlerRef.current = () => {
+                const y = window.scrollY || window.pageYOffset
+                if (y > gateClampYRef.current) {
+                  window.scrollTo({ top: gateClampYRef.current })
+                }
+              }
+              window.addEventListener('scroll', gateScrollHandlerRef.current, { passive: true })
+            }
+            try { tlRef.current?.progress(0.985) } catch {}
+          }
+          if (gateLockedRef.current) {
+            const hold = Math.max(self.start, self.end - 2)
+            const y = window.scrollY || window.pageYOffset
+            if (y > hold) {
+              window.scrollTo({ top: hold })
+            }
+          }
         }
       });
 
@@ -312,6 +386,11 @@ export default function CinematicScroll() {
       try { ScrollTrigger.getAll().forEach(t => t.kill()) } catch {}
       ctx.revert();
       initGuardRef.current = false
+      if (unlockTimeoutRef.current) { clearTimeout(unlockTimeoutRef.current); unlockTimeoutRef.current = null }
+      scrollLockCleanupRef.current?.()
+      if (gateScrollHandlerRef.current) { window.removeEventListener('scroll', gateScrollHandlerRef.current) }
+      gateLockedRef.current = false
+      gateReleasedRef.current = false
     };
   }, []);
 
@@ -473,16 +552,20 @@ export default function CinematicScroll() {
                 <span className="wspace-letter">E</span>
               </h1>
             <Button
-              className={`cta-button cta-button-premium mt-10 px-8 py-6 text-lg rounded-2xl glow-cyan relative left-3 md:left-5 ${ctaRipple ? 'btn-glow-once btn-glow-once--subtle btn-glow-once--subtle-active' : 'btn-glow-once btn-glow-once--subtle'}`}
+              className={`cta-button cta-button-premium mt-10 px-8 py-6 text-lg rounded-2xl glow-cyan relative left-3 md:left-5 ${ctaRipple ? 'btn-glow-once btn-glow-once--subtle btn-glow-once--subtle-active' : 'btn-glow-once btn-glow-once--subtle'} ${ctaAttention ? 'cta-attn-on' : ''}`}
               onClick={() => {
+                lockScroll(3700)
                 setCtaRipple(true)
                 setTimeout(() => setCtaRipple(false), 900)
+                setCtaAttention(false)
                 try { window.dispatchEvent(new CustomEvent('start_cosmic')) } catch {}
                 setTimeout(() => scrollToIdSlow('wspace-start', 2600), 1000)
+                setTimeout(() => unlockScroll(), 3700)
               }}
             >
               Comenzamos
               {ctaRipple && <span aria-hidden className="once-ripple-subtle once-ripple-subtle--blue" />}
+              {ctaAttention && <span aria-hidden className="cta-attn-ring" />}
             </Button>
             </div>
           </div>

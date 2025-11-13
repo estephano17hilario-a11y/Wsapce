@@ -79,7 +79,7 @@ export default function TopGoldTicker() {
           startedRef.current = true
           scheduleNext(1500)
         }
-      }, 1800)
+      }, 2700)
     }
     window.addEventListener('start_cosmic', onStartCosmic)
     const onGold = (e: Event) => {
