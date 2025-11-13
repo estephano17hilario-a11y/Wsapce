@@ -66,14 +66,14 @@ export default function HypeSection() {
   }
 
   const features = [
-    { emoji: '🌐', title: 'CHAT GLOBAL', cat: 'Comunidad', catClass: 'cat-comunidad' },
-    { emoji: '👕', title: 'SKINS DE CLAN ÚNICAS', cat: 'Comunidad', catClass: 'cat-comunidad' },
-    { emoji: '🏆', title: 'RANKINGS GLOBALES', cat: 'Comunidad', catClass: 'cat-comunidad' },
-    { emoji: '🗺️', title: 'MINIMAPA DE GUERRA', cat: 'Juego', catClass: 'cat-juego' },
-    { emoji: '💣', title: '20+ PÍXELES ESPECIALES', cat: 'Juego', catClass: 'cat-juego' },
-    { emoji: '🌌', title: 'UNIVERSO INMENSO', cat: 'Juego', catClass: 'cat-juego' },
-    { emoji: '🎤', title: 'CHAT DE VOZ TÁCTICO', cat: 'Tecnología', catClass: 'cat-tecnologia' },
-    { emoji: '🔊', title: 'PÍXELES DE AUDIO', cat: 'Tecnología', catClass: 'cat-tecnologia' },
+    { emoji: '🌐', title: 'CHAT GLOBAL', cat: 'Comunidad', catClass: 'cat-comunidad', desc: 'Chat en tiempo real en diferentes canales, incluyendo al chat global' },
+    { emoji: '👕', title: 'SKINS DE CLAN ÚNICAS', cat: 'Comunidad', catClass: 'cat-comunidad', desc: 'Los clanes son buenos, pero necesitan personalidad para cada miembro..' },
+    { emoji: '🏆', title: 'RANKINGS GLOBALES', cat: 'Comunidad', catClass: 'cat-comunidad', desc: 'Los mejores de los mejores, los que toman acción, pertenecen aquí' },
+    { emoji: '🗺️', title: 'MINIMAPA DE GUERRA', cat: 'Juego', catClass: 'cat-juego', desc: 'Es un herramienta táctica para la guerra, en especial, si se da, en el espacio...' },
+    { emoji: '💣', title: '20+ PÍXELES ESPECIALES', cat: 'Juego', catClass: 'cat-juego', desc: 'Píxeles zombie, bomba, troya, cambia forma, entre otros más espectaculares...' },
+    { emoji: '🌌', title: 'UNIVERSO INMENSO', cat: 'Juego', catClass: 'cat-juego', desc: 'Si la tierra te parece grande, el universo, ¿qué es? Es tan inimaginable su tamaño, pero pronto lo podrás ver...' },
+    { emoji: '🎤', title: 'CHAT DE VOZ TÁCTICO', cat: 'Tecnología', catClass: 'cat-tecnologia', desc: 'Escribir, hablar y coordinar, que empieze la guerraaa' },
+    { emoji: '🔊', title: 'PÍXELES DE AUDIO', cat: 'Tecnología', catClass: 'cat-tecnologia', desc: 'Este píxel es muy especial, es uno donde tu voz o audio, va a quedar resonando en el espacio...' },
     { emoji: '⚙️', title: 'OPTIMIZACIONES PREMIUM', cat: 'Tecnología', catClass: 'cat-tecnologia' },
   ]
 
@@ -102,6 +102,9 @@ export default function HypeSection() {
                   <span className="feature-icon text-2xl">[{f.emoji}]</span>
                   <span className="text-lg md:text-xl font-semibold uppercase tracking-wide">{f.title}</span>
                 </div>
+                {f.desc && (
+                  <p className="mt-2 text-xs md:text-sm text-cyan-100/80 leading-relaxed">{f.desc}</p>
+                )}
               </div>
             ))}
           </div>
