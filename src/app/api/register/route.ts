@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createUser, getUserByEmail, normalizeRefLink, readDB, validateCode, recordRelation } from '@/lib/referralDB'
+import { encodeSession } from '@/lib/auth'
 
 function validEmail(e: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)
@@ -31,6 +32,7 @@ export async function POST(req: NextRequest) {
     await recordRelation(code, email)
   }
   const store = await cookies()
-  store.set('wspace_uid', user.id, { httpOnly: false, sameSite: 'lax', path: '/' })
+  store.set('wspace_sess', encodeSession(user.id), { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
+  store.set('wspace_uid', user.id, { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
   return NextResponse.json({ ok: true, user })
 }
