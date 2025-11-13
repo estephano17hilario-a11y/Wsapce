@@ -8,6 +8,8 @@ export default function LoadingOverlay() {
   const [name, setName] = useState("")
   const [progress, setProgress] = useState(0)
   const [uiProgress, setUiProgress] = useState(0)
+  const [phraseActive, setPhraseActive] = useState(false)
+  const [phraseDust, setPhraseDust] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const rafRef = useRef<number>(0)
   const startedRef = useRef(false)
@@ -129,39 +131,67 @@ export default function LoadingOverlay() {
     document.documentElement.style.overflow = prevHtmlOverflowRef.current || ""
     document.body.style.overflow = prevBodyOverflowRef.current || ""
     setVisible(false)
+    setPhraseActive(true)
+    setPhraseDust(false)
   }
 
-  if (!visible) return null
+  useEffect(() => {
+    if (!phraseActive) return
+    const onScroll = () => {
+      if (window.scrollY > 10) {
+        setPhraseDust(true)
+        setTimeout(() => { setPhraseActive(false) }, 500)
+        window.removeEventListener('scroll', onScroll)
+      }
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => { try { window.removeEventListener('scroll', onScroll) } catch {} }
+  }, [phraseActive])
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-black text-white flex items-center justify-center">
-      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true" />
-      <div className="relative w-full max-w-lg md:max-w-xl mx-auto p-6 md:p-7 rounded-2xl bg-black/60 border border-white/10 shadow-lg">
-        <div className="text-center text-lg md:text-xl font-semibold">¿Cuál es tu nombre?</div>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Escribe tu nombre"
-          className="mt-4 w-full rounded-md bg-neutral-900/70 border border-neutral-700 px-4 py-3 text-base focus:outline-none focus:ring-1 focus:ring-cyan-400"
-          aria-label="Nombre"
-        />
-        <div className="mt-4">
-          <div className="h-2.5 md:h-3 w-full rounded-full bg-neutral-700">
-            <div className="h-full rounded-full bg-cyan-400" style={{ width: `${Math.round(uiProgress * 100)}%` }} />
+    <>
+      {visible && (
+        <div className="fixed inset-0 z-[9999] bg-black text-white flex items-center justify-center">
+          <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true" />
+          <div className="relative w-full max-w-lg md:max-w-xl mx-auto p-6 md:p-7 rounded-2xl bg-black/60 border border-white/10 shadow-lg">
+            <div className="text-center text-lg md:text-xl font-semibold">¿Cuál es tu nombre?</div>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Escribe tu nombre"
+              className="mt-4 w-full rounded-md bg-neutral-900/70 border border-neutral-700 px-4 py-3 text-base focus:outline-none focus:ring-1 focus:ring-cyan-400"
+              aria-label="Nombre"
+            />
+            <div className="mt-4">
+              <div className="h-2.5 md:h-3 w-full rounded-full bg-neutral-700">
+                <div className="h-full rounded-full bg-cyan-400" style={{ width: `${Math.round(uiProgress * 100)}%` }} />
+              </div>
+              <div className="mt-2 text-sm md:text-base text-neutral-300">Precargando… {Math.round(uiProgress * 100)}%</div>
+            </div>
+            {ready && (
+              <button
+                type="button"
+                className="mt-6 w-full rounded-md bg-neutral-100 text-black font-bold py-3.5 md:py-4 text-base hover:bg-white/90"
+                onClick={start}
+              >
+                ¿Comenzamos?
+              </button>
+            )}
           </div>
-          <div className="mt-2 text-sm md:text-base text-neutral-300">Precargando… {Math.round(uiProgress * 100)}%</div>
         </div>
-        {ready && (
-          <button
-            type="button"
-            className="mt-6 w-full rounded-md bg-neutral-100 text-black font-bold py-3.5 md:py-4 text-base hover:bg-white/90"
-            onClick={start}
-          >
-            ¿Comenzamos?
-          </button>
-        )}
-      </div>
-    </div>
+      )}
+      {phraseActive && (
+        <div className={`fixed inset-0 z-[9998] pointer-events-none flex items-center justify-center transition-all duration-500 ${phraseDust ? 'opacity-0 blur-md translate-y-1' : 'opacity-100'}`}>
+          <div className="relative">
+            <span aria-hidden className="absolute -inset-24 cta-aurora" />
+            <span aria-hidden className="absolute -inset-16 cta-radial" />
+            <h1 className="text-center text-3xl md:text-5xl font-black tracking-tight cinematic-text bg-gradient-to-r from-red-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
+              forma la historia la historia que siempre quisistee tener
+            </h1>
+          </div>
+        </div>
+      )}
+    </>
   )
 }

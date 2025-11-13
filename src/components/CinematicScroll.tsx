@@ -369,11 +369,11 @@ export default function CinematicScroll() {
             </div>
 
             <div className="relative text-center max-w-3xl">
-              <h1 className="cta-title text-6xl md:text-8xl font-extrabold tracking-tight cinematic-text">
-                Wspace
+              <h1 className="cta-title text-6xl md:text-8xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent cinematic-text">
+                TÚ
               </h1>
-              <p className="cta-subtitle mt-6 text-xl md:text-2xl text-gray-300">
-                Donde tu viaje se vuelve épico.
+              <p className="cta-subtitle mt-6 text-xl md:text-2xl text-white/90">
+                una donde los límites los pongas
               </p>
             <Button className="cta-button mt-10 px-8 py-6 text-lg rounded-full glow-cyan">
               Empezamos
