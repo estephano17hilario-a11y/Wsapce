@@ -41,6 +41,7 @@ export default function CinematicScroll() {
       // Títulos y subtítulos para escenas (CTA-style)
       const title1 = text1Ref.current?.querySelector('h1') as HTMLElement | null
       const subtitle1 = text1Ref.current?.querySelector('p') as HTMLElement | null
+      const tu1 = (text1Ref.current?.querySelectorAll('h1')?.[1] ?? null) as HTMLElement | null
       const title2 = text2Ref.current?.querySelector('h1') as HTMLElement | null
       const subtitle2 = text2Ref.current?.querySelector('p') as HTMLElement | null
       const title3 = text3Ref.current?.querySelector('h1') as HTMLElement | null
@@ -53,6 +54,8 @@ export default function CinematicScroll() {
       gsap.set([scene2Ref.current, scene3Ref.current, scene4Ref.current, scene5Ref.current, scene6Ref.current], { opacity: 0 });
       // Texto de la ESCENA 1 visible desde el inicio (scroll 0)
       gsap.set(text1Ref.current, { opacity: 1, y: 0 });
+      gsap.set(subtitle1, { opacity: 0, filter: 'blur(8px)', y: 12 });
+      gsap.set(tu1, { opacity: 0, filter: 'blur(10px)', y: 16 });
       gsap.set([text2Ref.current, text3Ref.current, text4Ref.current, text5Ref.current], { opacity: 0, y: 50 });
 
       // Crear línea de tiempo maestra con suavizado interno
@@ -65,8 +68,13 @@ export default function CinematicScroll() {
         { opacity: 1, scale: 4.0, yPercent: 6, transformOrigin: '50% 80%' },
         { opacity: 1, scale: 1, yPercent: 0, duration: 2.2, ease: 'none' }
       )
-      // Texto (Escena 1): ya visible al inicio; sin animación de entrada, solo salida
-      .add(ctaFadeOut(title1, subtitle1), "+=1.2")
+      .fromTo(title1,
+        { opacity: 1, filter: 'blur(0px)', y: 0 },
+        { opacity: 0, filter: 'blur(10px)', y: -12, duration: 0.9, ease: 'power2.in' },
+        "+=0.3"
+      )
+      .add(ctaSubtitle(subtitle1), "-=0.5")
+      .add(ctaTitle(tu1), "-=0.2")
       // Imagen: fade out al salir de la escena
       .to(img1, { opacity: 0, duration: 0.8, ease: 'power2.in' }, "-=0.6")
       // Contenedor: solo fade out
