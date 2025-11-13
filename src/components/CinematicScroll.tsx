@@ -105,6 +105,7 @@ export default function CinematicScroll() {
     scrollLockCleanupRef.current?.()
     gateLockedRef.current = false
     gateReleasedRef.current = true
+    if (gateScrollHandlerRef.current) { window.removeEventListener('scroll', gateScrollHandlerRef.current); gateScrollHandlerRef.current = null }
   }
 
   useLayoutEffect(() => {
@@ -344,7 +345,7 @@ export default function CinematicScroll() {
             hintHiddenRef.current = true
             setShowScrollHint(false)
           }
-          if (self.progress > 0.92 && !gateLockedRef.current && !gateReleasedRef.current) {
+          if (self.progress > 0.965 && !gateLockedRef.current && !gateReleasedRef.current) {
             gateLockedRef.current = true
             lockScroll()
             gateClampYRef.current = Math.max(self.start, self.end - 2)
@@ -357,7 +358,7 @@ export default function CinematicScroll() {
               }
               window.addEventListener('scroll', gateScrollHandlerRef.current, { passive: true })
             }
-            try { tlRef.current?.progress(0.985) } catch {}
+            try { tlRef.current?.progress(0.995) } catch {}
           }
           if (gateLockedRef.current) {
             const hold = Math.max(self.start, self.end - 2)
@@ -554,13 +555,12 @@ export default function CinematicScroll() {
             <Button
               className={`cta-button cta-button-premium mt-10 px-8 py-6 text-lg rounded-2xl glow-cyan relative left-3 md:left-5 ${ctaRipple ? 'btn-glow-once btn-glow-once--subtle btn-glow-once--subtle-active' : 'btn-glow-once btn-glow-once--subtle'} ${ctaAttention ? 'cta-attn-on' : ''}`}
               onClick={() => {
-                lockScroll(3700)
+                lockScroll(1000)
                 setCtaRipple(true)
                 setTimeout(() => setCtaRipple(false), 900)
                 setCtaAttention(false)
                 try { window.dispatchEvent(new CustomEvent('start_cosmic')) } catch {}
                 setTimeout(() => scrollToIdSlow('wspace-start', 2600), 1000)
-                setTimeout(() => unlockScroll(), 3700)
               }}
             >
               Comenzamos
