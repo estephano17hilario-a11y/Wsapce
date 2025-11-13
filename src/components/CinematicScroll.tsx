@@ -1,6 +1,6 @@
 'use client';
 
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState, useEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Image from 'next/image';
@@ -23,6 +23,8 @@ export default function CinematicScroll() {
   const scene6Ref = useRef<HTMLDivElement>(null);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
   const initGuardRef = useRef<boolean>(false);
+  const [showScrollHint, setShowScrollHint] = useState(false)
+  const hintHiddenRef = useRef<boolean>(false)
 
   // Referencias para textos
   const text1Ref = useRef<HTMLDivElement>(null);
@@ -134,10 +136,10 @@ export default function CinematicScroll() {
         { opacity: 0 }, 
         { opacity: 1, duration: 0.8, ease: "power2.out" }
       )
-      // Imagen: fade in + zoom-out (más agresivo)
+      // Imagen: zoom in inicial + suave, luego se aleja con el scroll hasta pantalla completa
       .fromTo(img2,
-        { opacity: 0, scale: 1.45, transformOrigin: 'center center' },
-        { opacity: 1, scale: 1, duration: 2, ease: 'none' },
+        { opacity: 0, scale: 2.2, transformOrigin: 'center center' },
+        { opacity: 1, scale: 1.08, duration: 1.8, ease: 'none' },
         "-=0.4"
       )
       // Texto (Escena 2): efecto CTA para título y subtítulo
@@ -155,29 +157,28 @@ export default function CinematicScroll() {
       // Contenedor: solo fade in
       .fromTo(scene3Ref.current, 
         { opacity: 0 }, 
-        { opacity: 1, duration: 0.8, ease: "power2.out" }
+        { opacity: 1, duration: 0.5, ease: "power2.out" }
       )
       // Imagen: fade in + zoom-out (más agresivo)
       .fromTo(img3,
-        { opacity: 0, scale: 1.45, transformOrigin: 'center center' },
-        { opacity: 1, scale: 0.12, duration: 2.6, ease: 'none' },
+        { opacity: 0.8, scale: 3.6, transformOrigin: 'center center' },
+        { opacity: 1, scale: 0.12, duration: 3.0, ease: 'none' },
         "-=0.4"
       )
-      // Texto (Escena 3): efecto CTA con blur elegante (igual a escena 4)
-      .fromTo(text3Ref.current, { opacity: 0 }, { opacity: 1, duration: 0.8, ease: 'power2.out' }, "-=0.8")
+      .to({}, { duration: 0.6 })
+      .fromTo(text3Ref.current, { opacity: 0 }, { opacity: 1, duration: 0.9, ease: 'power2.out' }, "-=0.8")
       .add(ctaTitle(title3, {
-        duration: 2.2,
+        duration: 2.8,
         from: { filter: 'blur(32px) brightness(0.82)', letterSpacing: '0.26em', scale: 1.28, y: 60 },
         to:   { filter: 'blur(0px) brightness(1.05)', y: 0 }
-      }), "-=1.2")
+      }), "+=0.2")
       .add(ctaSubtitle(subtitle3, {
-        duration: 1.8,
+        duration: 2.4,
         from: { filter: 'blur(22px) brightness(0.85)', y: 42 },
         to:   { filter: 'blur(0px) brightness(1)', y: 0 }
-      }), "-=1.0")
+      }), "+=0.1")
       .add(ctaFadeOut(title3, null), "+=1.2")
       .add(ctaFadeOut(null, subtitle3), "-=0.6")
-      // Pausa breve antes de salida de Tierra (se detiene un poco)
       .to({}, { duration: 0.3 })
       // Tierra se va un poco antes (sin solape con Espacio)
       .to(img3, { opacity: 0, duration: 0.7, ease: 'power2.in' })
@@ -199,23 +200,22 @@ export default function CinematicScroll() {
         { scale: 1.0, duration: 2.8, ease: 'none' },
         "-=1.5"
       )
-      // Asegurar visibilidad del contenedor de texto (evita que desaparezca)
+      .to({}, { duration: 0.6 })
       .fromTo(text4Ref.current,
         { opacity: 0 },
-        { opacity: 1, duration: 0.8, ease: 'power2.out' },
-        "-=1.4"
+        { opacity: 1, duration: 1.0, ease: 'power2.out' },
+        "+=0.0"
       )
-      // Texto: CTA con blur elegante y brillante
       .add(ctaTitle(title4, {
-        duration: 2.2,
+        duration: 2.6,
         from: { filter: 'blur(32px) brightness(0.82)', letterSpacing: '0.26em', scale: 1.28, y: 60 },
         to:   { filter: 'blur(0px) brightness(1.05)', y: title4TargetY }
-      }), "-=1.2")
+      }), "+=0.3")
       .add(ctaSubtitle(subtitle4, {
-        duration: 1.8,
+        duration: 2.2,
         from: { filter: 'blur(22px) brightness(0.85)', y: 42 },
         to:   { filter: 'blur(0px) brightness(1)', y: subtitle4TargetY }
-      }), "-=1.0")
+      }), "+=0.2")
       .add(ctaFadeOut(title4, subtitle4), "+=1.2")
       // Imagen: salida solo con fade out
       .to(img4, { opacity: 0, duration: 0.8, ease: 'power2.in' }, "-=0.6")
@@ -235,10 +235,10 @@ export default function CinematicScroll() {
         { opacity: 1, scale: 1.0, duration: 3.0, ease: 'none' },
         "-=0.4"
       )
-      // Texto (Escena 5): efecto CTA para título y subtítulo
-      .fromTo(text5Ref.current, { opacity: 0 }, { opacity: 1, duration: 0.8, ease: 'power2.out' }, "-=0.8")
-      .add(ctaTitle(title5), "-=0.8")
-      .add(ctaSubtitle(subtitle5), "-=0.7")
+      .to({}, { duration: 0.5 })
+      .fromTo(text5Ref.current, { opacity: 0 }, { opacity: 1, duration: 1.1, ease: 'power2.out' }, "+=0.2")
+      .add(ctaTitle(title5, { duration: 2.4 }), "+=0.2")
+      .add(ctaSubtitle(subtitle5, { duration: 2.0 }), "+=0.1")
       .add(ctaFadeOut(title5, subtitle5), "+=1.2")
       // Imagen: fade out y contenedor: solo fade out
       
@@ -288,6 +288,10 @@ export default function CinematicScroll() {
             trackEvent('scroll_completion', { progress: self.progress })
             completionReportedRef.current = true
           }
+          if (!hintHiddenRef.current && self.progress > 0.03) {
+            hintHiddenRef.current = true
+            setShowScrollHint(false)
+          }
         }
       });
 
@@ -311,10 +315,25 @@ export default function CinematicScroll() {
     };
   }, []);
 
+  useEffect(() => {
+    const id = setTimeout(() => setShowScrollHint(true), 1200)
+    return () => clearTimeout(id)
+  }, [])
+
   return (
     <section ref={mainContainerRef} className="relative w-full h-screen overflow-hidden">
       {/* Contenedor fijo para todas las escenas */}
       <div className="fixed inset-0">
+        {showScrollHint && (
+          <div className="absolute left-1/2 bottom-10 -translate-x-1/2 z-[60] pointer-events-none">
+            <div className="scroll-lux relative">
+              <span className="scroll-label">scroll</span>
+              <span className="scroll-mouse">
+                <span className="scroll-wheel" />
+              </span>
+            </div>
+          </div>
+        )}
         
         {/* ESCENA 1: Inicio Personal */}
         <div ref={scene1Ref} className="absolute inset-0 w-full h-full bg-black">

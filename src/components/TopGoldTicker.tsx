@@ -67,19 +67,21 @@ export default function TopGoldTicker() {
         }
       }, delay)
     }
-    const onTrigger = () => {
-      setActive(true)
-      setSticky(true)
-      stickyRef.current = true
-      setShow(true)
-      doFlash()
-      kickCompactCycle()
-      if (!startedRef.current) {
-        startedRef.current = true
-        scheduleNext(1500)
-      }
+    const onStartCosmic = () => {
+      window.setTimeout(() => {
+        setActive(true)
+        setSticky(true)
+        stickyRef.current = true
+        setShow(true)
+        doFlash()
+        kickCompactCycle()
+        if (!startedRef.current) {
+          startedRef.current = true
+          scheduleNext(1500)
+        }
+      }, 1800)
     }
-    window.addEventListener('after_andromeda', onTrigger)
+    window.addEventListener('start_cosmic', onStartCosmic)
     const onGold = (e: Event) => {
       try {
         const ev = e as CustomEvent<{ email?: string }>
@@ -100,7 +102,7 @@ export default function TopGoldTicker() {
     }
     window.addEventListener('gold_purchased', onGold)
     return () => {
-      window.removeEventListener('after_andromeda', onTrigger)
+      window.removeEventListener('start_cosmic', onStartCosmic)
       window.removeEventListener('gold_purchased', onGold)
     }
   }, [])

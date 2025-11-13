@@ -146,6 +146,7 @@ export default function LoadingOverlay() {
               className="mt-4 w-full rounded-md bg-neutral-900/70 border border-neutral-700 px-4 py-3 text-base focus:outline-none focus:ring-1 focus:ring-cyan-400"
               aria-label="Nombre"
             />
+            <div className="mt-1 text-xs md:text-sm text-neutral-400">(luego descubriras el porqué)</div>
             <div className="mt-4">
               <div className="h-2.5 md:h-3 w-full rounded-full bg-neutral-700">
                 <div className="h-full rounded-full bg-cyan-400" style={{ width: `${Math.round(uiProgress * 100)}%` }} />
@@ -162,6 +163,7 @@ export default function LoadingOverlay() {
               </button>
             )}
           </div>
+          <div className="absolute left-4 bottom-3 text-white/70 text-xs md:text-sm">Wspace</div>
         </div>
       )}
       
