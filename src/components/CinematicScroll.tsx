@@ -592,13 +592,12 @@ export default function CinematicScroll() {
             <Button
               className={`cta-button cta-button-premium mt-10 px-8 py-6 text-lg rounded-2xl glow-cyan relative left-3 md:left-5 ${ctaRipple ? 'btn-glow-once btn-glow-once--subtle btn-glow-once--subtle-active' : 'btn-glow-once btn-glow-once--subtle'} ${ctaAttention ? 'cta-attn-on' : ''}`}
               onClick={() => {
-                lockScroll(1000)
+                lockScroll(3800)
                 setCtaRipple(true)
                 setTimeout(() => setCtaRipple(false), 900)
                 setCtaAttention(false)
                 try { window.dispatchEvent(new CustomEvent('start_cosmic')) } catch {}
                 setTimeout(() => scrollToIdSlow('wspace-start', 2600), 1000)
-                setTimeout(() => { unlockScroll(); try { stRef.current?.animation?.resume() } catch {} }, 2700)
               }}
             >
               Comenzamos
