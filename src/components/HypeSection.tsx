@@ -74,7 +74,7 @@ export default function HypeSection() {
     { emoji: '🌌', title: 'UNIVERSO INMENSO', cat: 'Juego', catClass: 'cat-juego', desc: 'Si la tierra te parece grande, el universo, ¿qué es? Es tan inimaginable su tamaño, pero pronto lo podrás ver...' },
     { emoji: '🎤', title: 'CHAT DE VOZ TÁCTICO', cat: 'Tecnología', catClass: 'cat-tecnologia', desc: 'Escribir, hablar y coordinar, que empieze la guerraaa' },
     { emoji: '🔊', title: 'PÍXELES DE AUDIO', cat: 'Tecnología', catClass: 'cat-tecnologia', desc: 'Este píxel es muy especial, es uno donde tu voz o audio, va a quedar resonando en el espacio...' },
-    { emoji: '⚙️', title: 'OPTIMIZACIONES PREMIUM', cat: 'Tecnología', catClass: 'cat-tecnologia' },
+    { emoji: '⚙️', title: 'CUENTA PERSONALIZABLE', cat: 'Tecnología', catClass: 'cat-tecnologia', desc: 'banners, banderas, perfiles, nombres, logros, insignias. Desmuestra tu superioridad...' },
   ]
 
   return (
@@ -118,7 +118,7 @@ export default function HypeSection() {
               <div className="flex justify-center">
                 <div
                   ref={secretRef}
-                  className="relative lux-card lux-card--soft tilt-3d p-6 hype-secret hype-secret--minimal secret-supernova feature-card max-w-[780px] w-full text-center"
+                  className="relative lux-card lux-card--soft lux-card--dark lux-card--gold-ring tilt-3d p-6 hype-secret hype-secret--minimal secret-supernova feature-card max-w-[780px] w-full text-center"
                   data-emoji="❓"
                   onPointerEnter={handlePointerEnter}
                   onPointerMove={handlePointerMove}
@@ -128,6 +128,7 @@ export default function HypeSection() {
                   onPointerUp={(e) => { try { secretRef.current?.releasePointerCapture(e.pointerId) } catch {} }}
                 >
                   {/* Overlays ligeros y elegantes */}
+                  <span className="inner-lights inner-lights--gold" aria-hidden />
                   <span className="nebula-soft" aria-hidden />
                   <span className="space-dust-soft" aria-hidden />
                   <span className="edge-glow-soft" aria-hidden />
@@ -148,7 +149,7 @@ export default function HypeSection() {
               {/* Columna: anuncio app */}
               <div className="flex justify-center">
                 <div
-                  className="relative lux-card lux-card--soft p-6 max-w-[780px] w-full text-center tilt-3d"
+                  className="relative lux-card lux-card--soft lux-card--dark lux-card--blue-border p-6 max-w-[780px] w-full text-center tilt-3d"
                   onPointerEnter={handlePointerEnterElement}
                   onPointerMove={handlePointerMoveElement}
                   onPointerLeave={resetTiltElement}
@@ -156,6 +157,7 @@ export default function HypeSection() {
                   onPointerDown={(e) => { try { (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId) } catch {} }}
                   onPointerUp={(e) => { try { (e.currentTarget as HTMLDivElement).releasePointerCapture(e.pointerId) } catch {} }}
                 >
+                  <span className="inner-lights inner-lights--blue" aria-hidden />
                   <span className="nebula-soft" aria-hidden />
                   <span className="space-dust-soft" aria-hidden />
                   <span className="stars-soft" aria-hidden />

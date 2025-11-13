@@ -28,8 +28,9 @@ export default function WarmupHeroSection() {
   return (
     <section id="cta-warmup" className="relative w-full my-64 md:my-96 px-6">
       <div className="relative max-w-4xl mx-auto">
-        <div className="relative warmup-hero p-6 md:p-8 text-center overflow-hidden">
-          {/* Overlays cósmicos suaves (sin recuadro) */}
+        <div className="relative warmup-hero warmup-hero--dark p-6 md:p-8 text-center overflow-hidden">
+          {/* Overlays cósmicos suaves y luces potentes */}
+          <span className="hero-lights-strong" aria-hidden />
           <span className="nebula-soft" aria-hidden />
           <span className="space-dust-soft" aria-hidden />
           <span className="stars-soft" aria-hidden />
@@ -46,7 +47,7 @@ export default function WarmupHeroSection() {
           {/* CTA — botón elegante y super premium */}
           <div className="mt-7">
             <button
-              className={`btn-glow-once btn-glow-once--subtle cta-premium ${ctaBtnActive ? 'btn-glow-once--subtle-active' : ''} px-6 md:px-10 py-4 md:py-6 text-base md:text-lg uppercase tracking-widest rounded-2xl bg-neutral-900/60 hover:bg-neutral-800/70 text-white shadow-xl relative`}
+              className={`btn-glow-once btn-glow-once--subtle cta-premium cta-blink ${ctaBtnActive ? 'btn-glow-once--subtle-active' : ''} px-6 md:px-10 py-4 md:py-6 text-base md:text-lg uppercase tracking-widest rounded-2xl bg-neutral-900/60 hover:bg-neutral-800/70 text-white shadow-xl relative`}
               aria-label="¡SÍ! ¡QUIERO MI INSIGNIA DE FUNDADOR!"
               onClick={handleClick}
             >
