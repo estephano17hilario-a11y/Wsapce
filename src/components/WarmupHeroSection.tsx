@@ -28,14 +28,7 @@ export default function WarmupHeroSection() {
   return (
     <section id="cta-warmup" className="relative w-full my-64 md:my-96 px-6">
       <div className="relative max-w-4xl mx-auto">
-        <div className="relative warmup-hero warmup-hero--dark p-6 md:p-8 text-center overflow-hidden">
-          {/* Overlays cósmicos suaves y luces potentes */}
-          <span className="hero-lights-strong" aria-hidden />
-          <span className="nebula-soft" aria-hidden />
-          <span className="space-dust-soft" aria-hidden />
-          <span className="stars-soft" aria-hidden />
-          <span className="blue-accents-soft" aria-hidden />
-          <div className="absolute bottom-0 left-0 w-full h-1/2 cta-aurora" aria-hidden />
+        <div className="relative p-6 md:p-8 text-center">
 
           {/* Gancho emocional */}
           <h3 className="text-3xl md:text-5xl font-black tracking-tight shine-text">LA GLORIA ES PARA LOS QUE ACTÚAN.</h3>
@@ -44,15 +37,14 @@ export default function WarmupHeroSection() {
             El Lienzo Virgen espera. El Ejército se forma. El tiempo corre.
           </p>
 
-          {/* CTA — botón elegante y super premium */}
+          {/* CTA minimal y accesible */}
           <div className="mt-7">
             <button
-              className={`btn-glow-once btn-glow-once--subtle cta-premium cta-blink ${ctaBtnActive ? 'btn-glow-once--subtle-active' : ''} px-6 md:px-10 py-4 md:py-6 text-base md:text-lg uppercase tracking-widest rounded-2xl bg-neutral-900/60 hover:bg-neutral-800/70 text-white shadow-xl relative`}
-              aria-label="¡SÍ! ¡QUIERO MI INSIGNIA DE FUNDADOR!"
+              className={`cta-hero ${ctaBtnActive ? '' : ''} px-10 md:px-16 py-6 md:py-7 text-lg md:text-2xl rounded-2xl text-white shadow-xl`}
+              aria-label="¡Sí, quiero mi insignia de emperador!"
               onClick={handleClick}
             >
-              ¡SÍ! ¡QUIERO MI INSIGNIA DE FUNDADOR!
-              {ctaBtnActive && <span aria-hidden className="once-ripple-subtle once-ripple-subtle--gold" />}
+              ¡Sí, quiero mi insignia de emperador!
             </button>
           </div>
 

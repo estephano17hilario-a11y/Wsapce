@@ -239,7 +239,11 @@ export default function PricingSection() {
                 {plan.variant !== "enterprise" && (
                   <div className="mt-3">
                     <button
-                      className={`pricing-cta ${plan.variant === "creator" ? "cta-secondary" : "cta-primary"} ${plataGenerating ? 'btn-loading' : ''} ${plataLink && plan.variant === 'creator' ? 'opacity-60 cursor-not-allowed' : ''}`}
+                      className={
+                        plan.variant === 'starter'
+                          ? `cta-minimal ${plataGenerating ? 'btn-loading' : ''} px-7 md:px-12 py-4 md:py-5 text-base md:text-xl rounded-2xl text-white shadow-xl`
+                          : `pricing-cta ${plan.variant === 'creator' ? 'cta-secondary' : 'cta-primary'} ${plataGenerating ? 'btn-loading' : ''} ${plataLink && plan.variant === 'creator' ? 'opacity-60 cursor-not-allowed' : ''}`
+                      }
                       disabled={plan.variant === 'creator' && !!plataLink}
                       onClick={async () => {
                         setPlataStatus(null)
