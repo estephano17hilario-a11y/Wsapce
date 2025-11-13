@@ -57,7 +57,7 @@ export default function CinematicScroll() {
     } catch {}
   }
 
-  const scrollToIdSlow = (id: string, duration = 4200) => {
+  const scrollToIdSlow = (id: string, duration = 2500) => {
     if (typeof window === 'undefined') return
     const el = document.getElementById(id)
     if (!el) return
@@ -65,7 +65,7 @@ export default function CinematicScroll() {
     const rect = el.getBoundingClientRect()
     const targetY = rect.top + startY
     const start = performance.now()
-    const ease = (t: number) => 0.5 - 0.5 * Math.cos(Math.PI * t)
+    const ease = (t: number) => (t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2)
     const tick = (now: number) => {
       const elapsed = now - start
       const ratio = Math.min(1, elapsed / duration)
@@ -337,7 +337,7 @@ export default function CinematicScroll() {
       .call(() => trackEvent('scene_exit', { id: 6 }));
 
       // Configurar ScrollTrigger con mejor control
-      ScrollTrigger.create({
+      stRef.current = ScrollTrigger.create({
         trigger: mainContainerRef.current,
         start: "top top",
         end: "+=13500",
@@ -370,6 +370,7 @@ export default function CinematicScroll() {
               window.addEventListener('scroll', gateScrollHandlerRef.current, { passive: true })
             }
             try {
+              stRef.current?.animation?.pause()
               gateTweenRef.current?.kill();
               const tl = tlRef.current!;
               const d = tl.duration();
@@ -589,12 +590,13 @@ export default function CinematicScroll() {
             <Button
               className={`cta-button cta-button-premium mt-10 px-8 py-6 text-lg rounded-2xl glow-cyan relative left-3 md:left-5 ${ctaRipple ? 'btn-glow-once btn-glow-once--subtle btn-glow-once--subtle-active' : 'btn-glow-once btn-glow-once--subtle'} ${ctaAttention ? 'cta-attn-on' : ''}`}
               onClick={() => {
-                lockScroll(1200)
+                lockScroll(1000)
                 setCtaRipple(true)
-                setTimeout(() => setCtaRipple(false), 1200)
+                setTimeout(() => setCtaRipple(false), 900)
                 setCtaAttention(false)
                 try { window.dispatchEvent(new CustomEvent('start_cosmic')) } catch {}
-                setTimeout(() => scrollToIdSlow('wspace-start', 4200), 1000)
+                setTimeout(() => scrollToIdSlow('wspace-start', 2600), 1000)
+                setTimeout(() => { unlockScroll(); try { stRef.current?.animation?.resume() } catch {} }, 2700)
               }}
             >
               Comenzamos

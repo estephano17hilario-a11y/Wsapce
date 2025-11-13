@@ -592,7 +592,7 @@ body {
   will-change: transform, filter;
 }
 
-.cta-attn-on { animation: softBlink 2.8s ease-in-out infinite; }
+.cta-attn-on { animation: softBlink 1.8s ease-in-out infinite; }
 .cta-attn-ring {
   position: absolute;
   inset: -10px;
@@ -600,10 +600,10 @@ body {
   pointer-events: none;
   background: radial-gradient(ellipse at center, rgba(34,211,238,0.20) 0%, rgba(34,211,238,0.08) 40%, rgba(34,211,238,0.02) 70%, transparent 75%),
               radial-gradient(ellipse at center, rgba(59,130,246,0.15) 0%, rgba(59,130,246,0.06) 40%, rgba(59,130,246,0.02) 70%, transparent 75%);
-  animation: attnPulse 2.2s ease-in-out infinite;
+  animation: attnPulse 1.8s ease-in-out infinite;
 }
 @keyframes softBlink { 0% { filter: brightness(1) } 50% { filter: brightness(1.22) } 100% { filter: brightness(1) } }
-@keyframes attnPulse { 0% { opacity: 0.10 } 50% { opacity: 0.34 } 100% { opacity: 0.10 } }
+@keyframes attnPulse { 0% { opacity: 0.10 } 50% { opacity: 0.32 } 100% { opacity: 0.10 } }
 
 /* Respeta usuarios con reduce motion: desactiva transiciones pesadas */
 @media (prefers-reduced-motion: reduce) {
