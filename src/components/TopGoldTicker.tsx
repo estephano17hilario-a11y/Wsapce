@@ -125,10 +125,10 @@ export default function TopGoldTicker() {
           <div className="mx-3 mt-2 rounded-md border border-amber-400/30 bg-gradient-to-r from-amber-500/20 via-emerald-500/10 to-cyan-500/20 shadow-[0_0_30px_rgba(255,200,0,0.25)] relative overflow-hidden">
             <span aria-hidden className={`absolute inset-0 rounded-md bg-amber-300/25 blur-md mix-blend-screen transition-opacity duration-500 ${flash ? 'opacity-100' : 'opacity-0'}`} />
             <span aria-hidden className={`absolute inset-0 rounded-md ring-2 ring-amber-300/60 transition-opacity duration-500 pointer-events-none ${flash ? 'opacity-70' : 'opacity-0'}`} />
-            <div className={`flex items-center gap-3 px-4 ${compact ? 'py-2' : 'py-3 md:py-4'}`}>
-              <span className={`text-amber-300 ${compact ? 'text-xl md:text-2xl' : 'text-2xl md:text-3xl'}`}>👑</span>
-              <span className={`${compact ? 'text-xs md:text-sm' : 'text-sm md:text-base'} text-amber-100 font-semibold`}>Plan Oro</span>
-              <span className={`${compact ? 'text-[10px] md:text-xs' : 'text-xs md:text-sm'} text-cyan-100/90`}>{msg}</span>
+            <div className="flex items-center gap-3 px-4 py-3 md:py-4">
+              <span className="text-amber-300 text-2xl md:text-3xl">👑</span>
+              <span className="text-sm md:text-base text-amber-100 font-semibold">Plan Oro</span>
+              <span className="text-xs md:text-sm text-cyan-100/90">{msg}</span>
             </div>
           </div>
         </div>
