@@ -8,8 +8,6 @@ export default function LoadingOverlay() {
   const [name, setName] = useState("")
   const [progress, setProgress] = useState(0)
   const [uiProgress, setUiProgress] = useState(0)
-  const [phraseActive, setPhraseActive] = useState(false)
-  const [phraseDust, setPhraseDust] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const rafRef = useRef<number>(0)
   const startedRef = useRef(false)
@@ -131,22 +129,7 @@ export default function LoadingOverlay() {
     document.documentElement.style.overflow = prevHtmlOverflowRef.current || ""
     document.body.style.overflow = prevBodyOverflowRef.current || ""
     setVisible(false)
-    setPhraseActive(true)
-    setPhraseDust(false)
   }
-
-  useEffect(() => {
-    if (!phraseActive) return
-    const onScroll = () => {
-      if (window.scrollY > 10) {
-        setPhraseDust(true)
-        setTimeout(() => { setPhraseActive(false) }, 500)
-        window.removeEventListener('scroll', onScroll)
-      }
-    }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => { try { window.removeEventListener('scroll', onScroll) } catch {} }
-  }, [phraseActive])
 
   return (
     <>
@@ -181,17 +164,7 @@ export default function LoadingOverlay() {
           </div>
         </div>
       )}
-      {phraseActive && (
-        <div className={`fixed inset-0 z-[9998] pointer-events-none flex items-center justify-center transition-all duration-500 ${phraseDust ? 'opacity-0 blur-md translate-y-1' : 'opacity-100'}`}>
-          <div className="relative">
-            <span aria-hidden className="absolute -inset-24 cta-aurora" />
-            <span aria-hidden className="absolute -inset-16 cta-radial" />
-            <h1 className="text-center text-3xl md:text-5xl font-black tracking-tight cinematic-text bg-gradient-to-r from-red-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
-              forma la historia la historia que siempre quisistee tener
-            </h1>
-          </div>
-        </div>
-      )}
+      {/* frase inicial ahora está arraigada a la Escena 1 del CinematicScroll */}
     </>
   )
 }

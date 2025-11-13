@@ -256,11 +256,12 @@ export default function CinematicScroll() {
           />
           <div ref={text1Ref} className="absolute inset-0 flex items-center justify-center opacity-0">
             <div className="text-center text-white">
-              <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-white to-cyan-400 bg-clip-text text-transparent cinematic-text">
-                Tu Viaje Comienza
+              <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent cinematic-text">
+                TÚ
               </h1>
-              <p className="text-xl opacity-80">
-                Desde lo personal hacia lo infinito
+              <p className="text-xl opacity-90">
+                <span className="block text-white/95">una donde los límites los pongas</span>
+                <span className="mt-2 block bg-gradient-to-r from-red-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">forma la historia la historia que siempre quisistee tener</span>
               </p>
             </div>
           </div>
