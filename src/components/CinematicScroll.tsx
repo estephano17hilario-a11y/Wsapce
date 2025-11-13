@@ -21,6 +21,7 @@ export default function CinematicScroll() {
   const scene4Ref = useRef<HTMLDivElement>(null);
   const scene5Ref = useRef<HTMLDivElement>(null);
   const scene6Ref = useRef<HTMLDivElement>(null);
+  const tlRef = useRef<gsap.core.Timeline | null>(null);
 
   // Referencias para textos
   const text1Ref = useRef<HTMLDivElement>(null);
@@ -31,6 +32,16 @@ export default function CinematicScroll() {
   const completionReportedRef = useRef<boolean>(false);
 
   useLayoutEffect(() => {
+    const onUserStart = () => {
+      try {
+        window.scrollTo({ top: 0, behavior: 'auto' })
+        const titleEl = text1Ref.current?.querySelector('h1') as HTMLElement | null
+        gsap.set(text1Ref.current, { opacity: 1, y: 0 })
+        if (titleEl) gsap.set(titleEl, { opacity: 1, y: 0, scale: 1 })
+        tlRef.current?.progress(0)
+        ScrollTrigger.refresh()
+      } catch {}
+    }
     const ctx = gsap.context(() => {
       // Cachear imágenes de escenas para evitar querySelector en cada tick
       const img1 = scene1Ref.current?.querySelector('img') as HTMLElement | null
@@ -60,6 +71,7 @@ export default function CinematicScroll() {
 
       // Crear línea de tiempo maestra con suavizado interno
       const tl = gsap.timeline({ smoothChildTiming: true });
+      tlRef.current = tl
 
       // ESCENA 1: Inicio Personal (0% - 16.6%)
       tl.call(() => trackEvent('scene_enter', { id: 1 }))
@@ -68,13 +80,15 @@ export default function CinematicScroll() {
         { opacity: 1, scale: 4.0, yPercent: 6, transformOrigin: '50% 80%' },
         { opacity: 1, scale: 1, yPercent: 0, duration: 2.2, ease: 'none' }
       )
-      .fromTo(title1,
-        { opacity: 1, filter: 'blur(0px)', y: 0 },
-        { opacity: 0, filter: 'blur(10px)', y: -12, duration: 0.9, ease: 'power2.in' },
-        "+=0.3"
-      )
-      .add(ctaSubtitle(subtitle1), "-=0.5")
-      .add(ctaTitle(tu1), "-=0.2")
+      // Mantener título principal visible y estable (solo transform para rendimiento)
+      // Fade out del título principal ANTES de que aparezca la segunda frase
+      .to(title1, { opacity: 0, y: -12, scale: 0.98, duration: 0.6, ease: 'power2.in' })
+      // Pequeña pausa para separar visualmente
+      .to({}, { duration: 0.6 })
+      // Ahora sí entra la segunda frase y luego "TÚ"
+      .add(ctaSubtitle(subtitle1))
+      .add(ctaTitle(tu1), "-=0")
+      .add(ctaFadeOut(tu1, subtitle1), "+=1.2")
       // Imagen: fade out al salir de la escena
       .to(img1, { opacity: 0, duration: 0.8, ease: 'power2.in' }, "-=0.6")
       // Contenedor: solo fade out
@@ -96,8 +110,8 @@ export default function CinematicScroll() {
       )
       // Texto (Escena 2): efecto CTA para título y subtítulo
       .fromTo(text2Ref.current, { opacity: 0 }, { opacity: 1, duration: 0.8, ease: 'power2.out' }, "-=0.8")
-      .add(ctaTitle(title2), "-=0.8")
-      .add(ctaSubtitle(subtitle2), "-=0.7")
+      .add(ctaSubtitle(subtitle2), "-=0.6")
+      .add(ctaTitle(title2), "+=0.5")
       .add(ctaFadeOut(title2, subtitle2), "+=1.2")
       // Imagen: fade out y contenedor: solo fade out
       .to(img2, { opacity: 0, duration: 0.8, ease: 'power2.in' }, "-=0.6")
@@ -220,7 +234,7 @@ export default function CinematicScroll() {
         trigger: mainContainerRef.current,
         start: "top top",
         end: "+=13500",
-        scrub: 0.8, // Progreso más directo, menos amortiguación
+        scrub: 0.6, // Más responsivo, menos amortiguación
         pin: true,
         animation: tl,
         anticipatePin: 1,
@@ -234,6 +248,9 @@ export default function CinematicScroll() {
         }
       });
 
+      // Escuchar inicio del usuario para garantizar estado inicial perfecto
+      window.addEventListener('user_name_set', onUserStart)
+
       // Animación ligera de glow para el CTA (respeta prefers-reduced-motion)
       const reduceMotion = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
       if (!reduceMotion) {
@@ -242,7 +259,7 @@ export default function CinematicScroll() {
 
     }, mainContainerRef);
 
-    return () => ctx.revert();
+    return () => { window.removeEventListener('user_name_set', onUserStart); ctx.revert(); };
   }, []);
 
   return (
@@ -261,15 +278,17 @@ export default function CinematicScroll() {
             sizes="100vw"
             quality={80}
           />
-          <div ref={text1Ref} className="absolute inset-0 flex items-center justify-center opacity-0">
-            <div className="text-center text-white">
-              <h1 className="text-7xl md:text-9xl font-extrabold mb-6 bg-gradient-to-r from-red-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent cinematic-text">
-                forma la historia que siempre quisistes tener
+          <div ref={text1Ref} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full px-6 opacity-0 pointer-events-none">
+            <div className="relative text-center text-white">
+              <h1 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-5xl sm:text-6xl md:text-8xl leading-normal font-extrabold py-2 bg-gradient-to-r from-red-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent cinematic-text text-center whitespace-pre-line">
+                forma la historia que
+                <br />
+                siempre quisistes tener
               </h1>
-              <p className="text-xl md:text-2xl opacity-95 text-white/95">
+              <p className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl md:text-3xl opacity-95 text-white [text-shadow:0_0_12px_rgba(255,255,255,0.8),0_0_6px_rgba(255,255,255,0.6)]">
                 una donde los límites los pongas
               </p>
-              <h1 className="mt-6 text-6xl md:text-8xl font-extrabold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent cinematic-text">
+              <h1 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 translate-y-[120px] text-6xl md:text-8xl leading-normal font-extrabold py-2 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent cinematic-text z-10 [text-shadow:0_0_20px_rgba(56,189,248,0.9),0_0_8px_rgba(56,189,248,0.7)]">
                 TÚ
               </h1>
             </div>
@@ -287,14 +306,16 @@ export default function CinematicScroll() {
             sizes="100vw"
             quality={80}
           />
-          <div ref={text2Ref} className="absolute inset-0 flex items-center justify-center opacity-0">
+          <div ref={text2Ref} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full px-6 opacity-0 pointer-events-none">
             <div className="text-center text-white">
-              <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent cinematic-text">
-                El Caos Nos Rodea
-              </h1>
-              <p className="text-xl opacity-80">
-                Pero hay una salida...
-              </p>
+              <div className="relative inline-block max-w-[90vw] px-8 py-6">
+                <p className="text-2xl md:text-3xl text-white opacity-95 font-semibold [text-shadow:0_0_16px_rgba(255,255,255,0.9),0_0_8px_rgba(255,255,255,0.7)]">
+                  el mundo es un caos para construir esa historia
+                </p>
+                <h1 className="mt-2 text-6xl md:text-8xl leading-normal font-black py-2 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent cinematic-text [text-shadow:0_0_22px_rgba(56,189,248,0.9),0_0_10px_rgba(56,189,248,0.7)]">
+                  tu legado
+                </h1>
+              </div>
             </div>
           </div>
         </div>
@@ -310,9 +331,9 @@ export default function CinematicScroll() {
             sizes="100vw"
             quality={80}
           />
-          <div ref={text3Ref} className="absolute inset-0 flex items-center justify-center opacity-0">
+          <div ref={text3Ref} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full px-6 opacity-0 pointer-events-none">
             <div className="text-center text-white">
-              <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent cinematic-text">
+              <h1 className="text-6xl leading-normal font-bold mb-4 py-2 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent cinematic-text">
                 Elevándose
               </h1>
               <p className="text-xl opacity-80">
@@ -333,9 +354,9 @@ export default function CinematicScroll() {
             sizes="100vw"
             quality={80}
           />
-          <div ref={text4Ref} className="absolute inset-0 flex items-center justify-center opacity-0">
+          <div ref={text4Ref} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full px-6 opacity-0 pointer-events-none">
             <div className="text-center text-white">
-              <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent cinematic-text">
+              <h1 className="text-6xl leading-normal font-bold mb-4 py-2 bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent cinematic-text">
                 Atravesando el Cosmos
               </h1>
               <p className="text-xl opacity-80">
@@ -356,9 +377,9 @@ export default function CinematicScroll() {
             sizes="100vw"
             quality={80}
           />
-          <div ref={text5Ref} className="absolute inset-0 flex items-center justify-center opacity-0">
+          <div ref={text5Ref} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full px-6 opacity-0 pointer-events-none">
             <div className="text-center text-white">
-              <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-yellow-400 to-cyan-400 bg-clip-text text-transparent cinematic-text">
+              <h1 className="text-6xl leading-normal font-bold mb-4 py-2 bg-gradient-to-r from-yellow-400 to-cyan-400 bg-clip-text text-transparent cinematic-text">
                 Andrómeda
               </h1>
               <p className="text-xl opacity-80">
