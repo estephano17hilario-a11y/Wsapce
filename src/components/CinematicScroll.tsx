@@ -1,6 +1,6 @@
 'use client';
 
-import { useLayoutEffect, useRef, useState, useEffect } from 'react';
+import { useLayoutEffect, useRef, useState, useEffect, useCallback } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Image from 'next/image';
@@ -47,6 +47,7 @@ export default function CinematicScroll() {
   const gateClampYRef = useRef<number>(0)
   const gateScrollHandlerRef = useRef<((e: Event) => void) | null>(null)
   const gateTweenRef = useRef<gsap.core.Tween | null>(null)
+  const stRef = useRef<ReturnType<typeof ScrollTrigger.create> | null>(null)
   const [ctaAttention, setCtaAttention] = useState(true)
 
   const ensureCtaVisible = () => {
@@ -77,7 +78,16 @@ export default function CinematicScroll() {
     requestAnimationFrame(tick)
   }
 
-  const lockScroll = (ms?: number) => {
+  const unlockScroll = useCallback(() => {
+    if (unlockTimeoutRef.current) { clearTimeout(unlockTimeoutRef.current); unlockTimeoutRef.current = null }
+    scrollLockCleanupRef.current?.()
+    gateLockedRef.current = false
+    gateReleasedRef.current = true
+    if (gateScrollHandlerRef.current) { window.removeEventListener('scroll', gateScrollHandlerRef.current); gateScrollHandlerRef.current = null }
+    try { stRef.current?.animation?.resume() } catch {}
+  }, [])
+
+  const lockScroll = useCallback((ms?: number) => {
     if (typeof window === 'undefined') return
     prevHtmlOverflowRef.current = document.documentElement.style.overflow
     prevBodyOverflowRef.current = document.body.style.overflow
@@ -107,15 +117,7 @@ export default function CinematicScroll() {
         unlockTimeoutRef.current = null
       }, ms)
     }
-  }
-
-  const unlockScroll = () => {
-    if (unlockTimeoutRef.current) { clearTimeout(unlockTimeoutRef.current); unlockTimeoutRef.current = null }
-    scrollLockCleanupRef.current?.()
-    gateLockedRef.current = false
-    gateReleasedRef.current = true
-    if (gateScrollHandlerRef.current) { window.removeEventListener('scroll', gateScrollHandlerRef.current); gateScrollHandlerRef.current = null }
-  }
+  }, [unlockScroll])
 
   useLayoutEffect(() => {
     try { ScrollTrigger.getAll().forEach(t => t.kill()) } catch {}
@@ -428,7 +430,7 @@ export default function CinematicScroll() {
       gateLockedRef.current = false
       gateReleasedRef.current = false
     };
-  }, []);
+  }, [lockScroll]);
 
   useEffect(() => {
     const id = setTimeout(() => setShowScrollHint(true), 1200)
