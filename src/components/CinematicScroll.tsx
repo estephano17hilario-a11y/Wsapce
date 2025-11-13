@@ -319,23 +319,22 @@ export default function CinematicScroll() {
       // Entrada espectacular del texto y botón del CTA
       .fromTo(
         '.cta-title',
-        { opacity: 0, filter: 'blur(14px)', letterSpacing: '0.15em', scale: 1.2, y: 40, transformOrigin: 'center center' },
-        { opacity: 1, filter: 'blur(0px)', letterSpacing: '0em', scale: 1, y: 0, duration: 1.8, ease: 'expo.out' },
+        { opacity: 1, filter: 'none', letterSpacing: '0.10em', scale: 1.2, y: 40, transformOrigin: 'center center' },
+        { opacity: 1, filter: 'none', letterSpacing: '0.10em', scale: 1, y: 0, duration: 1.2, ease: 'expo.out' },
         "-=1.2"
       )
       
       .fromTo(
         '.cta-button',
-        { opacity: 0, scale: 0.9, y: 24, filter: 'brightness(0.8) blur(6px)' },
-        { opacity: 1, scale: 1, y: 0, filter: 'brightness(1) blur(0px)', duration: 1.3, ease: 'back.out(1.7)' },
+        { opacity: 1, scale: 0.99, y: 24, filter: 'none' },
+        { opacity: 1, scale: 1, y: 0, filter: 'none', duration: 1.0, ease: 'back.out(1.7)' },
         "-=0.8"
       )
       .add('cta_hold_start')
       // Mantener la sección Wspace visible por más tiempo sin cambiar visualmente
       .to({}, { duration: 2.5 })
       .add('cta_hold_end')
-      // Salida: solo fade out para las letras/botón
-      .to(['.cta-title', '.cta-button'], { opacity: 0, duration: 1, ease: 'power2.in' })
+      // Salida: sin fade out; mantenemos visibles
       .call(() => trackEvent('scene_exit', { id: 6 }));
 
       // Configurar ScrollTrigger con mejor control
@@ -592,12 +591,13 @@ export default function CinematicScroll() {
             <Button
               className={`cta-button cta-button-premium mt-10 px-8 py-6 text-lg rounded-2xl glow-cyan relative left-3 md:left-5 ${ctaRipple ? 'btn-glow-once btn-glow-once--subtle btn-glow-once--subtle-active' : 'btn-glow-once btn-glow-once--subtle'} ${ctaAttention ? 'cta-attn-on' : ''}`}
               onClick={() => {
-                lockScroll(3800)
+                lockScroll(1000)
                 setCtaRipple(true)
                 setTimeout(() => setCtaRipple(false), 900)
                 setCtaAttention(false)
                 try { window.dispatchEvent(new CustomEvent('start_cosmic')) } catch {}
                 setTimeout(() => scrollToIdSlow('wspace-start', 2600), 1000)
+                setTimeout(() => { unlockScroll(); try { stRef.current?.animation?.resume() } catch {} }, 2700)
               }}
             >
               Comenzamos
