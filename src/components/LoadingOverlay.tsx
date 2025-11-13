@@ -7,22 +7,32 @@ export default function LoadingOverlay() {
   const [visible, setVisible] = useState(true)
   const [name, setName] = useState("")
   const [progress, setProgress] = useState(0)
+  const [uiProgress, setUiProgress] = useState(0)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const rafRef = useRef<number>(0)
   const startedRef = useRef(false)
   const prevHtmlOverflowRef = useRef<string>("")
   const prevBodyOverflowRef = useRef<string>("")
+  const startAtRef = useRef<number>(0)
+  const [timeReady, setTimeReady] = useState(false)
 
   useEffect(() => {
-    prevHtmlOverflowRef.current = document.documentElement.style.overflow
-    prevBodyOverflowRef.current = document.body.style.overflow
-    document.documentElement.style.overflow = "hidden"
-    document.body.style.overflow = "hidden"
-    return () => {
+    startAtRef.current = performance.now()
+    const id = setTimeout(() => setTimeReady(true), 1200)
+    return () => clearTimeout(id)
+  }, [])
+
+  useEffect(() => {
+    if (visible) {
+      prevHtmlOverflowRef.current = document.documentElement.style.overflow
+      prevBodyOverflowRef.current = document.body.style.overflow
+      document.documentElement.style.overflow = "hidden"
+      document.body.style.overflow = "hidden"
+    } else {
       document.documentElement.style.overflow = prevHtmlOverflowRef.current || ""
       document.body.style.overflow = prevBodyOverflowRef.current || ""
     }
-  }, [])
+  }, [visible])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -89,7 +99,24 @@ export default function LoadingOverlay() {
     }).catch(() => {})
   }, [])
 
-  const ready = progress >= 1
+  useEffect(() => {
+    if (!visible) return
+    let r = 0
+    const step = () => {
+      setUiProgress((p) => {
+        const target = progress
+        const delta = target - p
+        if (delta <= 0.001) return target
+        const inc = Math.max(0.02, delta * 0.25)
+        return Math.min(target, p + inc)
+      })
+      r = requestAnimationFrame(step)
+    }
+    r = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(r)
+  }, [progress, visible])
+
+  const ready = progress >= 1 && timeReady
 
   const start = () => {
     try {
@@ -99,6 +126,8 @@ export default function LoadingOverlay() {
         window.dispatchEvent(new CustomEvent("user_name_set", { detail: { name: clean } }))
       }
     } catch {}
+    document.documentElement.style.overflow = prevHtmlOverflowRef.current || ""
+    document.body.style.overflow = prevBodyOverflowRef.current || ""
     setVisible(false)
   }
 
@@ -119,9 +148,9 @@ export default function LoadingOverlay() {
         />
         <div className="mt-4">
           <div className="h-1.5 w-full rounded-full bg-neutral-700">
-            <div className="h-full rounded-full bg-cyan-400" style={{ width: `${Math.round(progress * 100)}%` }} />
+            <div className="h-full rounded-full bg-cyan-400" style={{ width: `${Math.round(uiProgress * 100)}%` }} />
           </div>
-          <div className="mt-2 text-xs text-neutral-300">Precargando… {Math.round(progress * 100)}%</div>
+          <div className="mt-2 text-xs text-neutral-300">Precargando… {Math.round(uiProgress * 100)}%</div>
         </div>
         {ready && (
           <button
