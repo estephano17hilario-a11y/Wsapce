@@ -6,6 +6,12 @@ export default function TopGoldTicker() {
   const [active, setActive] = useState(false)
   const [show, setShow] = useState(false)
   const [msg, setMsg] = useState('')
+  const [sticky, setSticky] = useState(false)
+  const stickyRef = useRef(false)
+  const [compact, setCompact] = useState(false)
+  const compactTimerRef = useRef<number | null>(null)
+  const [flash, setFlash] = useState(false)
+  const flashTimerRef = useRef<number | null>(null)
   const timerRef = useRef<number | null>(null)
   const hideRef = useRef<number | null>(null)
   const startedRef = useRef(false)
@@ -32,6 +38,18 @@ export default function TopGoldTicker() {
       return `${nameMask}@${providerMask}${tld ? `.${tld}` : ''}`
     }
 
+    function kickCompactCycle() {
+      setCompact(false)
+      if (compactTimerRef.current) { clearTimeout(compactTimerRef.current); compactTimerRef.current = null }
+      compactTimerRef.current = window.setTimeout(() => { setCompact(true) }, 5000)
+    }
+
+    function doFlash() {
+      setFlash(true)
+      if (flashTimerRef.current) { clearTimeout(flashTimerRef.current); flashTimerRef.current = null }
+      flashTimerRef.current = window.setTimeout(() => { setFlash(false) }, 500)
+    }
+
     function scheduleNext(initialDelay?: number) {
       if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null }
       const delay = typeof initialDelay === 'number' ? initialDelay : (Math.floor(10 + Math.random() * 30) * 1000)
@@ -39,15 +57,26 @@ export default function TopGoldTicker() {
         const name = pickName()
         setMsg(`${name} acaba de obtener la Insignia de Oro`)
         setShow(true)
-        if (hideRef.current) { clearTimeout(hideRef.current); hideRef.current = null }
-        hideRef.current = window.setTimeout(() => { setShow(false); scheduleNext() }, 6000)
+        doFlash()
+        kickCompactCycle()
+        if (!stickyRef.current) {
+          if (hideRef.current) { clearTimeout(hideRef.current); hideRef.current = null }
+          hideRef.current = window.setTimeout(() => { setShow(false); scheduleNext() }, 6000)
+        } else {
+          scheduleNext()
+        }
       }, delay)
     }
     const onTrigger = () => {
       setActive(true)
+      setSticky(true)
+      stickyRef.current = true
+      setShow(true)
+      doFlash()
+      kickCompactCycle()
       if (!startedRef.current) {
         startedRef.current = true
-        scheduleNext(2000)
+        scheduleNext(1500)
       }
     }
     window.addEventListener('after_andromeda', onTrigger)
@@ -59,8 +88,14 @@ export default function TopGoldTicker() {
         setActive(true)
         setMsg(`${label} acaba de obtener la Insignia de Oro`)
         setShow(true)
-        if (hideRef.current) { clearTimeout(hideRef.current); hideRef.current = null }
-        hideRef.current = window.setTimeout(() => { setShow(false); scheduleNext(10_000) }, 6000)
+        doFlash()
+        kickCompactCycle()
+        if (!stickyRef.current) {
+          if (hideRef.current) { clearTimeout(hideRef.current); hideRef.current = null }
+          hideRef.current = window.setTimeout(() => { setShow(false); scheduleNext(10_000) }, 6000)
+        } else {
+          scheduleNext(10_000)
+        }
       } catch {}
     }
     window.addEventListener('gold_purchased', onGold)
@@ -71,21 +106,29 @@ export default function TopGoldTicker() {
   }, [])
 
   useEffect(() => {
+    stickyRef.current = sticky
+  }, [sticky])
+
+  useEffect(() => {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)
       if (hideRef.current) clearTimeout(hideRef.current)
+      if (compactTimerRef.current) clearTimeout(compactTimerRef.current)
+      if (flashTimerRef.current) clearTimeout(flashTimerRef.current)
     }
   }, [])
 
   return (
     <div className={`fixed top-0 left-0 right-0 z-50 ${active ? '' : 'pointer-events-none'}`} aria-live="polite">
-      <div className={`transition-transform duration-500 ${show ? 'translate-y-0' : '-translate-y-full'}`}>
-        <div className="mx-auto max-w-7xl">
-          <div className="mx-3 mt-2 rounded-md border border-amber-400/30 bg-gradient-to-r from-amber-500/20 via-emerald-500/10 to-cyan-500/20 shadow-[0_0_30px_rgba(255,200,0,0.25)]">
-            <div className="flex items-center gap-3 px-3 py-2">
-              <span className="text-amber-300 text-lg">👑</span>
-              <span className="text-xs md:text-sm text-amber-100 font-semibold">Plan Oro</span>
-              <span className="text-[11px] md:text-xs text-cyan-100/90">{msg}</span>
+      <div className={`transition-all duration-700 ease-out ${show ? 'translate-y-0 opacity-100 blur-0' : '-translate-y-full opacity-0 blur-sm'}`}>
+        <div className={`mx-auto max-w-7xl transition-transform duration-700 ${compact ? '-translate-y-[calc(100%-6px)] md:-translate-y-[calc(100%-8px)]' : 'translate-y-0'}`}>
+          <div className="mx-3 mt-2 rounded-md border border-amber-400/30 bg-gradient-to-r from-amber-500/20 via-emerald-500/10 to-cyan-500/20 shadow-[0_0_30px_rgba(255,200,0,0.25)] relative overflow-hidden">
+            <span aria-hidden className={`absolute inset-0 rounded-md bg-amber-300/25 blur-md mix-blend-screen transition-opacity duration-500 ${flash ? 'opacity-100' : 'opacity-0'}`} />
+            <span aria-hidden className={`absolute inset-0 rounded-md ring-2 ring-amber-300/60 transition-opacity duration-500 pointer-events-none ${flash ? 'opacity-70' : 'opacity-0'}`} />
+            <div className={`flex items-center gap-3 px-4 ${compact ? 'py-2' : 'py-3 md:py-4'}`}>
+              <span className={`text-amber-300 ${compact ? 'text-xl md:text-2xl' : 'text-2xl md:text-3xl'}`}>👑</span>
+              <span className={`${compact ? 'text-xs md:text-sm' : 'text-sm md:text-base'} text-amber-100 font-semibold`}>Plan Oro</span>
+              <span className={`${compact ? 'text-[10px] md:text-xs' : 'text-xs md:text-sm'} text-cyan-100/90`}>{msg}</span>
             </div>
           </div>
         </div>
