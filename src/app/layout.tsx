@@ -35,6 +35,12 @@ export default function RootLayout({
         <link rel="preload" as="image" href="/perxonas up - copia.webp" />
         <link rel="preload" as="image" href="/tierra para implementar - copia - copia.webp" />
         {process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN ? (
+          <>
+            <link rel="dns-prefetch" href="https://plausible.io" />
+            <link rel="preconnect" href="https://plausible.io" />
+          </>
+        ) : null}
+        {process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN ? (
           <Script
             defer
             data-domain={process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN}

@@ -136,26 +136,26 @@ export default function LoadingOverlay() {
   return (
     <div className="fixed inset-0 z-[9999] bg-black text-white flex items-center justify-center">
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true" />
-      <div className="relative w-full max-w-sm mx-auto p-5 rounded-xl bg-black/60 border border-white/10 shadow-lg">
-        <div className="text-center font-semibold">¿Cuál es tu nombre?</div>
+      <div className="relative w-full max-w-lg md:max-w-xl mx-auto p-6 md:p-7 rounded-2xl bg-black/60 border border-white/10 shadow-lg">
+        <div className="text-center text-lg md:text-xl font-semibold">¿Cuál es tu nombre?</div>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Escribe tu nombre"
-          className="mt-3 w-full rounded-md bg-neutral-900/70 border border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-400"
+          className="mt-4 w-full rounded-md bg-neutral-900/70 border border-neutral-700 px-4 py-3 text-base focus:outline-none focus:ring-1 focus:ring-cyan-400"
           aria-label="Nombre"
         />
         <div className="mt-4">
-          <div className="h-1.5 w-full rounded-full bg-neutral-700">
+          <div className="h-2.5 md:h-3 w-full rounded-full bg-neutral-700">
             <div className="h-full rounded-full bg-cyan-400" style={{ width: `${Math.round(uiProgress * 100)}%` }} />
           </div>
-          <div className="mt-2 text-xs text-neutral-300">Precargando… {Math.round(uiProgress * 100)}%</div>
+          <div className="mt-2 text-sm md:text-base text-neutral-300">Precargando… {Math.round(uiProgress * 100)}%</div>
         </div>
         {ready && (
           <button
             type="button"
-            className="mt-5 w-full rounded-md bg-neutral-100 text-black font-bold py-2.5 hover:bg-white/90"
+            className="mt-6 w-full rounded-md bg-neutral-100 text-black font-bold py-3.5 md:py-4 text-base hover:bg-white/90"
             onClick={start}
           >
             ¿Comenzamos?
