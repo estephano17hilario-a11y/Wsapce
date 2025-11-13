@@ -52,7 +52,6 @@ export default function CosmicBackground() {
     let t = 0
     let raf = 0
     let running = false
-    let isInView = false
     let parallaxX = 0
     let parallaxY = 0
     let started = false
@@ -167,19 +166,14 @@ export default function CosmicBackground() {
     }
     canvas.addEventListener('mousemove', onMove, { passive: true })
 
-    // iniciar cuando la sección Wspace entre en vista, luego mantener
-    const anchor = document.getElementById('wspace-start')
-    const io = new IntersectionObserver(([entry]) => {
-      isInView = entry.isIntersecting
-      if (isInView && !started) {
-        started = true
-        running = true
-        // Activar fondo con transición suave y opacidad reducida ~25%
-        canvas.style.opacity = '0.85'
-        if (!raf) raf = requestAnimationFrame(render)
-      }
-    }, { root: null, threshold: 0.2 })
-    if (anchor) io.observe(anchor)
+    const onStartCosmic = () => {
+      if (started) return
+      started = true
+      running = true
+      canvas.style.opacity = '0.85'
+      if (!raf) raf = requestAnimationFrame(render)
+    }
+    window.addEventListener('start_cosmic', onStartCosmic)
 
     const onVisibility = () => {
       // si ya empezó, pausa animación cuando pestaña esté oculta
@@ -208,7 +202,7 @@ export default function CosmicBackground() {
       canvas.removeEventListener('mousemove', onMove)
       document.removeEventListener('visibilitychange', onVisibility)
       window.removeEventListener('resize', onResize)
-      io.disconnect()
+      window.removeEventListener('start_cosmic', onStartCosmic)
     }
   }, [])
 

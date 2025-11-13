@@ -1,6 +1,6 @@
 'use client';
 
-import { useLayoutEffect, useRef } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Image from 'next/image';
@@ -22,6 +22,7 @@ export default function CinematicScroll() {
   const scene5Ref = useRef<HTMLDivElement>(null);
   const scene6Ref = useRef<HTMLDivElement>(null);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
+  const initGuardRef = useRef<boolean>(false);
 
   // Referencias para textos
   const text1Ref = useRef<HTMLDivElement>(null);
@@ -30,8 +31,33 @@ export default function CinematicScroll() {
   const text4Ref = useRef<HTMLDivElement>(null);
   const text5Ref = useRef<HTMLDivElement>(null);
   const completionReportedRef = useRef<boolean>(false);
+  const [ctaRipple, setCtaRipple] = useState(false)
+
+  const scrollToIdSlow = (id: string, duration = 2500) => {
+    if (typeof window === 'undefined') return
+    const el = document.getElementById(id)
+    if (!el) return
+    const startY = window.scrollY || window.pageYOffset
+    const rect = el.getBoundingClientRect()
+    const targetY = rect.top + startY
+    const start = performance.now()
+    const ease = (t: number) => (t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2)
+    const tick = (now: number) => {
+      const elapsed = now - start
+      const ratio = Math.min(1, elapsed / duration)
+      const eased = ease(ratio)
+      const y = startY + (targetY - startY) * eased
+      window.scrollTo({ top: y })
+      if (ratio < 1) requestAnimationFrame(tick)
+    }
+    requestAnimationFrame(tick)
+  }
 
   useLayoutEffect(() => {
+    try { ScrollTrigger.getAll().forEach(t => t.kill()) } catch {}
+    try { tlRef.current?.kill(); tlRef.current = null } catch {}
+    completionReportedRef.current = false
+    try { window.scrollTo({ top: 0, behavior: 'auto' }) } catch {}
     const onUserStart = () => {
       try {
         window.scrollTo({ top: 0, behavior: 'auto' })
@@ -42,6 +68,8 @@ export default function CinematicScroll() {
         ScrollTrigger.refresh()
       } catch {}
     }
+    if (initGuardRef.current) return
+    initGuardRef.current = true
     const ctx = gsap.context(() => {
       // Cachear imágenes de escenas para evitar querySelector en cada tick
       const img1 = scene1Ref.current?.querySelector('img') as HTMLElement | null
@@ -61,6 +89,10 @@ export default function CinematicScroll() {
       const subtitle4 = text4Ref.current?.querySelector('p') as HTMLElement | null
       const title5 = text5Ref.current?.querySelector('h1') as HTMLElement | null
       const subtitle5 = text5Ref.current?.querySelector('p') as HTMLElement | null
+      const bpMd = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(min-width: 768px)').matches
+      const bpLg = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(min-width: 1024px)').matches
+      const subtitle4TargetY = bpLg ? -120 : bpMd ? -100 : -80
+      const title4TargetY = bpLg ? 20 : bpMd ? 16 : 12
       // Configurar estado inicial de todas las escenas
       gsap.set([scene2Ref.current, scene3Ref.current, scene4Ref.current, scene5Ref.current, scene6Ref.current], { opacity: 0 });
       // Texto de la ESCENA 1 visible desde el inicio (scroll 0)
@@ -131,11 +163,20 @@ export default function CinematicScroll() {
         { opacity: 1, scale: 0.12, duration: 2.6, ease: 'none' },
         "-=0.4"
       )
-      // Texto (Escena 3): efecto CTA para título y subtítulo
+      // Texto (Escena 3): efecto CTA con blur elegante (igual a escena 4)
       .fromTo(text3Ref.current, { opacity: 0 }, { opacity: 1, duration: 0.8, ease: 'power2.out' }, "-=0.8")
-      .add(ctaTitle(title3), "-=0.8")
-      .add(ctaSubtitle(subtitle3), "-=0.7")
-      .add(ctaFadeOut(title3, subtitle3), "+=1.2")
+      .add(ctaTitle(title3, {
+        duration: 2.2,
+        from: { filter: 'blur(32px) brightness(0.82)', letterSpacing: '0.26em', scale: 1.28, y: 60 },
+        to:   { filter: 'blur(0px) brightness(1.05)', y: 0 }
+      }), "-=1.2")
+      .add(ctaSubtitle(subtitle3, {
+        duration: 1.8,
+        from: { filter: 'blur(22px) brightness(0.85)', y: 42 },
+        to:   { filter: 'blur(0px) brightness(1)', y: 0 }
+      }), "-=1.0")
+      .add(ctaFadeOut(title3, null), "+=1.2")
+      .add(ctaFadeOut(null, subtitle3), "-=0.6")
       // Pausa breve antes de salida de Tierra (se detiene un poco)
       .to({}, { duration: 0.3 })
       // Tierra se va un poco antes (sin solape con Espacio)
@@ -164,12 +205,19 @@ export default function CinematicScroll() {
         { opacity: 1, duration: 0.8, ease: 'power2.out' },
         "-=1.4"
       )
-      // Texto: igual al CTA (Wspace) para título y subtítulo (centralizado)
-      .add(ctaTitle(title4), "-=1.2")
-      .add(ctaSubtitle(subtitle4), "-=1.0")
+      // Texto: CTA con blur elegante y brillante
+      .add(ctaTitle(title4, {
+        duration: 2.2,
+        from: { filter: 'blur(32px) brightness(0.82)', letterSpacing: '0.26em', scale: 1.28, y: 60 },
+        to:   { filter: 'blur(0px) brightness(1.05)', y: title4TargetY }
+      }), "-=1.2")
+      .add(ctaSubtitle(subtitle4, {
+        duration: 1.8,
+        from: { filter: 'blur(22px) brightness(0.85)', y: 42 },
+        to:   { filter: 'blur(0px) brightness(1)', y: subtitle4TargetY }
+      }), "-=1.0")
       .add(ctaFadeOut(title4, subtitle4), "+=1.2")
-      // Imagen: salida con más zoom-out + fade out
-      .to(img4, { scale: 0.9, duration: 1.4, ease: 'none' })
+      // Imagen: salida solo con fade out
       .to(img4, { opacity: 0, duration: 0.8, ease: 'power2.in' }, "-=0.6")
       .to(scene4Ref.current, { opacity: 0, duration: 0.8, ease: 'power2.in' }, "-=0.4")
       .call(() => trackEvent('scene_exit', { id: 4 }))
@@ -183,8 +231,8 @@ export default function CinematicScroll() {
       )
       // Imagen: fade in + zoom-out (más agresivo)
       .fromTo(img5,
-        { opacity: 0, scale: 1.45, transformOrigin: 'center center' },
-        { opacity: 1, scale: 1, duration: 2, ease: 'none' },
+        { opacity: 0, scale: 4.8, transformOrigin: 'center center' },
+        { opacity: 1, scale: 1.0, duration: 3.0, ease: 'none' },
         "-=0.4"
       )
       // Texto (Escena 5): efecto CTA para título y subtítulo
@@ -193,7 +241,7 @@ export default function CinematicScroll() {
       .add(ctaSubtitle(subtitle5), "-=0.7")
       .add(ctaFadeOut(title5, subtitle5), "+=1.2")
       // Imagen: fade out y contenedor: solo fade out
-      .to(img5, { opacity: 0, duration: 0.8, ease: 'power2.in' }, "-=0.6")
+      
       .to(scene5Ref.current, { opacity: 0, duration: 0.8, ease: 'power2.in' }, "-=0.4")
       .call(() => trackEvent('scene_exit', { id: 5 }))
       .call(() => { try { window.dispatchEvent(new CustomEvent('after_andromeda')) } catch {} })
@@ -211,12 +259,7 @@ export default function CinematicScroll() {
         { opacity: 1, filter: 'blur(0px)', letterSpacing: '0em', scale: 1, y: 0, duration: 1.8, ease: 'expo.out' },
         "-=1.2"
       )
-      .fromTo(
-        '.cta-subtitle',
-        { opacity: 0, filter: 'blur(10px)', y: 30 },
-        { opacity: 1, filter: 'blur(0px)', y: 0, duration: 1.4, ease: 'power3.out' },
-        "-=1.0"
-      )
+      
       .fromTo(
         '.cta-button',
         { opacity: 0, scale: 0.9, y: 24, filter: 'brightness(0.8) blur(6px)' },
@@ -226,7 +269,7 @@ export default function CinematicScroll() {
       // Mantener la sección Wspace visible por más tiempo sin cambiar visualmente
       .to({}, { duration: 2.5 })
       // Salida: solo fade out para las letras/botón
-      .to(['.cta-title', '.cta-subtitle', '.cta-button'], { opacity: 0, duration: 1, ease: 'power2.in' })
+      .to(['.cta-title', '.cta-button'], { opacity: 0, duration: 1, ease: 'power2.in' })
       .call(() => trackEvent('scene_exit', { id: 6 }));
 
       // Configurar ScrollTrigger con mejor control
@@ -259,7 +302,13 @@ export default function CinematicScroll() {
 
     }, mainContainerRef);
 
-    return () => { window.removeEventListener('user_name_set', onUserStart); ctx.revert(); };
+    return () => { 
+      window.removeEventListener('user_name_set', onUserStart);
+      try { tlRef.current?.kill(); tlRef.current = null } catch {}
+      try { ScrollTrigger.getAll().forEach(t => t.kill()) } catch {}
+      ctx.revert();
+      initGuardRef.current = false
+    };
   }, []);
 
   return (
@@ -331,13 +380,10 @@ export default function CinematicScroll() {
             quality={80}
           />
           <div ref={text3Ref} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full px-6 opacity-0 pointer-events-none">
-            <div className="text-center text-white">
-              <h1 className="text-6xl leading-normal font-bold mb-4 py-2 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent cinematic-text">
-                Elevándose
+            <div className="relative text-center">
+              <h1 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 translate-y-[60px] md:translate-y-[80px] text-6xl md:text-8xl font-black tracking-tight bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent cinematic-text [text-shadow:0_0_20px_rgba(56,189,248,0.85),0_0_10px_rgba(56,189,248,0.6)]">
+                el lienzo perfecto
               </h1>
-              <p className="text-xl opacity-80">
-                Dejando atrás lo conocido
-              </p>
             </div>
           </div>
         </div>
@@ -354,13 +400,13 @@ export default function CinematicScroll() {
             quality={80}
           />
           <div ref={text4Ref} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full px-6 opacity-0 pointer-events-none">
-            <div className="text-center text-white">
-              <h1 className="text-6xl leading-normal font-bold mb-4 py-2 bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent cinematic-text">
-                Atravesando el Cosmos
-              </h1>
-              <p className="text-xl opacity-80">
-                Hacia nuevas dimensiones
+            <div className="relative text-center">
+              <p className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl md:text-3xl text-white [text-shadow:0_0_12px_rgba(255,255,255,0.85),0_0_6px_rgba(255,255,255,0.6)]">
+                Una que no entienda de
               </p>
+              <h1 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-8xl md:text-[10rem] font-black tracking-tight bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent cinematic-text [text-shadow:0_0_22px_rgba(56,189,248,0.9),0_0_10px_rgba(56,189,248,0.7)]">
+                límites
+              </h1>
             </div>
           </div>
         </div>
@@ -368,7 +414,7 @@ export default function CinematicScroll() {
         {/* ESCENA 5: Destino Final */}
         <div ref={scene5Ref} className="absolute inset-0 w-full h-full opacity-0 bg-black">
           <Image
-            src="/andromeda up - copia.webp"
+            src="/andromeda zoom out up (2).webp"
             alt="Destino Final - Andrómeda"
             fill
             className="object-cover object-center scene-image"
@@ -377,13 +423,13 @@ export default function CinematicScroll() {
             quality={80}
           />
           <div ref={text5Ref} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full px-6 opacity-0 pointer-events-none">
-            <div className="text-center text-white">
-              <h1 className="text-6xl leading-normal font-bold mb-4 py-2 bg-gradient-to-r from-yellow-400 to-cyan-400 bg-clip-text text-transparent cinematic-text">
-                Andrómeda
-              </h1>
-              <p className="text-xl opacity-80">
-                El destino final te espera
+            <div className="relative text-center">
+              <p className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -translate-y-[320px] md:-translate-y-[420px] lg:-translate-y-[480px] text-2xl md:text-3xl text-white opacity-95 [text-shadow:0_0_14px_rgba(255,255,255,0.85),0_0_6px_rgba(255,255,255,0.6)]">
+                para construir
               </p>
+              <h1 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 translate-y-[6px] md:translate-y-[8px] text-7xl md:text-9xl font-black tracking-tight bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent cinematic-text [text-shadow:0_0_22px_rgba(56,189,248,0.9),0_0_10px_rgba(56,189,248,0.7)]">
+                tu imperio
+              </h1>
             </div>
           </div>
         </div>
@@ -399,14 +445,25 @@ export default function CinematicScroll() {
             </div>
 
             <div className="relative text-center max-w-3xl">
-              <h1 className="cta-title text-6xl md:text-8xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent cinematic-text">
-                TÚ
+              <h1 className="cta-title wspace-cosmic-title text-7xl md:text-9xl font-extrabold" aria-label="WSPACE">
+                <span className="wspace-letter">W</span>
+                <span className="wspace-letter">S</span>
+                <span className="wspace-letter">P</span>
+                <span className="wspace-letter">A</span>
+                <span className="wspace-letter">C</span>
+                <span className="wspace-letter">E</span>
               </h1>
-              <p className="cta-subtitle mt-6 text-xl md:text-2xl text-white/90">
-                una donde los límites los pongas
-              </p>
-            <Button className="cta-button mt-10 px-8 py-6 text-lg rounded-full glow-cyan">
-              Empezamos
+            <Button
+              className={`cta-button cta-button-premium mt-10 px-8 py-6 text-lg rounded-2xl glow-cyan relative left-3 md:left-5 ${ctaRipple ? 'btn-glow-once btn-glow-once--subtle btn-glow-once--subtle-active' : 'btn-glow-once btn-glow-once--subtle'}`}
+              onClick={() => {
+                setCtaRipple(true)
+                setTimeout(() => setCtaRipple(false), 900)
+                try { window.dispatchEvent(new CustomEvent('start_cosmic')) } catch {}
+                setTimeout(() => scrollToIdSlow('wspace-start', 2600), 1000)
+              }}
+            >
+              Comenzamos
+              {ctaRipple && <span aria-hidden className="once-ripple-subtle once-ripple-subtle--blue" />}
             </Button>
             </div>
           </div>
