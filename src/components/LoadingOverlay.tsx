@@ -164,7 +164,7 @@ export default function LoadingOverlay() {
           </div>
         </div>
       )}
-      {/* frase inicial ahora está arraigada a la Escena 1 del CinematicScroll */}
+      
     </>
   )
 }

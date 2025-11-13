@@ -51,7 +51,9 @@ export default function CinematicScroll() {
       const subtitle5 = text5Ref.current?.querySelector('p') as HTMLElement | null
       // Configurar estado inicial de todas las escenas
       gsap.set([scene2Ref.current, scene3Ref.current, scene4Ref.current, scene5Ref.current, scene6Ref.current], { opacity: 0 });
-      gsap.set([text1Ref.current, text2Ref.current, text3Ref.current, text4Ref.current, text5Ref.current], { opacity: 0, y: 50 });
+      // Texto de la ESCENA 1 visible desde el inicio (scroll 0)
+      gsap.set(text1Ref.current, { opacity: 1, y: 0 });
+      gsap.set([text2Ref.current, text3Ref.current, text4Ref.current, text5Ref.current], { opacity: 0, y: 50 });
 
       // Crear línea de tiempo maestra con suavizado interno
       const tl = gsap.timeline({ smoothChildTiming: true });
@@ -63,10 +65,7 @@ export default function CinematicScroll() {
         { opacity: 1, scale: 4.0, yPercent: 6, transformOrigin: '50% 80%' },
         { opacity: 1, scale: 1, yPercent: 0, duration: 2.2, ease: 'none' }
       )
-      // Texto (Escena 1): efecto CTA para título y subtítulo
-      .fromTo(text1Ref.current, { opacity: 0 }, { opacity: 1, duration: 0.8, ease: 'power2.out' }, "-=0.8")
-      .add(ctaTitle(title1), "-=0.8")
-      .add(ctaSubtitle(subtitle1), "-=0.7")
+      // Texto (Escena 1): ya visible al inicio; sin animación de entrada, solo salida
       .add(ctaFadeOut(title1, subtitle1), "+=1.2")
       // Imagen: fade out al salir de la escena
       .to(img1, { opacity: 0, duration: 0.8, ease: 'power2.in' }, "-=0.6")
@@ -256,13 +255,15 @@ export default function CinematicScroll() {
           />
           <div ref={text1Ref} className="absolute inset-0 flex items-center justify-center opacity-0">
             <div className="text-center text-white">
-              <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent cinematic-text">
+              <h1 className="text-7xl md:text-9xl font-extrabold mb-6 bg-gradient-to-r from-red-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent cinematic-text">
+                forma la historia que siempre quisistes tener
+              </h1>
+              <p className="text-xl md:text-2xl opacity-95 text-white/95">
+                una donde los límites los pongas
+              </p>
+              <h1 className="mt-6 text-6xl md:text-8xl font-extrabold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent cinematic-text">
                 TÚ
               </h1>
-              <p className="text-xl opacity-90">
-                <span className="block text-white/95">una donde los límites los pongas</span>
-                <span className="mt-2 block bg-gradient-to-r from-red-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">forma la historia la historia que siempre quisistee tener</span>
-              </p>
             </div>
           </div>
         </div>
