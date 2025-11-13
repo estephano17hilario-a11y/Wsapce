@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "mcp:add": "npx -y mcp-remote https://mcp.mercadopago.com/mcp --header \"Authorization: Bearer %MERCADOPAGO_ACCESS_TOKEN%\""
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3",
