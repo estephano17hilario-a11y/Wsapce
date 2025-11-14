@@ -1349,6 +1349,23 @@ body {
   100% { opacity: 0; }
 }
 
+.pricing-card--starter { position: relative; }
+.pricing-card--starter::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 16px;
+  pointer-events: none;
+  box-shadow: 0 0 0 2px rgba(253, 224, 71, 0.55), 0 0 22px rgba(253, 224, 71, 0.30);
+  opacity: 0.55;
+  animation: goldGlowPulse 2600ms ease-in-out infinite;
+}
+@keyframes goldGlowPulse {
+  0% { opacity: 0.45; box-shadow: 0 0 0 2px rgba(253,224,71,0.45), 0 0 14px rgba(253,224,71,0.22); }
+  50% { opacity: 0.85; box-shadow: 0 0 0 2px rgba(253,224,71,0.70), 0 0 28px rgba(253,224,71,0.40); }
+  100% { opacity: 0.45; box-shadow: 0 0 0 2px rgba(253,224,71,0.45), 0 0 14px rgba(253,224,71,0.22); }
+}
+
 /* Grupos/Secciones por variante */
 .pricing-group { position: relative; padding-top: 8px; }
 .pricing-group__label {

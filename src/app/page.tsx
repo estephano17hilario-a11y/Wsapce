@@ -4,7 +4,7 @@ const CosmicBackground = dynamic(() => import('@/components/CosmicBackground'))
 const SectionThree = dynamic(() => import('@/components/SectionThree'))
 import HypeSectionClient from '@/components/HypeSectionClient'
 const WarmupHeroSection = dynamic(() => import('@/components/WarmupHeroSection'))
-import PricingSection from '@/components/PricingSection'
+import PricingSectionClient from '@/components/PricingSectionClient'
 const Footer = dynamic(() => import('@/components/Footer'))
 const RankingsSection = dynamic(() => import('@/components/RankingsSection'))
 const PerfPanel = dynamic(() => import('@/components/PerfPanel'))
@@ -18,7 +18,7 @@ export default function Home() {
       <SectionThree />
       <HypeSectionClient />
       <WarmupHeroSection />
-      <PricingSection />
+      <PricingSectionClient />
       <RankingsSection />
       <Footer />
       <PerfPanel />

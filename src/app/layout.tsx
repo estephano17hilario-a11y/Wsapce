@@ -26,8 +26,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="es" translate="no">
       <head>
+        <meta name="google" content="notranslate" />
+        <meta name="format-detection" content="telephone=no" />
         {/* Preload de imágenes críticas para primer render */}
         <link rel="preload" as="image" href="/andromeda up - copia.webp" />
         <link rel="preload" as="image" href="/espacio azul up - copia.webp" />
@@ -49,7 +51,7 @@ export default function RootLayout({
         ) : null}
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black overflow-x-hidden`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black overflow-x-hidden notranslate`}
       >
         <LoadingOverlay />
         <TopGoldTicker />

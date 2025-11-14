@@ -143,15 +143,15 @@ export default function PricingSection() {
   }
 
   return (
-    <section id="pricing" className="relative w-full pt-14 md:pt-18 pb-20 md:pb-24 px-6" suppressHydrationWarning>
+    <section id="pricing" className="relative w-full pt-14 md:pt-18 pb-20 md:pb-24 px-6">
       <div className="relative max-w-7xl mx-auto pricing">
         <div className="text-center">
           <h2 className="text-3xl md:text-5xl font-black tracking-tight shine-text">
-            Choose the Perfect Plan for You
+            Selecciona el plan que te represente
           </h2>
           <p className="mt-3 text-sm md:text-base text-cyan-200/80">
-            Choose a plan that will help you create professional videos with AI quickly
-            and easily. Suitable for personal projects, teamwork and large-scale content.
+            Elige un plan que impulse tu contenido y tu estrategia.
+            Ideal para proyectos personales, trabajo en equipo y comunidades en expansión.
           </p>
         </div>
 
