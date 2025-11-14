@@ -1,5 +1,6 @@
 import { promises as fs } from 'fs'
 import path from 'path'
+import { kv } from '@vercel/kv'
 
 type Plan = 'bronce' | 'plata' | 'oro'
 
@@ -11,6 +12,7 @@ type DB = { users: User[]; links: ReferralLink[]; relations: ReferralRelation[];
 
 const dataDir = process.env.NODE_ENV === 'production' ? path.join('/tmp', 'wspace_data') : path.join(process.cwd(), 'data')
 const dataFile = path.join(dataDir, 'referrals.json')
+const useKV = !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN)
 
 async function ensureFile() {
   try {
@@ -24,12 +26,24 @@ async function ensureFile() {
 }
 
 export async function readDB(): Promise<DB> {
+  if (useKV) {
+    try {
+      const r = await kv.get<DB>('wspace:referrals')
+      if (r) return r
+      const initial: DB = { users: [], links: [], relations: [], config: { ttlDays: 90, inviteLimit: 500 } }
+      await kv.set('wspace:referrals', initial)
+      return initial
+    } catch {}
+  }
   await ensureFile()
   const raw = await fs.readFile(dataFile, 'utf8')
   return JSON.parse(raw) as DB
 }
 
 export async function writeDB(db: DB) {
+  if (useKV) {
+    try { await kv.set('wspace:referrals', db); return } catch {}
+  }
   await fs.mkdir(dataDir, { recursive: true })
   await fs.writeFile(dataFile, JSON.stringify(db, null, 2), 'utf8')
 }
