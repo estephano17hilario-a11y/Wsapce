@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
+const nextConfig: NextConfig & { allowedDevOrigins?: string[] } = {
   reactStrictMode: true,
   poweredByHeader: false,
   compress: true,
@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
   },
+  allowedDevOrigins: ["192.168.18.105"],
   async headers() {
     return [
       {

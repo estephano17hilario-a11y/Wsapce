@@ -2,9 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react"
 import clsx from 'clsx'
-import { trackEvent } from '@/lib/analytics'
-
-type BillingCycle = "monthly" | "annually"
+ 
 
 type Plan = {
   id: string
@@ -23,7 +21,6 @@ type Plan = {
 }
 
 export default function PricingSection() {
-  const [cycle, setCycle] = useState<BillingCycle>("monthly")
   const [user, setUser] = useState<{ id: string; email: string; plan: "bronce" | "plata" | "oro" } | null>(null)
   const [bronzeEmail, setBronzeEmail] = useState("")
   const [bronzeRef, setBronzeRef] = useState("")
@@ -150,32 +147,10 @@ export default function PricingSection() {
             Selecciona el plan que te represente
           </h2>
           <p className="mt-3 text-sm md:text-base text-cyan-200/80">
-            Elige un plan que impulse tu contenido y tu estrategia.
-            Ideal para proyectos personales, trabajo en equipo y comunidades en expansión.
+            para forjar un legado, solo una opcion, es la opcion correcta...
           </p>
         </div>
 
-        {/* Toggle Monthly / Annually */}
-        <div className="mt-6 flex justify-end md:justify-end">
-          <div className="pricing-toggle" role="tablist" aria-label="Billing cycle">
-            <button
-              role="tab"
-              aria-selected={cycle === "monthly"}
-              className={`toggle-btn ${cycle === "monthly" ? "is-active" : ""}`}
-              onClick={() => setCycle("monthly")}
-            >
-              Monthly
-            </button>
-            <button
-              role="tab"
-              aria-selected={cycle === "annually"}
-              className={`toggle-btn ${cycle === "annually" ? "is-active" : ""}`}
-              onClick={() => setCycle("annually")}
-            >
-              Annually
-            </button>
-          </div>
-        </div>
 
         {/* Cards */}
         <div className="mt-10 grid gap-6 md:grid-cols-3">
@@ -286,18 +261,16 @@ export default function PricingSection() {
                         if (plan.variant === 'starter') {
                           try {
                             setOroProcessing(true)
-                            const res = await fetch('/api/upgrade', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plan: 'oro' }) })
-                            const data = await res.json()
-                            if (!res.ok) { return }
-                            setUser(data.user)
-                            try {
-                              trackEvent('gold_purchase', { email: data.user?.email })
-                            } catch {}
-                            try {
-                              if (typeof window !== 'undefined') {
-                                window.dispatchEvent(new CustomEvent('gold_purchased', { detail: { email: data.user?.email } }))
-                              }
-                            } catch {}
+                            const r = await fetch('/api/create-payment', { method: 'POST' })
+                            const d = await r.json()
+                            if (!r.ok || !d.id) { return }
+                            const pub = process.env.NEXT_PUBLIC_MP_PUBLIC_KEY || 'APP_USR-442ce80d-80a5-4712-a832-dd98e0b4844e'
+                            type MPCtor = new (publicKey: string, options?: { locale?: string }) => { checkout: (opts: { preference: { id: string }; autoOpen?: boolean }) => void }
+                            const MP = (window as unknown as { MercadoPago?: MPCtor }).MercadoPago
+                            if (typeof MP === 'function') {
+                              const mp = new MP(pub, { locale: 'es-PE' })
+                              mp.checkout({ preference: { id: d.id }, autoOpen: true })
+                            }
                           } catch {}
                           finally { setOroProcessing(false) }
                           return
