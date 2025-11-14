@@ -33,6 +33,7 @@ export default function PricingSection() {
   const [plataGenerating, setPlataGenerating] = useState(false)
   const [plataExpiresAt, setPlataExpiresAt] = useState<number | null>(null)
   const [bronzeFlash, setBronzeFlash] = useState(false)
+  const [oroProcessing, setOroProcessing] = useState(false)
 
   const msg = (code?: string) => {
     switch (code) {
@@ -43,7 +44,7 @@ export default function PricingSection() {
       case 'invite_limit_reached': return 'Límite de invitaciones alcanzado'
       case 'not_authenticated': return 'No autenticado'
       case 'user_not_found': return 'Usuario no encontrado'
-      case 'must_be_bronce': return 'Debes estar en BRONCE para subir a PLATA'
+      case 'must_be_bronce': return 'primero tienes que tener el plan bronce'
       case 'must_be_plata': return 'primero tienes que tener el plan bronce'
       case 'debes_registrarte_en_bronce': return 'primero tienes que tener el plan bronce'
       case 'network_error': return 'Error de red'
@@ -243,14 +244,14 @@ export default function PricingSection() {
                     <button
                       className={
                         plan.variant === 'starter'
-                          ? `btn-glow-once btn-glow-once--subtle cta-premium cta-blink cta-ambient cta-border-wave ${plataGenerating ? 'btn-loading' : ''} px-8 md:px-14 py-5 md:py-6 text-lg md:text-2xl rounded-2xl bg-neutral-900/70 hover:bg-neutral-800/80 text-white shadow-xl relative`
+                          ? `btn-glow-once btn-glow-once--subtle cta-premium cta-blink cta-ambient cta-border-wave ${oroProcessing ? 'btn-loading' : ''} px-8 md:px-14 py-5 md:py-6 text-lg md:text-2xl rounded-2xl bg-neutral-900/70 hover:bg-neutral-800/80 text-white shadow-xl relative`
                           : `pricing-cta ${plan.variant === 'creator' ? 'cta-secondary' : 'cta-primary'} ${plataGenerating ? 'btn-loading' : ''} ${plataLink && plan.variant === 'creator' ? 'opacity-60 cursor-not-allowed' : ''}`
                       }
                       disabled={plan.variant === 'creator' && !!plataLink}
                       onClick={async () => {
-                        setPlataStatus(null)
-                        setPlataLink(null)
                         if (plan.variant === 'creator') {
+                          setPlataStatus(null)
+                          setPlataLink(null)
                           if (plataLink) { return }
                           if (!user) { setPlataStatus({ error: msg('debes_registrarte_en_bronce') }); setBronzeFlash(true); setTimeout(() => setBronzeFlash(false), 1200); return }
                           if (user.plan === 'bronce') {
@@ -275,9 +276,10 @@ export default function PricingSection() {
                         }
                         if (plan.variant === 'starter') {
                           try {
+                            setOroProcessing(true)
                             const res = await fetch('/api/upgrade', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plan: 'oro' }) })
                             const data = await res.json()
-                            if (!res.ok) { setPlataStatus({ error: msg(data.error) }); return }
+                            if (!res.ok) { return }
                             setUser(data.user)
                             try {
                               trackEvent('gold_purchase', { email: data.user?.email })
@@ -287,7 +289,8 @@ export default function PricingSection() {
                                 window.dispatchEvent(new CustomEvent('gold_purchased', { detail: { email: data.user?.email } }))
                               }
                             } catch {}
-                          } catch { setPlataStatus({ error: msg('network_error') }) }
+                          } catch {}
+                          finally { setOroProcessing(false) }
                           return
                         }
                       }}

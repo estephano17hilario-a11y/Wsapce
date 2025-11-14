@@ -52,8 +52,8 @@ export default function CosmicBackground() {
     let t = 0
     let raf = 0
     let running = false
-    let parallaxX = 0
-    let parallaxY = 0
+    const parallaxX = 0
+    const parallaxY = 0
     let started = false
 
     const drawBackground = () => {
@@ -157,14 +157,7 @@ export default function CosmicBackground() {
       raf = requestAnimationFrame(render)
     }
 
-    const onMove = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect()
-      const mx = e.clientX - rect.left
-      const my = e.clientY - rect.top
-      parallaxX = (mx / width - 0.5) * 10
-      parallaxY = (my / height - 0.5) * 10
-    }
-    canvas.addEventListener('mousemove', onMove, { passive: true })
+    
 
     const onStartCosmic = () => {
       if (started) return
@@ -199,7 +192,6 @@ export default function CosmicBackground() {
 
     return () => {
       cancelAnimationFrame(raf)
-      canvas.removeEventListener('mousemove', onMove)
       document.removeEventListener('visibilitychange', onVisibility)
       window.removeEventListener('resize', onResize)
       window.removeEventListener('start_cosmic', onStartCosmic)

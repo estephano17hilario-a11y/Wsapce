@@ -1,80 +1,8 @@
 'use client'
 
-import React, { useRef } from 'react'
+import React from 'react'
 
 export default function HypeSection() {
-  const secretRef = useRef<HTMLDivElement>(null)
-  const frameRef = useRef<number | null>(null)
-  const tiltRef = useRef({ rx: 0, ry: 0, scale: 1 })
-
-  const schedule = () => {
-    if (frameRef.current != null) return
-    frameRef.current = requestAnimationFrame(() => {
-      const el = secretRef.current
-      if (!el) return
-      const { rx, ry, scale } = tiltRef.current
-      el.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg) scale(${scale})`
-      frameRef.current = null
-    })
-  }
-
-  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    const el = secretRef.current
-    if (!el) return
-    const rect = el.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
-    const rx = -((y - rect.height / 2) / rect.height) * 20
-    const ry = ((x - rect.width / 2) / rect.width) * 24
-    tiltRef.current.rx = rx
-    tiltRef.current.ry = ry
-    tiltRef.current.scale = 1.02
-    schedule()
-  }
-
-  const resetTilt = () => {
-    tiltRef.current = { rx: 0, ry: 0, scale: 1 }
-    schedule()
-  }
-
-  const handlePointerEnter = () => {
-    const el = secretRef.current
-    if (!el) return
-    tiltRef.current.scale = 1.03
-    schedule()
-  }
-
-  // Tilt genérico para elementos (e.currentTarget)
-  const rafGuardRef = useRef<number | null>(null)
-  const lastEventRef = useRef<{ el: HTMLDivElement; x: number; y: number } | null>(null)
-  const handlePointerMoveElement = (e: React.PointerEvent<HTMLDivElement>) => {
-    const el = e.currentTarget as HTMLDivElement
-    const rect = el.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
-    lastEventRef.current = { el, x, y }
-    if (rafGuardRef.current == null) {
-      rafGuardRef.current = requestAnimationFrame(() => {
-        const evt = lastEventRef.current
-        if (evt) {
-          const rx = -((evt.y - el.clientHeight / 2) / el.clientHeight) * 18
-          const ry = ((evt.x - el.clientWidth / 2) / el.clientWidth) * 22
-          evt.el.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1.04)`
-        }
-        rafGuardRef.current = null
-      })
-    }
-  }
-
-  const handlePointerEnterElement = (e: React.PointerEvent<HTMLDivElement>) => {
-    const el = e.currentTarget as HTMLDivElement
-    el.style.transform = `perspective(800px) rotateX(0deg) rotateY(0deg) scale(1.06)`
-  }
-
-  const resetTiltElement = (e: React.PointerEvent<HTMLDivElement>) => {
-    const el = e.currentTarget as HTMLDivElement
-    el.style.transform = `perspective(800px) rotateX(0deg) rotateY(0deg) scale(1)`
-  }
 
   const features = [
     { emoji: '🌐', title: 'CHAT GLOBAL', cat: 'Comunidad', catClass: 'cat-comunidad', desc: 'Chat en tiempo real en diferentes canales, incluyendo al chat global' },
@@ -128,15 +56,9 @@ export default function HypeSection() {
               {/* Columna: Secreto */}
               <div className="flex justify-center">
                 <div
-                  ref={secretRef}
-                  className="relative lux-card lux-card--soft lux-card--dark lux-card--gold-ring tilt-3d p-6 hype-secret hype-secret--minimal secret-supernova feature-card max-w-[780px] w-full text-center"
+                  className="relative lux-card lux-card--soft lux-card--dark lux-card--gold-ring p-6 hype-secret hype-secret--minimal secret-supernova feature-card max-w-[780px] w-full text-center"
                   data-emoji="❓"
-                  onPointerEnter={handlePointerEnter}
-                  onPointerMove={handlePointerMove}
-                  onPointerLeave={resetTilt}
-                  onPointerCancel={resetTilt}
-                  onPointerDown={(e) => { try { secretRef.current?.setPointerCapture(e.pointerId) } catch {} }}
-                  onPointerUp={(e) => { try { secretRef.current?.releasePointerCapture(e.pointerId) } catch {} }}
+                  
                 >
                   {/* Overlays ligeros y elegantes */}
                   <span className="inner-lights inner-lights--gold" aria-hidden />
@@ -160,13 +82,8 @@ export default function HypeSection() {
               {/* Columna: anuncio app */}
               <div className="flex justify-center">
                 <div
-                  className="relative lux-card lux-card--soft lux-card--dark lux-card--blue-border p-6 max-w-[780px] w-full text-center tilt-3d"
-                  onPointerEnter={handlePointerEnterElement}
-                  onPointerMove={handlePointerMoveElement}
-                  onPointerLeave={resetTiltElement}
-                  onPointerCancel={resetTiltElement}
-                  onPointerDown={(e) => { try { (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId) } catch {} }}
-                  onPointerUp={(e) => { try { (e.currentTarget as HTMLDivElement).releasePointerCapture(e.pointerId) } catch {} }}
+                  className="relative lux-card lux-card--soft lux-card--dark lux-card--blue-border p-6 max-w-[780px] w-full text-center"
+                  
                 >
                   <span className="inner-lights inner-lights--blue" aria-hidden />
                   <span className="nebula-soft" aria-hidden />
@@ -191,26 +108,16 @@ export default function HypeSection() {
 
                     {/* Mini teléfonos estilizados */}
                     <div
-                      className="relative w-9 h-16 rounded-2xl border border-neutral-700/60 bg-neutral-950/60 shadow-lg overflow-hidden tilt-3d"
-                      onPointerEnter={handlePointerEnterElement}
-                      onPointerMove={handlePointerMoveElement}
-                      onPointerLeave={resetTiltElement}
-                      onPointerCancel={resetTiltElement}
-                      onPointerDown={(e) => { try { (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId) } catch {} }}
-                      onPointerUp={(e) => { try { (e.currentTarget as HTMLDivElement).releasePointerCapture(e.pointerId) } catch {} }}
+                      className="relative w-9 h-16 rounded-2xl border border-neutral-700/60 bg-neutral-950/60 shadow-lg overflow-hidden"
+                      
                     >
                       <div className="absolute inset-0 bg-gradient-to-b from-neutral-800/30 to-neutral-900/40" />
                       <div className="absolute top-1 left-1/2 -translate-x-1/2 w-5 h-1.5 rounded-full bg-neutral-600/70" />
                       <div className="absolute inset-0 pointer-events-none"><span className="stars-soft" aria-hidden /></div>
                     </div>
                     <div
-                      className="relative w-9 h-16 rounded-2xl border border-neutral-700/60 bg-neutral-950/60 shadow-lg overflow-hidden tilt-3d"
-                      onPointerEnter={handlePointerEnterElement}
-                      onPointerMove={handlePointerMoveElement}
-                      onPointerLeave={resetTiltElement}
-                      onPointerCancel={resetTiltElement}
-                      onPointerDown={(e) => { try { (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId) } catch {} }}
-                      onPointerUp={(e) => { try { (e.currentTarget as HTMLDivElement).releasePointerCapture(e.pointerId) } catch {} }}
+                      className="relative w-9 h-16 rounded-2xl border border-neutral-700/60 bg-neutral-950/60 shadow-lg overflow-hidden"
+                      
                     >
                       <div className="absolute inset-0 bg-gradient-to-b from-neutral-800/30 to-neutral-900/40" />
                       <div className="absolute top-1 left-1/2 -translate-x-1/2 w-5 h-1.5 rounded-full bg-neutral-600/70" />
