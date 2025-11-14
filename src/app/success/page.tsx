@@ -1,8 +1,8 @@
 "use client"
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 
-export default function Page() {
+function VerifyPayment() {
   const sp = useSearchParams()
   const [status, setStatus] = useState<string | null>(null)
   const [upgraded, setUpgraded] = useState(false)
@@ -23,11 +23,21 @@ export default function Page() {
   }, [sp])
 
   return (
+    <>
+      <p className="mt-3 text-sm md:text-base text-cyan-200/80">{status === 'approved' ? 'Tu compra fue aprobada.' : checked ? 'Verificando tu pago...' : ''}</p>
+      <div className="mt-2 text-xs md:text-sm text-cyan-200/80">{upgraded ? 'Tu cuenta fue ascendida a ORO.' : status === 'approved' ? 'Tu cuenta se actualizará en breve.' : ''}</div>
+    </>
+  )
+}
+
+export default function Page() {
+  return (
     <main className="min-h-screen grid place-items-center bg-black text-white">
       <div className="text-center">
         <h1 className="text-3xl md:text-5xl font-black tracking-tight">¡BIENVENIDO A LA ÉLITE!</h1>
-        <p className="mt-3 text-sm md:text-base text-cyan-200/80">{status === 'approved' ? 'Tu compra fue aprobada.' : checked ? 'Verificando tu pago...' : ''}</p>
-        <div className="mt-2 text-xs md:text-sm text-cyan-200/80">{upgraded ? 'Tu cuenta fue ascendida a ORO.' : status === 'approved' ? 'Tu cuenta se actualizará en breve.' : ''}</div>
+        <Suspense fallback={<p className="mt-3 text-sm md:text-base text-cyan-200/80">Verificando tu pago…</p>}>
+          <VerifyPayment />
+        </Suspense>
       </div>
     </main>
   )
