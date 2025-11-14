@@ -2,7 +2,7 @@ import dynamic from 'next/dynamic'
 const CinematicScroll = dynamic(() => import('@/components/CinematicScroll'))
 const CosmicBackground = dynamic(() => import('@/components/CosmicBackground'))
 const SectionThree = dynamic(() => import('@/components/SectionThree'))
-const HypeSection = dynamic(() => import('@/components/HypeSection'))
+import HypeSectionClient from '@/components/HypeSectionClient'
 const WarmupHeroSection = dynamic(() => import('@/components/WarmupHeroSection'))
 import PricingSection from '@/components/PricingSection'
 const Footer = dynamic(() => import('@/components/Footer'))
@@ -16,7 +16,7 @@ export default function Home() {
       {/* Fondo cósmico fullscreen: inicia al entrar la sección Wspace */}
       <CosmicBackground />
       <SectionThree />
-      <HypeSection />
+      <HypeSectionClient />
       <WarmupHeroSection />
       <PricingSection />
       <RankingsSection />
