@@ -32,6 +32,7 @@ export default function PricingSection() {
   const [plataExpiresAt, setPlataExpiresAt] = useState<number | null>(null)
   const [bronzeFlash, setBronzeFlash] = useState(false)
   const [oroProcessing, setOroProcessing] = useState(false)
+  const [oroStatus, setOroStatus] = useState<{ ok?: boolean; error?: string } | null>(null)
 
   const msg = (code?: string) => {
     switch (code) {
@@ -261,15 +262,20 @@ export default function PricingSection() {
                         if (plan.variant === 'starter') {
                           try {
                             setOroProcessing(true)
+                            setOroStatus(null)
                             const r = await fetch('/api/create-payment', { method: 'POST' })
-                            const d = await r.json()
-                            if (!r.ok || !d.id) { return }
+                            let d: unknown = null
+                            try { d = await r.json() } catch {}
+                            const id = (d as { id?: string } | null)?.id
+                            const err = (d as { error?: string } | null)?.error
+                            if (!r.ok || !id) { setOroStatus({ error: msg(err || 'network_error') }); return }
                             const pub = process.env.NEXT_PUBLIC_MP_PUBLIC_KEY || 'APP_USR-442ce80d-80a5-4712-a832-dd98e0b4844e'
                             type MPCtor = new (publicKey: string, options?: { locale?: string }) => { checkout: (opts: { preference: { id: string }; autoOpen?: boolean }) => void }
                             const MP = (window as unknown as { MercadoPago?: MPCtor }).MercadoPago
                             if (typeof MP === 'function') {
                               const mp = new MP(pub, { locale: 'es-PE' })
-                              mp.checkout({ preference: { id: d.id }, autoOpen: true })
+                               mp.checkout({ preference: { id }, autoOpen: true })
+                              setOroStatus({ ok: true })
                             }
                           } catch {}
                           finally { setOroProcessing(false) }
@@ -313,6 +319,7 @@ export default function PricingSection() {
                       </div>
                     )}
                     {plan.variant === 'creator' && plataStatus?.error && <div className="alert-bad mt-2">{plataStatus.error}</div>}
+                    {plan.variant === 'starter' && oroStatus?.error && <div className="alert-bad mt-2">{oroStatus.error}</div>}
                   </div>
                 )}
 

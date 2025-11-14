@@ -49,7 +49,7 @@ export default function RootLayout({
             src="https://plausible.io/js/script.tagged-events.js"
           />
         ) : null}
-        <Script src="https://sdk.mercadopago.com/js/v2" />
+        <Script src="https://sdk.mercadopago.com/js/v2" strategy="beforeInteractive" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black overflow-x-hidden notranslate`}
