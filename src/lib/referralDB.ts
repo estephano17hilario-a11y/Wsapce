@@ -9,7 +9,7 @@ export type ReferralRelation = { referrerId: string; refereeId: string; code: st
 
 type DB = { users: User[]; links: ReferralLink[]; relations: ReferralRelation[]; config: { ttlDays: number; inviteLimit: number } }
 
-const dataDir = path.join(process.cwd(), 'data')
+const dataDir = process.env.NODE_ENV === 'production' ? path.join('/tmp', 'wspace_data') : path.join(process.cwd(), 'data')
 const dataFile = path.join(dataDir, 'referrals.json')
 
 async function ensureFile() {
@@ -18,6 +18,7 @@ async function ensureFile() {
     await fs.access(dataFile)
   } catch {
     const initial: DB = { users: [], links: [], relations: [], config: { ttlDays: 90, inviteLimit: 500 } }
+    await fs.mkdir(dataDir, { recursive: true })
     await fs.writeFile(dataFile, JSON.stringify(initial, null, 2), 'utf8')
   }
 }
@@ -29,6 +30,7 @@ export async function readDB(): Promise<DB> {
 }
 
 export async function writeDB(db: DB) {
+  await fs.mkdir(dataDir, { recursive: true })
   await fs.writeFile(dataFile, JSON.stringify(db, null, 2), 'utf8')
 }
 
