@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useEffect, useMemo, useState } from "react"
+import clsx from 'clsx'
 import { trackEvent } from '@/lib/analytics'
 
 type BillingCycle = "monthly" | "annually"
@@ -244,8 +245,16 @@ export default function PricingSection() {
                     <button
                       className={
                         plan.variant === 'starter'
-                          ? `btn-glow-once btn-glow-once--subtle cta-premium cta-blink cta-ambient cta-border-wave ${oroProcessing ? 'btn-loading' : ''} px-8 md:px-14 py-5 md:py-6 text-lg md:text-2xl rounded-2xl bg-neutral-900/70 hover:bg-neutral-800/80 text-white shadow-xl relative`
-                          : `pricing-cta ${plan.variant === 'creator' ? 'cta-secondary' : 'cta-primary'} ${plataGenerating ? 'btn-loading' : ''} ${plataLink && plan.variant === 'creator' ? 'opacity-60 cursor-not-allowed' : ''}`
+                          ? clsx(
+                              'btn-glow-once btn-glow-once--subtle cta-premium cta-blink cta-ambient cta-border-wave px-8 md:px-14 py-5 md:py-6 text-lg md:text-2xl rounded-2xl bg-neutral-900/70 hover:bg-neutral-800/80 text-white shadow-xl relative',
+                              { 'btn-loading': oroProcessing }
+                            )
+                          : clsx(
+                              'pricing-cta',
+                              plan.variant === 'creator' ? 'cta-secondary' : 'cta-primary',
+                              { 'btn-loading': plan.variant === 'creator' && plataGenerating },
+                              { 'opacity-60 cursor-not-allowed': plan.variant === 'creator' && !!plataLink }
+                            )
                       }
                       disabled={plan.variant === 'creator' && !!plataLink}
                       onClick={async () => {
@@ -295,7 +304,7 @@ export default function PricingSection() {
                         }
                       }}
                       >
-                      {plataGenerating ? 'Generando enlace…' : plan.ctaLabel}
+                      {plan.variant === 'creator' ? (plataGenerating ? 'Generando enlace…' : plan.ctaLabel) : plan.ctaLabel}
                       {plan.variant === 'starter' && (
                         <span aria-hidden className="cta-stars" />
                       )}
@@ -314,13 +323,13 @@ export default function PricingSection() {
                         {user?.plan === 'plata' ? 'Tu plan: PLATA' : user?.plan === 'bronce' ? 'Tu plan: BRONCE (se requiere subir a PLATA para generar link)' : 'Regístrate en BRONCE para continuar'}
                       </div>
                     )}
-                    {plataGenerating && (
+                    {plan.variant === 'creator' && plataGenerating && (
                       <div className="mt-3 text-xs">
                         <div className="loading-dots" />
                         <div className="text-cyan-200/80 mt-1">Generando tu enlace único…</div>
                       </div>
                     )}
-                    {plataLink && (
+                    {plan.variant === 'creator' && plataLink && (
                       <div className="mt-3 text-xs">
                         <div className="text-emerald-300">Enlace generado:</div>
                         <div className="break-all text-cyan-200/90">{plataLink}</div>
