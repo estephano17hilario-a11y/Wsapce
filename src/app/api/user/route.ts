@@ -7,5 +7,10 @@ export async function GET() {
   const store = await cookies()
   const uid = decodeSession(store.get('wspace_sess')?.value) || store.get('wspace_uid')?.value || ''
   const user = uid ? await getUserById(uid) : null
-  return NextResponse.json({ user })
+  return new NextResponse(JSON.stringify({ user }), {
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'private, no-store'
+    }
+  })
 }

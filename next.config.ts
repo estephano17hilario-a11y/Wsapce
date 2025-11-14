@@ -17,6 +17,20 @@ const nextConfig: NextConfig = {
           { key: "Cache-Control", value: "public, immutable, max-age=31536000" },
         ],
       },
+      {
+        // Cache para assets generados por Next
+        source: "/_next/static/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, immutable, max-age=31536000" },
+        ],
+      },
+      {
+        // Cache moderado para fuentes
+        source: "/:path*.(woff|woff2|ttf|otf)",
+        headers: [
+          { key: "Cache-Control", value: "public, immutable, max-age=31536000" },
+        ],
+      },
     ]
   },
   compiler: {

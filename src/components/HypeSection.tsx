@@ -45,14 +45,25 @@ export default function HypeSection() {
   }
 
   // Tilt genérico para elementos (e.currentTarget)
+  const rafGuardRef = useRef<number | null>(null)
+  const lastEventRef = useRef<{ el: HTMLDivElement; x: number; y: number } | null>(null)
   const handlePointerMoveElement = (e: React.PointerEvent<HTMLDivElement>) => {
     const el = e.currentTarget as HTMLDivElement
     const rect = el.getBoundingClientRect()
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
-    const rx = -((y - rect.height / 2) / rect.height) * 18
-    const ry = ((x - rect.width / 2) / rect.width) * 22
-    el.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1.04)`
+    lastEventRef.current = { el, x, y }
+    if (rafGuardRef.current == null) {
+      rafGuardRef.current = requestAnimationFrame(() => {
+        const evt = lastEventRef.current
+        if (evt) {
+          const rx = -((evt.y - el.clientHeight / 2) / el.clientHeight) * 18
+          const ry = ((evt.x - el.clientWidth / 2) / el.clientWidth) * 22
+          evt.el.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1.04)`
+        }
+        rafGuardRef.current = null
+      })
+    }
   }
 
   const handlePointerEnterElement = (e: React.PointerEvent<HTMLDivElement>) => {

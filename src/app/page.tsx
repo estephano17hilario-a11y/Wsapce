@@ -1,11 +1,13 @@
-import CinematicScroll from '@/components/CinematicScroll';
-import CosmicBackground from '@/components/CosmicBackground';
-import SectionThree from '@/components/SectionThree';
-import HypeSection from '@/components/HypeSection';
-import WarmupHeroSection from '@/components/WarmupHeroSection';
-import PricingSection from '@/components/PricingSection';
-import Footer from '@/components/Footer';
-import RankingsSection from '@/components/RankingsSection';
+import dynamic from 'next/dynamic'
+const CinematicScroll = dynamic(() => import('@/components/CinematicScroll'))
+const CosmicBackground = dynamic(() => import('@/components/CosmicBackground'))
+const SectionThree = dynamic(() => import('@/components/SectionThree'))
+const HypeSection = dynamic(() => import('@/components/HypeSection'))
+const WarmupHeroSection = dynamic(() => import('@/components/WarmupHeroSection'))
+import PricingSection from '@/components/PricingSection'
+const Footer = dynamic(() => import('@/components/Footer'))
+const RankingsSection = dynamic(() => import('@/components/RankingsSection'))
+const PerfPanel = dynamic(() => import('@/components/PerfPanel'))
 
 export default function Home() {
   return (
@@ -19,6 +21,7 @@ export default function Home() {
       <PricingSection />
       <RankingsSection />
       <Footer />
+      <PerfPanel />
   </main>
   );
 }

@@ -32,6 +32,7 @@ export default function PricingSection() {
   const [plataStatus, setPlataStatus] = useState<{ ok?: boolean; error?: string } | null>(null)
   const [plataGenerating, setPlataGenerating] = useState(false)
   const [plataExpiresAt, setPlataExpiresAt] = useState<number | null>(null)
+  const [bronzeFlash, setBronzeFlash] = useState(false)
 
   const msg = (code?: string) => {
     switch (code) {
@@ -43,7 +44,8 @@ export default function PricingSection() {
       case 'not_authenticated': return 'No autenticado'
       case 'user_not_found': return 'Usuario no encontrado'
       case 'must_be_bronce': return 'Debes estar en BRONCE para subir a PLATA'
-      case 'must_be_plata': return 'Debes ser PLATA para generar enlace'
+      case 'must_be_plata': return 'primero tienes que tener el plan bronce'
+      case 'debes_registrarte_en_bronce': return 'primero tienes que tener el plan bronce'
       case 'network_error': return 'Error de red'
       default: return code || 'Error'
     }
@@ -63,6 +65,23 @@ export default function PricingSection() {
 
   const plans: Plan[] = useMemo(
     () => [
+      {
+        id: "recluta-bronce",
+        name: "RECLUTA DE BRONCE",
+        priceMonthly: 0,
+        priceText: "GRATIS (SOLO REGISTRO)",
+        priceSuffix: "",
+        limitsTitle: "",
+        featuresTitle: "TU VENTAJA",
+        limits: [],
+        features: [
+          "✅ ¡ACCESO ESTÁNDAR: 8 HORAS ANTES!",
+          "✅ ¡ENTRA ANTES QUE EL PÚBLICO GENERAL!",
+          "✅ Insignia de BRONCE",
+        ],
+        ctaLabel: "Solo me registro...",
+        variant: "enterprise",
+      },
       {
         id: "fundador-oro",
         name: "FUNDADOR DE ORO",
@@ -99,23 +118,6 @@ export default function PricingSection() {
         ctaLabel: "Pagar con Sangre (Generar mi Link)",
         variant: "creator",
       },
-      {
-        id: "recluta-bronce",
-        name: "RECLUTA DE BRONCE",
-        priceMonthly: 0,
-        priceText: "GRATIS (SOLO REGISTRO)",
-        priceSuffix: "",
-        limitsTitle: "",
-        featuresTitle: "TU VENTAJA",
-        limits: [],
-        features: [
-          "✅ ¡ACCESO ESTÁNDAR: 8 HORAS ANTES!",
-          "✅ ¡ENTRA ANTES QUE EL PÚBLICO GENERAL!",
-          "✅ Insignia de BRONCE",
-        ],
-        ctaLabel: "Solo me registro...",
-        variant: "enterprise",
-      },
     ],
     []
   )
@@ -139,7 +141,7 @@ export default function PricingSection() {
   }
 
   return (
-    <section id="pricing" className="relative w-full py-20 md:py-28 px-6">
+    <section id="pricing" className="relative w-full pt-14 md:pt-18 pb-20 md:pb-24 px-6" suppressHydrationWarning>
       <div className="relative max-w-7xl mx-auto pricing">
         <div className="text-center">
           <h2 className="text-3xl md:text-5xl font-black tracking-tight shine-text">
@@ -181,7 +183,7 @@ export default function PricingSection() {
                 {variantLabel(plan.variant)}
               </div>
               <article
-                className={`pricing-card pricing-card--${plan.variant} lux-card`}
+                className={`pricing-card pricing-card--${plan.variant} lux-card${plan.variant === 'enterprise' && bronzeFlash ? ' bronze-flash' : ''}`}
               >
               {plan.ribbon && (
                 <div className="corner-badge">{plan.ribbon}</div>
@@ -241,7 +243,7 @@ export default function PricingSection() {
                     <button
                       className={
                         plan.variant === 'starter'
-                          ? `cta-minimal ${plataGenerating ? 'btn-loading' : ''} px-7 md:px-12 py-4 md:py-5 text-base md:text-xl rounded-2xl text-white shadow-xl`
+                          ? `btn-glow-once btn-glow-once--subtle cta-premium cta-blink cta-ambient cta-border-wave ${plataGenerating ? 'btn-loading' : ''} px-8 md:px-14 py-5 md:py-6 text-lg md:text-2xl rounded-2xl bg-neutral-900/70 hover:bg-neutral-800/80 text-white shadow-xl relative`
                           : `pricing-cta ${plan.variant === 'creator' ? 'cta-secondary' : 'cta-primary'} ${plataGenerating ? 'btn-loading' : ''} ${plataLink && plan.variant === 'creator' ? 'opacity-60 cursor-not-allowed' : ''}`
                       }
                       disabled={plan.variant === 'creator' && !!plataLink}
@@ -250,7 +252,7 @@ export default function PricingSection() {
                         setPlataLink(null)
                         if (plan.variant === 'creator') {
                           if (plataLink) { return }
-                          if (!user) { setPlataStatus({ error: 'debes_registrarte_en_bronce' }); return }
+                          if (!user) { setPlataStatus({ error: msg('debes_registrarte_en_bronce') }); setBronzeFlash(true); setTimeout(() => setBronzeFlash(false), 1200); return }
                           if (user.plan === 'bronce') {
                             try {
                               const res = await fetch('/api/upgrade', { method: 'POST' })
@@ -263,7 +265,7 @@ export default function PricingSection() {
                           try {
                             const res = await fetch('/api/referrals/generate', { method: 'POST' })
                             const data = await res.json()
-                            if (!res.ok) { setPlataStatus({ error: msg(data.error) }); return }
+                            if (!res.ok) { setPlataStatus({ error: msg(data.error) }); if (data.error === 'must_be_plata') { setBronzeFlash(true); setTimeout(() => setBronzeFlash(false), 1200) } return }
                             setPlataStatus({ ok: true })
                             setPlataLink(data.link as string)
                             setPlataExpiresAt(typeof data.expiresAt === 'number' ? data.expiresAt : null)
@@ -289,8 +291,20 @@ export default function PricingSection() {
                           return
                         }
                       }}
-                    >
+                      >
                       {plataGenerating ? 'Generando enlace…' : plan.ctaLabel}
+                      {plan.variant === 'starter' && (
+                        <span aria-hidden className="cta-stars" />
+                      )}
+                      {plan.variant === 'starter' && (
+                        <span aria-hidden className="cta-lights-soft" />
+                      )}
+                      {plan.variant === 'starter' && (
+                        <span aria-hidden className="cta-orbits" />
+                      )}
+                      {plan.variant === 'starter' && (
+                        <span aria-hidden className="cta-orbits cta-orbits--gold" />
+                      )}
                     </button>
                     {plan.variant === 'creator' && (
                       <div className="mt-2 text-xs text-cyan-200/80">
@@ -313,7 +327,7 @@ export default function PricingSection() {
                         <div className="text-cyan-200/70 mt-1">Este enlace es único de tu cuenta y queda bloqueado 90 días.</div>
                       </div>
                     )}
-                    {plataStatus?.error && <div className="alert-bad mt-2">{plataStatus.error}</div>}
+                    {plan.variant === 'creator' && plataStatus?.error && <div className="alert-bad mt-2">{plataStatus.error}</div>}
                   </div>
                 )}
 

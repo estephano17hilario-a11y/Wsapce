@@ -10,5 +10,10 @@ export async function GET() {
   const user = await getUserById(uid)
   if (!user) return NextResponse.json({ error: 'user_not_found' }, { status: 404 })
   const stats = await getStatsForUser(uid)
-  return NextResponse.json({ ok: true, stats })
+  return new NextResponse(JSON.stringify({ ok: true, stats }), {
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'private, max-age=30'
+    }
+  })
 }

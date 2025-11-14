@@ -40,11 +40,14 @@ export default function WarmupHeroSection() {
           {/* CTA minimal y accesible */}
           <div className="mt-7">
             <button
-              className={`cta-hero ${ctaBtnActive ? '' : ''} px-10 md:px-16 py-6 md:py-7 text-lg md:text-2xl rounded-2xl text-white shadow-xl`}
+              className={`cta-hero cta-border-wave ${ctaBtnActive ? '' : ''} px-10 md:px-16 py-6 md:py-7 text-lg md:text-2xl rounded-2xl text-white shadow-xl relative`}
               aria-label="¡Sí, quiero mi insignia de emperador!"
               onClick={handleClick}
             >
               ¡Sí, quiero mi insignia de emperador!
+              <span aria-hidden className="cta-stars" />
+              <span aria-hidden className="cta-orbits" />
+              <span aria-hidden className="cta-orbits cta-orbits--gold" />
             </button>
           </div>
 
