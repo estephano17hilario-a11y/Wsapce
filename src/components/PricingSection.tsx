@@ -269,7 +269,7 @@ export default function PricingSection() {
                             const id = (d as { id?: string } | null)?.id
                             const err = (d as { error?: string } | null)?.error
                             if (!r.ok || !id) { setOroStatus({ error: msg(err || 'network_error') }); return }
-                            const pub = process.env.NEXT_PUBLIC_MP_PUBLIC_KEY || 'APP_USR-442ce80d-80a5-4712-a832-dd98e0b4844e'
+                            const pub = process.env.NEXT_PUBLIC_MP_PUBLIC_KEY || process.env.NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY_TEST || process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY_TEST || 'APP_USR-442ce80d-80a5-4712-a832-dd98e0b4844e'
                             type MPCtor = new (publicKey: string, options?: { locale?: string }) => { checkout: (opts: { preference: { id: string }; autoOpen?: boolean }) => void }
                             const MP = (window as unknown as { MercadoPago?: MPCtor }).MercadoPago
                             if (typeof MP === 'function') {

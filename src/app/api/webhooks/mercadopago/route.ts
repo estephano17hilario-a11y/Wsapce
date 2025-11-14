@@ -4,7 +4,7 @@ import { getUserById, upgradeUserToOro } from '@/lib/referralDB'
 
 async function handlePayment(id: string) {
   const env = process.env
-  const accessToken = env.MP_ACCESS_TOKEN || env.MERCADOPAGO_ACCESS_TOKEN || env.MERCADO_PAGO_ACCESS_TOKEN || env.MP_TOKEN || env.MERCADOPAGO_TOKEN
+  const accessToken = env.MP_ACCESS_TOKEN || env.MERCADOPAGO_ACCESS_TOKEN || env.MERCADO_PAGO_ACCESS_TOKEN || env.MP_TOKEN || env.MERCADOPAGO_TOKEN || env.MERCADO_PAGO_ACCESS_TOKEN_TEST || env.MERCADOPAGO_ACCESS_TOKEN_TEST
   if (!accessToken) return { ok: false }
   const client = new MercadoPagoConfig({ accessToken })
   const payment = new Payment(client)
