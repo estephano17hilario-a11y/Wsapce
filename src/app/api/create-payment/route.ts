@@ -6,7 +6,7 @@ import { getUserById } from '@/lib/referralDB'
 
 export async function POST(req: NextRequest) {
   const env = process.env
-  const accessToken = env.MP_ACCESS_TOKEN || env.MERCADOPAGO_ACCESS_TOKEN || env.MERCADO_PAGO_ACCESS_TOKEN || env.MP_TOKEN || env.MERCADOPAGO_TOKEN || env.MERCADO_PAGO_ACCESS_TOKEN_TEST || env.MERCADOPAGO_ACCESS_TOKEN_TEST
+  const accessToken = env.MP_ACCESS_TOKEN || env.MERCADOPAGO_ACCESS_TOKEN || env.MERCADO_PAGO_ACCESS_TOKEN || env.MP_TOKEN || env.MERCADOPAGO_TOKEN || env.MERCADO_PAGO_ACCESS_TOKEN_TEST || env.MERCADOPAGO_ACCESS_TOKEN_TEST || env.MERCADO_PAGO_ACCESS_TOKEN_TES || env.MERCADOPAGO_ACCESS_TOKEN_TES
   if (!accessToken) return NextResponse.json({ error: 'missing_access_token' }, { status: 500 })
   const origin = req.nextUrl.origin
   const currency = process.env.MP_CURRENCY || 'PEN'
