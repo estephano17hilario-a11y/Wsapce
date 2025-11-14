@@ -5,7 +5,8 @@ import { decodeSession } from '@/lib/auth'
 import { getUserById } from '@/lib/referralDB'
 
 export async function POST(req: NextRequest) {
-  const accessToken = process.env.MP_ACCESS_TOKEN || process.env.MERCADOPAGO_ACCESS_TOKEN
+  const env = process.env
+  const accessToken = env.MP_ACCESS_TOKEN || env.MERCADOPAGO_ACCESS_TOKEN || env.MERCADO_PAGO_ACCESS_TOKEN || env.MP_TOKEN || env.MERCADOPAGO_TOKEN
   if (!accessToken) return NextResponse.json({ error: 'missing_access_token' }, { status: 500 })
   const origin = req.nextUrl.origin
   const currency = process.env.MP_CURRENCY || 'PEN'

@@ -6,7 +6,8 @@ import { getUserById, upgradeUserToOro } from '@/lib/referralDB'
 
 export async function GET(req: NextRequest) {
   const id = req.nextUrl.searchParams.get('id') || req.nextUrl.searchParams.get('payment_id') || req.nextUrl.searchParams.get('collection_id')
-  const accessToken = process.env.MP_ACCESS_TOKEN || process.env.MERCADOPAGO_ACCESS_TOKEN
+  const env = process.env
+  const accessToken = env.MP_ACCESS_TOKEN || env.MERCADOPAGO_ACCESS_TOKEN || env.MERCADO_PAGO_ACCESS_TOKEN || env.MP_TOKEN || env.MERCADOPAGO_TOKEN
   if (!accessToken) return new NextResponse(JSON.stringify({ error: 'missing_access_token' }), { status: 500, headers: { 'Content-Type': 'application/json' } })
   if (!id) return new NextResponse(JSON.stringify({ error: 'missing_id' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
 
