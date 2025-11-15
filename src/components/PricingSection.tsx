@@ -269,12 +269,12 @@ export default function PricingSection() {
                             const preferenceId = (d as { preferenceId?: string } | null)?.preferenceId
                             const err = (d as { error?: string } | null)?.error
                             if (!r.ok || !preferenceId) { setOroStatus({ error: msg(err || 'network_error') }); return }
-                            if (!process.env.NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY) { setOroStatus({ error: 'Falta clave pública' }); return }
-                            const pub = process.env.NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY as string
+                            const pub = process.env.NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY ?? document.querySelector('meta[name="mp-public-key"]')?.getAttribute('content') ?? undefined
+                            if (!pub) { setOroStatus({ error: 'Falta clave pública' }); return }
                             type MPCtor = new (publicKey: string, options?: { locale?: string }) => { checkout: (opts: { preference: { id: string } }) => { render: (opts: { container: string; label: string }) => void } }
                             const MP = (window as unknown as { MercadoPago?: MPCtor }).MercadoPago
                             if (typeof MP === 'function') {
-                              const mp = new MP(pub, { locale: 'es-PE' })
+                              const mp = new MP(pub as string, { locale: 'es-PE' })
                                const checkout = mp.checkout({ preference: { id: preferenceId } })
                                checkout.render({ container: '#mp-checkout-gold', label: 'Pagar $1.00 USD' })
                               setOroStatus({ ok: true })

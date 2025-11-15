@@ -30,6 +30,7 @@ export default function RootLayout({
       <head>
         <meta name="google" content="notranslate" />
         <meta name="format-detection" content="telephone=no" />
+        <meta name="mp-public-key" content={process.env.MERCADO_PAGO_PUBLIC_KEY ?? process.env.NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY ?? ''} />
         {/* Preload de imágenes críticas para primer render */}
         <link rel="preload" as="image" href="/andromeda up - copia.webp" />
         <link rel="preload" as="image" href="/espacio azul up - copia.webp" />
