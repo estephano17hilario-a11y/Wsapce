@@ -85,7 +85,7 @@ export default function PricingSection() {
       {
         id: "fundador-oro",
         name: "FUNDADOR DE ORO",
-        priceMonthly: 4.99,
+        priceMonthly: 1.0,
         priceSuffix: "",
         limitsTitle: "",
         featuresTitle: "TU VENTAJA",
@@ -98,7 +98,7 @@ export default function PricingSection() {
           "✅ Discord de Élite (Acceso VIP)",
           "✅ Tu nombre en el Leaderboard",
         ],
-        ctaLabel: "¡FORJAR MI LEGADO [ORO] ($4.99)!",
+        ctaLabel: "¡FUNDADOR DE ORO ($1.00)!",
         variant: "starter",
       },
       {
@@ -266,15 +266,17 @@ export default function PricingSection() {
                             const r = await fetch('/api/create-payment', { method: 'POST' })
                             let d: unknown = null
                             try { d = await r.json() } catch {}
-                            const id = (d as { id?: string } | null)?.id
+                            const preferenceId = (d as { preferenceId?: string } | null)?.preferenceId
                             const err = (d as { error?: string } | null)?.error
-                            if (!r.ok || !id) { setOroStatus({ error: msg(err || 'network_error') }); return }
-                            const pub = process.env.NEXT_PUBLIC_MP_PUBLIC_KEY || process.env.NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY_TEST || process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY_TEST || process.env.NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY_TES || process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY_TES || 'APP_USR-442ce80d-80a5-4712-a832-dd98e0b4844e'
-                            type MPCtor = new (publicKey: string, options?: { locale?: string }) => { checkout: (opts: { preference: { id: string }; autoOpen?: boolean }) => void }
+                            if (!r.ok || !preferenceId) { setOroStatus({ error: msg(err || 'network_error') }); return }
+                            if (!process.env.NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY) { setOroStatus({ error: 'Falta clave pública' }); return }
+                            const pub = process.env.NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY as string
+                            type MPCtor = new (publicKey: string, options?: { locale?: string }) => { checkout: (opts: { preference: { id: string } }) => { render: (opts: { container: string; label: string }) => void } }
                             const MP = (window as unknown as { MercadoPago?: MPCtor }).MercadoPago
                             if (typeof MP === 'function') {
                               const mp = new MP(pub, { locale: 'es-PE' })
-                               mp.checkout({ preference: { id }, autoOpen: true })
+                               const checkout = mp.checkout({ preference: { id: preferenceId } })
+                               checkout.render({ container: '#mp-checkout-gold', label: 'Pagar $1.00 USD' })
                               setOroStatus({ ok: true })
                             }
                           } catch {}
@@ -297,6 +299,9 @@ export default function PricingSection() {
                         <span aria-hidden className="cta-orbits cta-orbits--gold" />
                       )}
                     </button>
+                    {plan.variant === 'starter' && (
+                      <div id="mp-checkout-gold" />
+                    )}
                     {plan.variant === 'creator' && (
                       <div className="mt-2 text-xs text-cyan-200/80">
                         {user?.plan === 'plata' ? 'Tu plan: PLATA' : user?.plan === 'bronce' ? 'Tu plan: BRONCE (se requiere subir a PLATA para generar link)' : 'Regístrate en BRONCE para continuar'}
