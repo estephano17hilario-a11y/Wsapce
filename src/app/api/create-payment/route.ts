@@ -21,9 +21,9 @@ export async function POST(req: NextRequest) {
       body: {
         items: [{ id: 'wspace_gold_pack', title, unit_price: 1.0, quantity: 1, currency_id: 'USD' }],
         back_urls: {
-          success: `${origin}?status=approved`,
-          failure: `${origin}?status=failure`,
-          pending: `${origin}?status=pending`
+          success: `${origin}?status=approved#pricing`,
+          failure: `${origin}?status=failure#pricing`,
+          pending: `${origin}?status=pending#pricing`
         },
         notification_url: `${origin}/api/webhooks/mercadopago`,
         external_reference: uid || 'anon',

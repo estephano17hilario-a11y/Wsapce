@@ -327,6 +327,12 @@ export default function PricingSection() {
                             setOroStatus(null)
                             setOroFlash(true)
                             setTimeout(() => setOroFlash(false), 900)
+                            try {
+                              const overlay = document.createElement('div')
+                              overlay.className = 'web-burst web-burst--gold'
+                              document.body.appendChild(overlay)
+                              window.setTimeout(() => { try { overlay.remove() } catch {} }, 1200)
+                            } catch {}
                             const r = await fetch('/api/create-payment', { method: 'POST' })
                             let d: unknown = null
                             try { d = await r.json() } catch {}
@@ -335,7 +341,12 @@ export default function PricingSection() {
                             const err = (d as { error?: string } | null)?.error
                             if (!r.ok || !preferenceId) { setOroStatus({ error: msg(err || 'network_error') }); return }
                             if (initPoint) {
-                              await new Promise((resolve) => setTimeout(resolve, 450))
+                              try {
+                                const u = new URL(window.location.href)
+                                u.hash = 'pricing'
+                                history.replaceState({}, '', u.toString())
+                              } catch {}
+                              await new Promise((resolve) => setTimeout(resolve, 250))
                               window.location.href = initPoint
                               setOroStatus({ ok: true })
                               return
