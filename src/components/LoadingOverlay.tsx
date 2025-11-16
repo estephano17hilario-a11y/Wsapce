@@ -78,7 +78,8 @@ export default function LoadingOverlay() {
       typedAtRef.current = performance.now()
       if (nameDelayTimerRef.current) { clearTimeout(nameDelayTimerRef.current); nameDelayTimerRef.current = null }
       window.setTimeout(() => setNameDelayOk(false), 0)
-      nameDelayTimerRef.current = window.setTimeout(() => { setNameDelayOk(true) }, 1500)
+      nameDelayTimerRef.current = window.setTimeout(() => { setNameDelayOk(true) }, 600)
+      try { localStorage.setItem('wspace_name', name.trim()) } catch {}
     } else {
       typedAtRef.current = 0
       if (nameDelayTimerRef.current) { clearTimeout(nameDelayTimerRef.current); nameDelayTimerRef.current = null }
@@ -181,7 +182,7 @@ export default function LoadingOverlay() {
     return () => cancelAnimationFrame(r)
   }, [progress, visible])
 
-  const ready = progress >= 1 && timeReady && name.trim().length > 0 && nameDelayOk
+  const ready = timeReady && name.trim().length > 0 && nameDelayOk
 
   const start = () => {
     try {
@@ -210,6 +211,9 @@ export default function LoadingOverlay() {
               placeholder="Escribe tu nombre"
               className="mt-4 w-full rounded-md bg-neutral-900/70 border border-neutral-700 px-4 py-3 text-base focus:outline-none focus:ring-1 focus:ring-cyan-400"
               aria-label="Nombre"
+              autoFocus
+              maxLength={80}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); if (ready) start() } }}
             />
             <div className="mt-1 text-xs md:text-sm text-neutral-400">(luego descubriras el porqué)</div>
             <div className="mt-4">

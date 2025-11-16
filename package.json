@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "eslint . --cache",
     "mcp:add": "npx -y mcp-remote https://mcp.mercadopago.com/mcp --header \"Authorization: Bearer %MERCADOPAGO_ACCESS_TOKEN%\" --header \"X-Caller: wspace_pls\""
   },
   "dependencies": {
