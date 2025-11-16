@@ -67,6 +67,24 @@ export default function PricingSection() {
     return () => window.removeEventListener('user_session_changed', onSess)
   }, [])
 
+  useEffect(() => {
+    if (user?.plan === 'plata' && !plataLink && !plataGenerating) {
+      ;(async () => {
+        try {
+          setPlataGenerating(true)
+          setPlataStatus(null)
+          const res = await fetch('/api/referrals/generate', { method: 'POST' })
+          const data = await res.json()
+          if (!res.ok) { setPlataStatus({ error: msg(data.error) }); return }
+          setPlataStatus({ ok: true })
+          setPlataLink(data.link as string)
+          setPlataExpiresAt(typeof data.expiresAt === 'number' ? data.expiresAt : null)
+        } catch { setPlataStatus({ error: msg('network_error') }) }
+        finally { setPlataGenerating(false) }
+      })()
+    }
+  }, [user?.plan, plataLink, plataGenerating])
+
   async function ensureMercadoPago(): Promise<boolean> {
     try {
       type MPCtor = new (publicKey: string, options?: { locale?: string }) => { checkout: (opts: { preference: { id: string } }) => { render: (opts: { container: string; label: string }) => void } }
@@ -206,16 +224,34 @@ export default function PricingSection() {
   }
 
   return (
-    <section id="pricing" className="relative w-full pt-14 md:pt-18 pb-20 md:pb-24 px-6">
-      <div className="relative max-w-7xl mx-auto pricing">
-        <div className="text-center">
-          <h2 className="text-3xl md:text-5xl font-black tracking-tight shine-text">
-            Selecciona el plan que te represente
-          </h2>
-          <p className="mt-3 text-sm md:text-base text-cyan-200/80">
-            para forjar un legado, solo una opcion, es la opcion correcta...
-          </p>
-        </div>
+  <section id="pricing" className="relative w-full pt-14 md:pt-18 pb-20 md:pb-24 px-6">
+    <div className="relative max-w-7xl mx-auto pricing">
+      <div className="text-center">
+        <h2 className="text-3xl md:text-5xl font-black tracking-tight shine-text">
+          Selecciona el plan que te represente
+        </h2>
+        <p className="mt-3 text-sm md:text-base text-cyan-200/80">
+          para forjar un legado, solo una opcion, es la opcion correcta...
+        </p>
+        {user && (
+          <div className="mt-3 text-xs md:text-sm">
+            <div className="text-emerald-300">Ya te has registrado: <span className="text-cyan-200/90">{user.email}</span></div>
+            {user.plan === 'plata' && (
+              <div className="mt-2">
+                <div className="text-emerald-300">Ya eres PLATA</div>
+                {plataLink ? (
+                  <div className="break-all text-cyan-200/90 mt-1">Tu enlace único: {plataLink}</div>
+                ) : (
+                  <div className="mt-1 text-cyan-200/80">
+                    <div className="loading-dots" />
+                    <div className="mt-1">Generando tu enlace único…</div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
 
         {/* Cards */}
