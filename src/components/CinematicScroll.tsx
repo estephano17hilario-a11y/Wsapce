@@ -471,7 +471,7 @@ export default function CinematicScroll() {
               <p className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl md:text-3xl opacity-95 text-white [text-shadow:0_0_12px_rgba(255,255,255,0.8),0_0_6px_rgba(255,255,255,0.6)]">
                 una donde los límites los pongas
               </p>
-              <h1 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 translate-y-[120px] text-6xl md:text-8xl leading-normal font-extrabold py-2 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent cinematic-text z-10 [text-shadow:0_0_20px_rgba(56,189,248,0.9),0_0_8px_rgba(56,189,248,0.7)]">
+              <h1 className="absolute left-1/2 top-[calc(50%+120px)] -translate-x-1/2 -translate-y-1/2 text-6xl md:text-8xl leading-normal font-extrabold py-2 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent cinematic-text z-10 [text-shadow:0_0_20px_rgba(56,189,248,0.9),0_0_8px_rgba(56,189,248,0.7)]">
                 TÚ
               </h1>
             </div>
@@ -516,7 +516,7 @@ export default function CinematicScroll() {
           />
           <div ref={text3Ref} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full px-6 opacity-0 pointer-events-none">
             <div className="relative text-center">
-              <h1 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 translate-y-[60px] md:translate-y-[80px] text-6xl md:text-8xl font-black tracking-tight bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent cinematic-text [text-shadow:0_0_20px_rgba(56,189,248,0.85),0_0_10px_rgba(56,189,248,0.6)]">
+              <h1 className="absolute left-1/2 top-[calc(50%+60px)] md:top-[calc(50%+80px)] -translate-x-1/2 -translate-y-1/2 text-6xl md:text-8xl font-black tracking-tight bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent cinematic-text [text-shadow:0_0_20px_rgba(56,189,248,0.85),0_0_10px_rgba(56,189,248,0.6)]">
                 el lienzo perfecto
               </h1>
             </div>
@@ -559,10 +559,10 @@ export default function CinematicScroll() {
           />
           <div ref={text5Ref} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full px-6 opacity-0 pointer-events-none">
             <div className="relative text-center">
-              <p className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -translate-y-[320px] md:-translate-y-[420px] lg:-translate-y-[480px] text-2xl md:text-3xl text-white opacity-95 [text-shadow:0_0_14px_rgba(255,255,255,0.85),0_0_6px_rgba(255,255,255,0.6)]">
+              <p className="absolute left-1/2 top-[calc(50%-320px)] md:top-[calc(50%-420px)] lg:top-[calc(50%-480px)] -translate-x-1/2 -translate-y-1/2 text-2xl md:text-3xl text-white opacity-95 [text-shadow:0_0_14px_rgba(255,255,255,0.85),0_0_6px_rgba(255,255,255,0.6)]">
                 para construir
               </p>
-              <h1 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 translate-y-[6px] md:translate-y-[8px] text-7xl md:text-9xl font-black tracking-tight bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent cinematic-text [text-shadow:0_0_22px_rgba(56,189,248,0.9),0_0_10px_rgba(56,189,248,0.7)]">
+              <h1 className="absolute left-1/2 top-[calc(50%+6px)] md:top-[calc(50%+8px)] -translate-x-1/2 -translate-y-1/2 text-7xl md:text-9xl font-black tracking-tight bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent cinematic-text [text-shadow:0_0_22px_rgba(56,189,248,0.9),0_0_10px_rgba(56,189,248,0.7)]">
                 tu imperio
               </h1>
             </div>

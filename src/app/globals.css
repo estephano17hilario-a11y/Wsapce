@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+ 
 
 /* Estilos personalizados para Wspace */
 * {
@@ -922,45 +922,7 @@ body {
   background: linear-gradient(90deg, rgba(34,211,238,0.85), rgba(168,85,247,0.85));
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-}
+ 
 
 :root {
   --radius: 0.625rem;
@@ -1033,10 +995,12 @@ body {
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    border-color: var(--border);
+    outline-color: var(--ring);
   }
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--background);
+    color: var(--foreground);
   }
 }
 /* Optimización de rendering para imágenes en escenas */
@@ -1153,7 +1117,7 @@ body {
 }
 
 /* Variante de botón sutil y elegante para Bandera */
-.btn-glow-once--subtle { }
+.btn-glow-once--subtle { box-shadow: none; }
 .btn-glow-once--subtle-active {
   box-shadow: 0 0 0 1px rgba(56,189,248,0.25), 0 0 12px rgba(56,189,248,0.35);
 }
@@ -1765,20 +1729,20 @@ body {
 }
 
 /* Paletas de nebulosa: sin efecto activo (mantener por compatibilidad) */
-.nebula-cyan   { }
-.nebula-magenta{ }
-.nebula-green  { }
-.nebula-purple { }
-.nebula-gold   { }
-.nebula-silver { }
-.nebula-bronze { }
+.nebula-cyan   { --nebula-placeholder: 0; }
+.nebula-magenta{ --nebula-placeholder: 0; }
+.nebula-green  { --nebula-placeholder: 0; }
+.nebula-purple { --nebula-placeholder: 0; }
+.nebula-gold   { --nebula-placeholder: 0; }
+.nebula-silver { --nebula-placeholder: 0; }
+.nebula-bronze { --nebula-placeholder: 0; }
 
 /* Precio grande para el plan Oro */
 .price-big { font-size: clamp(2.8rem, 5vw, 4rem); line-height: 1; }
 
 /* Integración rápida con CTAs existentes (sin efecto) */
-.pricing-cta.btn-liquid { }
-.cta-primary.btn-liquid, .cta-secondary.btn-liquid { }
+.pricing-cta.btn-liquid { --liquid-placeholder: 0; }
+.cta-primary.btn-liquid, .cta-secondary.btn-liquid { --liquid-placeholder: 0; }
 
 /* Texto ‘liquid glass’ desactivado */
 .text-liquid { color: inherit !important; background: none !important; animation: none !important; text-shadow: none !important; -webkit-background-clip: initial; background-clip: initial; }

@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import LoadingOverlay from "@/components/LoadingOverlay";
 import TopGoldTicker from "@/components/TopGoldTicker";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -52,6 +53,7 @@ export default function RootLayout({
         <LoadingOverlay />
         <TopGoldTicker />
         {children}
+        <SpeedInsights />
       </body>
     </html>
   );
