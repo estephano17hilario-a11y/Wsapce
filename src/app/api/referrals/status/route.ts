@@ -10,11 +10,13 @@ export async function GET() {
     const db = await readDB()
     const links = db.links.filter(l => l.userId === uid)
     if (links.length === 0) {
-      return NextResponse.json({ ok: true, status: 'not_found' })
+      const totalInvites = db.relations.filter(r => r.referrerId === uid).length
+      return NextResponse.json({ ok: true, status: 'not_found', totalInvites })
     }
     const latest = links.slice().sort((a, b) => b.createdAt - a.createdAt)[0]
     const status = latest.lastStatus ?? 'valid'
-    const payload = { ok: true, status, code: latest.code, expiresAt: latest.expiresAt, lastStatus: latest.lastStatus ?? null, lastStatusAt: latest.lastStatusAt ?? null }
+    const totalInvites = db.relations.filter(r => r.referrerId === uid).length
+    const payload = { ok: true, status, code: latest.code, expiresAt: latest.expiresAt, lastStatus: latest.lastStatus ?? null, lastStatusAt: latest.lastStatusAt ?? null, totalInvites }
     return NextResponse.json(payload, { headers: { 'Cache-Control': 'private, max-age=10' } })
   } catch {
     return NextResponse.json({ error: 'server_error' }, { status: 500 })

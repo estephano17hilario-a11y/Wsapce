@@ -32,6 +32,7 @@ export default function PricingSection() {
   const [plataStatus, setPlataStatus] = useState<{ ok?: boolean; error?: string } | null>(null)
   const [plataGenerating, setPlataGenerating] = useState(false)
   const [plataExpiresAt, setPlataExpiresAt] = useState<number | null>(null)
+  const [plataInvites, setPlataInvites] = useState<number>(0)
   const [bronzeFlash, setBronzeFlash] = useState(false)
   const [oroProcessing, setOroProcessing] = useState(false)
   const [oroFlash, setOroFlash] = useState(false)
@@ -83,6 +84,7 @@ export default function PricingSection() {
           setPlataLinkStatus((d?.status || 'unknown') as typeof plataLinkStatus)
           setPlataLink(typeof d?.code === 'string' ? d.code : null)
           setPlataExpiresAt(typeof d?.expiresAt === 'number' ? d.expiresAt : null)
+          setPlataInvites(typeof d?.totalInvites === 'number' ? d.totalInvites : 0)
         } catch { setPlataStatus({ error: msg('network_error') }) }
       })()
     }
@@ -352,8 +354,7 @@ export default function PricingSection() {
                       onClick={async () => {
                         if (plan.variant === 'creator') {
                           setPlataStatus(null)
-                          setPlataLink(null)
-                          if (plataLink) { return }
+                          if (plataLink && plataLinkStatus === 'valid') { return }
                           if (!user) { setPlataStatus({ error: msg('debes_registrarte_en_bronce') }); setBronzeFlash(true); setTimeout(() => setBronzeFlash(false), 1200); return }
                           if (user.plan === 'bronce') {
                             try {
@@ -371,7 +372,7 @@ export default function PricingSection() {
                             const data = await res.json()
                             if (!res.ok) { setPlataStatus({ error: msg(data.error) }); if (data.error === 'must_be_plata') { setBronzeFlash(true); setTimeout(() => setBronzeFlash(false), 1200) } return }
                             setPlataStatus({ ok: true })
-                            setPlataLink(data.link as string)
+                            setPlataLink(typeof data.code === 'string' ? data.code : (data.link as string))
                             setPlataExpiresAt(typeof data.expiresAt === 'number' ? data.expiresAt : null)
                           } catch { setPlataStatus({ error: msg('network_error') }) }
                           finally { setPlataGenerating(false) }
@@ -459,11 +460,12 @@ export default function PricingSection() {
                     {plan.variant === 'creator' && plataLink && plataLinkStatus === 'valid' && (
                       <div className="mt-3 text-xs">
                         <div className="text-emerald-300">Enlace generado:</div>
-                        <div className="break-all text-cyan-200/90">{plataLink}</div>
+                        <div className="break-all text-cyan-200/90">{(() => { try { const u = new URL(window.location.origin); return `${u.origin}/?ref=${plataLink}` } catch { return plataLink } })()}</div>
                         {plataExpiresAt && (
                           <div className="text-cyan-200/70 mt-1">Expira: {new Date(plataExpiresAt).toLocaleDateString()}</div>
                         )}
                         <div className="text-cyan-200/70 mt-1">Este enlace es único de tu cuenta y queda bloqueado 90 días.</div>
+                        <div className="text-cyan-200/70 mt-1">Referidos totales: {plataInvites}</div>
                       </div>
                     )}
                     {plan.variant === 'creator' && plataStatus?.error && <div className="alert-bad mt-2">{plataStatus.error}</div>}
