@@ -129,17 +129,13 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
       ctx.fillRect(0, 0, width, height)
     }
 
-    let parallaxX = 0
-    let parallaxY = 0
+    // sin parallax global; el fondo no responde al cursor
 
     const drawStars = () => {
       for (const s of stars) {
         const a = 0.5 + 0.5 * Math.sin(t * 0.03 + s.p)
         ctx.fillStyle = `rgba(255,255,255,${a})`
-        // Parallax suave según puntero
-        const px = s.x + parallaxX * 0.04 * s.r
-        const py = s.y + parallaxY * 0.04 * s.r
-        ctx.fillRect(px, py, s.r, s.r)
+        ctx.fillRect(s.x, s.y, s.r, s.r)
       }
     }
 
@@ -754,8 +750,7 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
       const mx = e.clientX - rect.left
       const my = e.clientY - rect.top
       hue = (190 + (mx / width) * 120) % 360
-      parallaxX = (mx / width - 0.5) * 6
-      parallaxY = (my / height - 0.5) * 6
+      // sin parallax global: fondo no responde al cursor
       if (paintable) paintColor = `hsl(${(hue + 40) % 360} 90% 65%)`
       if (paintable && isPainting) {
         if (flagMode) applyFlag(mx, my)
@@ -799,10 +794,7 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
     const onEnter = () => {
       // sin cambios de carga en hover
     }
-    const onLeave = () => {
-      parallaxX = 0
-      parallaxY = 0
-    }
+    const onLeave = () => {}
     canvas.addEventListener('mouseenter', onEnter)
     canvas.addEventListener('mouseleave', onLeave)
     const onSpawnFlag = () => {
