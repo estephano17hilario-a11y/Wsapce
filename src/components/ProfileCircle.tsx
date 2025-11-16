@@ -7,7 +7,6 @@ type User = { id: string; email: string; plan: "bronce" | "plata" | "oro"; creat
 export default function ProfileCircle({ inlineName }: { inlineName?: string }) {
   const [user, setUser] = useState<User | null>(null)
   const [open, setOpen] = useState(false)
-  const [hiddenByCinematic, setHiddenByCinematic] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const startedRef = useRef<number>(0)
@@ -65,13 +64,7 @@ export default function ProfileCircle({ inlineName }: { inlineName?: string }) {
     return () => window.removeEventListener('user_session_changed', fn)
   }, [])
 
-  useEffect(() => {
-    const el = typeof window !== 'undefined' ? document.getElementById('cinematic-zone') : null
-    if (!el) return
-    const obs = new IntersectionObserver(([entry]) => { try { queueMicrotask(() => setHiddenByCinematic(entry.isIntersecting)) } catch {} }, { threshold: 0.55 })
-    obs.observe(el)
-    return () => { try { obs.disconnect() } catch {} }
-  }, [])
+  
 
 
   useEffect(() => {
@@ -88,7 +81,7 @@ export default function ProfileCircle({ inlineName }: { inlineName?: string }) {
   }, [loading])
 
   return (
-    <div className={`profile-anchor ${hiddenByCinematic && !loading ? 'hidden' : ''}`}>
+    <div className={`profile-anchor`}>
       <button className={`profile-circle ${planClass} ${loading ? 'is-loading' : ''} ${error ? 'profile-error' : ''}`} onClick={() => setOpen((o) => !o)}>
         <span className="profile-initial">{initial}</span>
       </button>
