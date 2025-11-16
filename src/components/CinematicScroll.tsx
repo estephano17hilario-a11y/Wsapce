@@ -437,7 +437,7 @@ export default function CinematicScroll() {
   }, [])
 
   return (
-    <section ref={mainContainerRef} className="relative w-full h-screen overflow-hidden">
+    <section ref={mainContainerRef} className="relative w-full h-screen overflow-hidden" id="cinematic-zone">
       {/* Contenedor fijo para todas las escenas */}
       <div className="fixed inset-0">
         {showScrollHint && (

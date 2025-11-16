@@ -1263,6 +1263,9 @@ body {
 @keyframes panelIn { 0% { transform: translateY(-6px); opacity: 0 } 100% { transform: translateY(0); opacity: 1 } }
 .profile-title { font-weight: 800; font-size: 13px; letter-spacing: 0.06em; color: #e5e7eb; margin-bottom: 6px; }
 .profile-row { display: flex; justify-content: space-between; font-size: 12px; color: #cbd5e1; margin-top: 6px; }
+
+/* Blur suave para emails y datos sensibles */
+.blur-soft { filter: blur(0.3px); opacity: 0.92; }
 @keyframes btnShimmer {
   0% { transform: translateX(0); opacity: 0; }
   20% { opacity: 0.12; }

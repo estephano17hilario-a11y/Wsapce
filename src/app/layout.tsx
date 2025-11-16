@@ -5,6 +5,7 @@ import "./globals.css";
 import LoadingOverlay from "@/components/LoadingOverlay";
 import TopGoldTicker from "@/components/TopGoldTicker";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import ProfileCircle from "@/components/ProfileCircle";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -51,6 +52,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black overflow-x-hidden notranslate`}
       >
         <LoadingOverlay />
+        <ProfileCircle />
         <TopGoldTicker />
         {children}
         <SpeedInsights />

@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import ProfileCircle from "@/components/ProfileCircle"
 import { preloadImages } from "@/lib/preload"
 
 export default function LoadingOverlay() {
@@ -40,6 +39,8 @@ export default function LoadingOverlay() {
   const [loginLoading, setLoginLoading] = useState(false)
   const [loginError, setLoginError] = useState<string | null>(null)
   const [loginOk, setLoginOk] = useState(false)
+  const [savedEmail, setSavedEmail] = useState<string>("")
+  const [hasCookieSession, setHasCookieSession] = useState(false)
 
   useEffect(() => {
     startAtRef.current = performance.now()
@@ -57,23 +58,15 @@ export default function LoadingOverlay() {
         if (u) {
           try { localStorage.setItem('wspace_auth', JSON.stringify(u)) } catch {}
           try { window.dispatchEvent(new CustomEvent('user_session_changed')) } catch {}
+          setHasCookieSession(true)
+          try { if (!localStorage.getItem('wspace_email')) localStorage.setItem('wspace_email', u.email) } catch {}
         } else {
           let email: string | null = null
           try { email = JSON.parse(localStorage.getItem('wspace_auth') || 'null')?.email || null } catch {}
           if (!email) {
             try { email = localStorage.getItem('wspace_email') || null } catch {}
           }
-          if (email) {
-            try {
-              const lr = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) })
-              const ld: unknown = await lr.json()
-              const uu = (ld as { user?: { id: string; email: string; plan: 'bronce' | 'plata' | 'oro' } }).user
-              if (lr.ok && uu) {
-                try { localStorage.setItem('wspace_auth', JSON.stringify(uu)) } catch {}
-                try { window.dispatchEvent(new CustomEvent('user_session_changed')) } catch {}
-              }
-            } catch {}
-          }
+          if (email) setSavedEmail(email)
         }
       } catch {}
     })()
@@ -204,7 +197,6 @@ export default function LoadingOverlay() {
       {visible && (
         <div className="fixed inset-0 z-[9999] bg-black text-white flex items-center justify-center">
           <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true" />
-          <ProfileCircle inlineName={name} />
           <div className="relative w-full max-w-lg md:max-w-xl mx-auto p-6 md:p-7 rounded-2xl bg-black/60 border border-white/10 shadow-lg">
             <div className="text-center text-lg md:text-xl font-semibold">¿Cuál es tu nombre?</div>
             <input
@@ -222,6 +214,59 @@ export default function LoadingOverlay() {
               </div>
               <div className="mt-2 text-sm md:text-base text-neutral-300">Precargando… {Math.round(uiProgress * 100)}%</div>
             </div>
+            {(hasCookieSession || !!savedEmail) && (
+              <div className="mt-5 text-center">
+                <button
+                  type="button"
+                  className={`inline-flex items-center px-3 py-2 rounded-md border border-cyan-400/40 bg-neutral-900/70 text-cyan-200 text-xs md:text-sm hover:bg-neutral-800/80 ${loginLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+                  onClick={async () => {
+                    if (loginLoading) return
+                    setLoginError(null)
+                    setLoginOk(false)
+                    setLoginLoading(true)
+                    try {
+                      let ok = false
+                      if (hasCookieSession) {
+                        ok = true
+                      } else if (savedEmail) {
+                        const r = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: savedEmail }) })
+                        const d = await r.json()
+                        if (r.ok) {
+                          ok = true
+                          try { localStorage.setItem('wspace_auth', JSON.stringify(d.user)) } catch {}
+                          try { localStorage.setItem('wspace_email', d.user?.email || savedEmail) } catch {}
+                          try { window.dispatchEvent(new CustomEvent('user_session_changed')) } catch {}
+                        } else {
+                          setLoginError(d?.error || 'error')
+                        }
+                      }
+                      if (ok) {
+                        try {
+                          const url = new URL(window.location.href)
+                          url.hash = 'pricing'
+                          history.replaceState({}, '', url.toString())
+                        } catch {}
+                        document.documentElement.style.overflow = prevHtmlOverflowRef.current || ""
+                        document.body.style.overflow = prevBodyOverflowRef.current || ""
+                        setVisible(false)
+                        try {
+                          const el = document.getElementById('pricing')
+                          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                        } catch {}
+                      }
+                    } catch { setLoginError('network_error') }
+                    finally { setLoginLoading(false) }
+                  }}
+                >
+                  Entrar con <span className="ml-1 blur-soft">{savedEmail || (typeof window !== 'undefined' ? (JSON.parse(localStorage.getItem('wspace_auth') || 'null')?.email || '') : '')}</span>
+                </button>
+                <div className="mt-2">
+                  <button type="button" className="inline-flex items-center px-3 py-1.5 rounded-md border border-neutral-600 bg-neutral-900/70 text-neutral-200 text-xs md:text-sm hover:bg-neutral-800/80" onClick={() => { setLoginOpen(true); setLoginError(null); setLoginOk(false) }}>
+                    Entrar por otra cuenta
+                  </button>
+                </div>
+              </div>
+            )}
             {progress >= 1 && timeReady && name.trim().length === 0 && (
               <div className="mt-3 text-xs md:text-sm text-red-300">Ingresa tu nombre para continuar</div>
             )}

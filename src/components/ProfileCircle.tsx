@@ -7,6 +7,7 @@ type User = { id: string; email: string; plan: "bronce" | "plata" | "oro"; creat
 export default function ProfileCircle({ inlineName }: { inlineName?: string }) {
   const [user, setUser] = useState<User | null>(null)
   const [open, setOpen] = useState(false)
+  const [hiddenByCinematic, setHiddenByCinematic] = useState(false)
 
   const name = useMemo(() => {
     const n = inlineName && inlineName.trim() ? inlineName.trim() : (typeof window !== 'undefined' ? (localStorage.getItem('wspace_name') || "") : "")
@@ -53,8 +54,16 @@ export default function ProfileCircle({ inlineName }: { inlineName?: string }) {
     return () => window.removeEventListener('user_session_changed', fn)
   }, [])
 
+  useEffect(() => {
+    const el = typeof window !== 'undefined' ? document.getElementById('cinematic-zone') : null
+    if (!el) return
+    const obs = new IntersectionObserver(([entry]) => { try { queueMicrotask(() => setHiddenByCinematic(entry.isIntersecting)) } catch {} }, { threshold: 0.15 })
+    obs.observe(el)
+    return () => { try { obs.disconnect() } catch {} }
+  }, [])
+
   return (
-    <div className="profile-anchor">
+    <div className={`profile-anchor ${hiddenByCinematic ? 'hidden' : ''}`}>
       <button className={`profile-circle ${planClass}`} onClick={() => setOpen((o) => !o)}>
         <span className="profile-initial">{initial}</span>
       </button>
