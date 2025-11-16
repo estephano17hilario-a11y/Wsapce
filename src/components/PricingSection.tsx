@@ -321,6 +321,9 @@ export default function PricingSection() {
                     {bronzeStatus?.ok && (
                       <div className="success-chip mt-2">Registro completado</div>
                     )}
+                    {user && (
+                      <div className="success-chip mt-2">Ya te has registrado: <span className="text-cyan-200/90">{user.email}</span></div>
+                    )}
                   </div>
                 )}
                 {plan.variant !== "enterprise" && (
