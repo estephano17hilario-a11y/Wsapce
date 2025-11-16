@@ -97,10 +97,6 @@ export default function ProfileCircle({ inlineName }: { inlineName?: string }) {
     window.addEventListener('gold_purchased', onGold as EventListener)
     return () => window.removeEventListener('gold_purchased', onGold as EventListener)
   }, [])
-  useEffect(() => {
-    const id = window.setInterval(() => { if (!document.hidden) refresh() }, 20000)
-    return () => window.clearInterval(id)
-  }, [])
 
   
 

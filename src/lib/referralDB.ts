@@ -10,7 +10,7 @@ export type ReferralRelation = { referrerId: string; refereeId: string; code: st
 
 type GoldEvent = { userId: string; email: string; name?: string; createdAt: number }
 
-type DB = { users: User[]; links: ReferralLink[]; relations: ReferralRelation[]; goldEvents: GoldEvent[]; config: { ttlDays: number; inviteLimit: number } }
+type DB = { users: User[]; links: ReferralLink[]; relations: ReferralRelation[]; goldEvents: GoldEvent[]; config: { ttlDays: number; inviteLimit: number; plataThreshold: number } }
 
 const dataDir = process.env.NODE_ENV === 'production' ? path.join('/tmp', 'wspace_data') : path.join(process.cwd(), 'data')
 const dataFile = path.join(dataDir, 'referrals.json')
@@ -21,7 +21,7 @@ async function ensureFile() {
     await fs.mkdir(dataDir, { recursive: true })
     await fs.access(dataFile)
   } catch {
-    const initial: DB = { users: [], links: [], relations: [], goldEvents: [], config: { ttlDays: 90, inviteLimit: 500 } }
+    const initial: DB = { users: [], links: [], relations: [], goldEvents: [], config: { ttlDays: 90, inviteLimit: 500, plataThreshold: 5 } }
     await fs.mkdir(dataDir, { recursive: true })
     await fs.writeFile(dataFile, JSON.stringify(initial, null, 2), 'utf8')
   }
@@ -35,7 +35,7 @@ export async function readDB(): Promise<DB> {
         if (!Array.isArray(r.goldEvents)) (r as unknown as DB).goldEvents = []
         return r
       }
-      const initial: DB = { users: [], links: [], relations: [], goldEvents: [], config: { ttlDays: 90, inviteLimit: 500 } }
+      const initial: DB = { users: [], links: [], relations: [], goldEvents: [], config: { ttlDays: 90, inviteLimit: 500, plataThreshold: 5 } }
       await kv.set('wspace:referrals', initial)
       return initial
     } catch {}
@@ -44,6 +44,8 @@ export async function readDB(): Promise<DB> {
   const raw = await fs.readFile(dataFile, 'utf8')
   const parsed = JSON.parse(raw) as Partial<DB>
   if (!Array.isArray(parsed.goldEvents)) parsed.goldEvents = []
+  if (!parsed.config) parsed.config = { ttlDays: 90, inviteLimit: 500, plataThreshold: 5 }
+  if (typeof parsed.config.plataThreshold !== 'number') parsed.config.plataThreshold = 5
   return parsed as DB
 }
 
@@ -175,6 +177,10 @@ export async function recordRelation(code: string, refereeEmail: string): Promis
   if (already) return already
   const relation: ReferralRelation = { referrerId: referrer.id, refereeId: referee.id, code: link.code, createdAt: now() }
   db.relations.push(relation)
+  const count = db.relations.filter(r => r.referrerId === referrer.id).length
+  if (referrer.plan === 'bronce' && count >= (db.config.plataThreshold || 5)) {
+    referrer.plan = 'plata'
+  }
   await writeDB(db)
   return relation
 }
