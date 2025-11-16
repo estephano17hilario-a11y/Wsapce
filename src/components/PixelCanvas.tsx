@@ -137,8 +137,8 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
         const a = 0.5 + 0.5 * Math.sin(t * 0.03 + s.p)
         ctx.fillStyle = `rgba(255,255,255,${a})`
         // Parallax suave según puntero
-        const px = s.x + parallaxX * 0.08 * s.r
-        const py = s.y + parallaxY * 0.08 * s.r
+        const px = s.x + parallaxX * 0.04 * s.r
+        const py = s.y + parallaxY * 0.04 * s.r
         ctx.fillRect(px, py, s.r, s.r)
       }
     }
@@ -748,15 +748,15 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
     let lastMove = 0
     const onMove = (e: MouseEvent) => {
       const now = performance.now()
-      if (now - lastMove < 16) return // ~60fps throttle
+      if (now - lastMove < 50) return // ~20fps throttle
       lastMove = now
       const rect = canvas.getBoundingClientRect()
       const mx = e.clientX - rect.left
       const my = e.clientY - rect.top
       hue = (190 + (mx / width) * 120) % 360
-      parallaxX = (mx / width - 0.5) * 10
-      parallaxY = (my / height - 0.5) * 10
-      paintColor = `hsl(${(hue + 40) % 360} 90% 65%)`
+      parallaxX = (mx / width - 0.5) * 6
+      parallaxY = (my / height - 0.5) * 6
+      if (paintable) paintColor = `hsl(${(hue + 40) % 360} 90% 65%)`
       if (paintable && isPainting) {
         if (flagMode) applyFlag(mx, my)
         else applyPaint(mx, my)
@@ -797,10 +797,7 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
     canvas.addEventListener('keydown', onKey)
 
     const onEnter = () => {
-      // Intensifica el glow en hover
-      for (let i = 0; i < 30; i++) {
-        stars.push({ x: Math.random() * width, y: Math.random() * height, r: Math.random() * 1.2 + 0.3, p: Math.random() * Math.PI * 2 })
-      }
+      // sin cambios de carga en hover
     }
     const onLeave = () => {
       parallaxX = 0
@@ -855,7 +852,7 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
       io.disconnect()
       document.removeEventListener('visibilitychange', onVisibility)
     }
-  }, [width, height, paintable, showShip])
+  }, [width, height, paintable, showShip, active])
 
   // cuando cambia la señal externa (>0), iniciar explosión (no en el montaje)
   useEffect(() => {
