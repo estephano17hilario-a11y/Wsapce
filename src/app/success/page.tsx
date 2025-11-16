@@ -26,6 +26,12 @@ function VerifyPayment() {
     <>
       <p className="mt-3 text-sm md:text-base text-cyan-200/80">{status === 'approved' ? 'Tu compra fue aprobada.' : checked ? 'Verificando tu pago...' : ''}</p>
       <div className="mt-2 text-xs md:text-sm text-cyan-200/80">{upgraded ? 'Tu cuenta fue ascendida a ORO.' : status === 'approved' ? 'Tu cuenta se actualizará en breve.' : ''}</div>
+      {(status === 'approved' || upgraded) && (
+        <div className="mt-6 text-center">
+          <div className="text-2xl md:text-4xl font-black tracking-tight wspace-cosmic-title">Ahora formas parte de la elite</div>
+          <div className="mt-2 text-base md:text-lg text-cyan-200/85">Siéntete orgulloso</div>
+        </div>
+      )}
     </>
   )
 }

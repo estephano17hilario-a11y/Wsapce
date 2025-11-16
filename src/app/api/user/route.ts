@@ -15,10 +15,9 @@ export async function GET() {
       if (email) {
         const u = await getUserById(uid)
         if (!u) {
-          const { createUser, upgradeUserToPlata, upgradeUserToOro } = await import('@/lib/referralDB')
+          const { createUser, upgradeUserToPlata } = await import('@/lib/referralDB')
           const created = await createUser(email)
           if (plan === 'plata') await upgradeUserToPlata(created.id)
-          if (plan === 'oro') await upgradeUserToOro(created.id)
           user = await getUserById(created.id)
           newUid = created.id
         }

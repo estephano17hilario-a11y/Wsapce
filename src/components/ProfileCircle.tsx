@@ -4,6 +4,10 @@ import { useEffect, useMemo, useRef, useState } from "react"
 
 type User = { id: string; email: string; plan: "bronce" | "plata" | "oro"; createdAt?: number; name?: string }
 
+export function planClassFor(plan: "bronce" | "plata" | "oro" | "guest") {
+  return plan === "oro" ? "profile-oro" : plan === "plata" ? "profile-plata" : plan === "bronce" ? "profile-bronce" : "profile-guest"
+}
+
 export default function ProfileCircle({ inlineName }: { inlineName?: string }) {
   const [user, setUser] = useState<User | null>(null)
   const [open, setOpen] = useState(false)
@@ -25,7 +29,7 @@ export default function ProfileCircle({ inlineName }: { inlineName?: string }) {
   }, [name, user?.email])
 
   const currentPlan: "bronce" | "plata" | "oro" | "guest" = user?.plan ? user.plan : "guest"
-  const planClass = currentPlan === "oro" ? "profile-oro" : currentPlan === "plata" ? "profile-plata" : currentPlan === "bronce" ? "profile-bronce" : "profile-guest"
+  const planClass = planClassFor(currentPlan)
 
   const refresh = async () => {
     try {

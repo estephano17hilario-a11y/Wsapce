@@ -4,11 +4,13 @@ import { kv } from '@vercel/kv'
 
 type Plan = 'bronce' | 'plata' | 'oro'
 
-export type User = { id: string; email: string; plan: Plan; createdAt: number; referredByCode?: string }
+export type User = { id: string; email: string; plan: Plan; createdAt: number; referredByCode?: string; name?: string }
 export type ReferralLink = { code: string; userId: string; createdAt: number; expiresAt: number; active: boolean }
 export type ReferralRelation = { referrerId: string; refereeId: string; code: string; createdAt: number }
 
-type DB = { users: User[]; links: ReferralLink[]; relations: ReferralRelation[]; config: { ttlDays: number; inviteLimit: number } }
+type GoldEvent = { userId: string; email: string; name?: string; createdAt: number }
+
+type DB = { users: User[]; links: ReferralLink[]; relations: ReferralRelation[]; goldEvents: GoldEvent[]; config: { ttlDays: number; inviteLimit: number } }
 
 const dataDir = process.env.NODE_ENV === 'production' ? path.join('/tmp', 'wspace_data') : path.join(process.cwd(), 'data')
 const dataFile = path.join(dataDir, 'referrals.json')
@@ -19,7 +21,7 @@ async function ensureFile() {
     await fs.mkdir(dataDir, { recursive: true })
     await fs.access(dataFile)
   } catch {
-    const initial: DB = { users: [], links: [], relations: [], config: { ttlDays: 90, inviteLimit: 500 } }
+    const initial: DB = { users: [], links: [], relations: [], goldEvents: [], config: { ttlDays: 90, inviteLimit: 500 } }
     await fs.mkdir(dataDir, { recursive: true })
     await fs.writeFile(dataFile, JSON.stringify(initial, null, 2), 'utf8')
   }
@@ -29,15 +31,20 @@ export async function readDB(): Promise<DB> {
   if (useKV) {
     try {
       const r = await kv.get<DB>('wspace:referrals')
-      if (r) return r
-      const initial: DB = { users: [], links: [], relations: [], config: { ttlDays: 90, inviteLimit: 500 } }
+      if (r) {
+        if (!Array.isArray(r.goldEvents)) (r as unknown as DB).goldEvents = []
+        return r
+      }
+      const initial: DB = { users: [], links: [], relations: [], goldEvents: [], config: { ttlDays: 90, inviteLimit: 500 } }
       await kv.set('wspace:referrals', initial)
       return initial
     } catch {}
   }
   await ensureFile()
   const raw = await fs.readFile(dataFile, 'utf8')
-  return JSON.parse(raw) as DB
+  const parsed = JSON.parse(raw) as Partial<DB>
+  if (!Array.isArray(parsed.goldEvents)) parsed.goldEvents = []
+  return parsed as DB
 }
 
 export async function writeDB(db: DB) {
@@ -112,6 +119,8 @@ export async function upgradeUserToOro(userId: string): Promise<User | null> {
   if (!u) return null
   if (u.plan !== 'oro') {
     u.plan = 'oro'
+    const ev: GoldEvent = { userId: u.id, email: u.email, name: u.name, createdAt: now() }
+    db.goldEvents.push(ev)
     await writeDB(db)
   }
   return u
@@ -142,6 +151,16 @@ export async function validateCode(code: string): Promise<ReferralLink | null> {
   const nowMs = now()
   const l = db.links.find(x => x.code.toUpperCase() === code.toUpperCase() && x.active && x.expiresAt > nowMs)
   return l || null
+}
+
+export async function getCodeStatus(code: string): Promise<{ status: 'valid' | 'expired' | 'inactive' | 'not_found'; link?: ReferralLink }> {
+  const db = await readDB()
+  const match = db.links.find(x => x.code.toUpperCase() === code.toUpperCase()) || null
+  if (!match) return { status: 'not_found' }
+  if (!match.active) return { status: 'inactive', link: match }
+  const nowMs = now()
+  if (match.expiresAt <= nowMs) return { status: 'expired', link: match }
+  return { status: 'valid', link: match }
 }
 
 export async function recordRelation(code: string, refereeEmail: string): Promise<ReferralRelation | null> {
@@ -220,4 +239,23 @@ export async function seedDemoData(usersCount: number, minZeros: number) {
   }
   await writeDB(db)
   return { usersCreated: total, zeros: zeros }
+}
+
+export async function getRecentGoldEvents(limit = 10, since?: number) {
+  const db = await readDB()
+  const events = db.goldEvents.slice().sort((a, b) => b.createdAt - a.createdAt)
+  const filtered = typeof since === 'number' ? events.filter(e => e.createdAt > since) : events
+  return filtered.slice(0, Math.max(1, limit))
+}
+
+export async function updateUserName(userId: string, name: string): Promise<User | null> {
+  const db = await readDB()
+  const u = db.users.find(x => x.id === userId)
+  if (!u) return null
+  const clean = (name || '').trim().slice(0, 80)
+  if (clean && clean !== (u.name || '')) {
+    u.name = clean
+    await writeDB(db)
+  }
+  return u
 }

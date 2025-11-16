@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { createUser, getUserByEmail, normalizeRefLink, readDB, validateCode, recordRelation } from '@/lib/referralDB'
+import { createUser, getUserByEmail, normalizeRefLink, readDB, recordRelation, getCodeStatus } from '@/lib/referralDB'
 import { encodeSession } from '@/lib/auth'
 
 function validEmail(e: string) {
@@ -18,8 +18,11 @@ export async function POST(req: NextRequest) {
 
   const code = normalizeRefLink(referralLink)
   if (code) {
-    const link = await validateCode(code)
-    if (!link) return NextResponse.json({ error: 'ref_invalid_or_expired' }, { status: 400 })
+    const status = await getCodeStatus(code)
+    if (status.status === 'not_found') return NextResponse.json({ error: 'ref_invalid' }, { status: 400 })
+    if (status.status === 'inactive') return NextResponse.json({ error: 'ref_inactive' }, { status: 400 })
+    if (status.status === 'expired') return NextResponse.json({ error: 'ref_expired' }, { status: 400 })
+    const link = status.link!
     const db = await readDB()
     const referrer = db.users.find(u => u.id === link.userId)
     if (referrer && referrer.email.toLowerCase() === email) return NextResponse.json({ error: 'self_referral_not_allowed' }, { status: 400 })

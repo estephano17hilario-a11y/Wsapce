@@ -1255,6 +1255,24 @@ body {
 .profile-plata { border-color: rgba(226,232,240,0.85); box-shadow: 0 0 12px rgba(226,232,240,0.32); }
 .profile-oro { border-color: rgba(253,224,71,0.95); box-shadow: 0 0 16px rgba(253,224,71,0.35), 0 0 30px rgba(253,224,71,0.18); animation: goldPulse 2400ms ease-in-out infinite; }
 @keyframes goldPulse { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.18); } }
+.profile-oro::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 9999px;
+  pointer-events: none;
+  background:
+    radial-gradient(20px 20px at 15% 20%, rgba(253,224,71,0.35), transparent 60%),
+    radial-gradient(24px 24px at 80% 70%, rgba(253,224,71,0.25), transparent 60%),
+    conic-gradient(from 120deg at 50% 50%, rgba(253,224,71,0.20), rgba(255,255,255,0.08), transparent 65%);
+  filter: blur(8px) saturate(115%);
+  animation: goldAuraPulse 3.2s ease-in-out infinite;
+}
+@keyframes goldAuraPulse {
+  0% { opacity: 0.50; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.04); }
+  100% { opacity: 0.50; transform: scale(1); }
+}
 .profile-flash { filter: brightness(1.2); box-shadow: 0 0 20px rgba(56,189,248,0.35), 0 0 6px rgba(56,189,248,0.25); }
 .profile-panel {
   position: absolute; top: 54px; left: 0; min-width: 240px; padding: 12px; border-radius: 12px;
@@ -1282,6 +1300,10 @@ body {
 }
 @keyframes profileSpin { to { transform: rotate(360deg) } }
 .profile-error { border-color: rgba(239,68,68,0.85) !important; box-shadow: 0 0 12px rgba(239,68,68,0.28) !important; }
+@media (prefers-reduced-motion: reduce) {
+  .profile-oro { animation: none !important; }
+  .profile-oro::before { animation: none !important; }
+}
 @keyframes btnShimmer {
   0% { transform: translateX(0); opacity: 0; }
   20% { opacity: 0.12; }

@@ -25,6 +25,9 @@ export default function PricingSection() {
   const [displayName, setDisplayName] = useState<string>("")
   const [bronzeEmail, setBronzeEmail] = useState("")
   const [bronzeRef, setBronzeRef] = useState("")
+  const [bronzeRefStatus, setBronzeRefStatus] = useState<"unknown" | "valid" | "expired" | "inactive" | "not_found">("unknown")
+  const [bronzeRefExpiresAt, setBronzeRefExpiresAt] = useState<number | null>(null)
+  const [bronzeRefChecking, setBronzeRefChecking] = useState(false)
   const [bronzeStatus, setBronzeStatus] = useState<{ ok?: boolean; error?: string } | null>(null)
   const [bronzeLoading, setBronzeLoading] = useState(false)
   const [plataLink, setPlataLink] = useState<string | null>(null)
@@ -41,6 +44,9 @@ export default function PricingSection() {
       case 'email_invalid': return 'Email inválido'
       case 'user_exists': return 'Ya estás registrado'
       case 'ref_invalid_or_expired': return 'Enlace inválido o expirado'
+      case 'ref_invalid': return 'Enlace inválido'
+      case 'ref_expired': return 'Enlace caducado'
+      case 'ref_inactive': return 'Enlace inactivo'
       case 'self_referral_not_allowed': return 'No puedes auto-referenciarte'
       case 'invite_limit_reached': return 'Límite de invitaciones alcanzado'
       case 'not_authenticated': return 'No autenticado'
@@ -61,6 +67,50 @@ export default function PricingSection() {
     } catch {}
   }
   useEffect(() => { fetchUser() }, [])
+  useEffect(() => {
+    const cache = (window as unknown as { __ref_cache?: Map<string, { status: string; expiresAt: number | null; at: number }> }).__ref_cache || new Map()
+    ;(window as unknown as { __ref_cache?: Map<string, { status: string; expiresAt: number | null; at: number }> }).__ref_cache = cache
+    let t: number | null = null
+    const run = async (value: string) => {
+      const key = value.trim()
+      if (!key || key.length < 8) { setBronzeRefStatus('unknown'); setBronzeRefExpiresAt(null); return }
+      const cached = cache.get(key)
+      const now = Date.now()
+      if (cached && now - cached.at < 60000) {
+        const stCached = (cached.status === 'valid' || cached.status === 'expired' || cached.status === 'inactive' || cached.status === 'not_found' ? cached.status : 'unknown') as 'unknown' | 'valid' | 'expired' | 'inactive' | 'not_found'
+        setBronzeRefStatus(stCached)
+        setBronzeRefExpiresAt(cached.expiresAt)
+        return
+      }
+      setBronzeRefChecking(true)
+      try {
+        const u = new URL(window.location.href)
+        u.pathname = '/api/referrals/validate'
+        u.search = `code=${encodeURIComponent(key)}`
+        const r = await fetch(u.toString(), { method: 'GET' })
+        if (r.status === 304) { return }
+        const d = await r.json()
+        const st = (d?.status || 'not_found') as typeof bronzeRefStatus
+        const ex = typeof d?.expiresAt === 'number' ? d.expiresAt : null
+        setBronzeRefStatus(st)
+        setBronzeRefExpiresAt(ex)
+        cache.set(key, { status: st, expiresAt: ex, at: now })
+      } catch { setBronzeRefStatus('unknown'); setBronzeRefExpiresAt(null) }
+      finally { setBronzeRefChecking(false) }
+    }
+    t = window.setTimeout(() => { run(bronzeRef) }, 420)
+    return () => { if (t) window.clearTimeout(t) }
+  }, [bronzeRef])
+
+  const refStatusText = useMemo(() => {
+    switch (bronzeRefStatus) {
+      case 'valid': return bronzeRefExpiresAt ? `Válido, expira: ${new Date(bronzeRefExpiresAt).toLocaleDateString()}` : 'Válido'
+      case 'expired': return 'Enlace caducado'
+      case 'inactive': return 'Enlace inactivo'
+      case 'not_found': return 'Enlace inválido'
+      default: return ''
+    }
+  }, [bronzeRefStatus, bronzeRefExpiresAt])
   useEffect(() => {
     const onSess = () => { fetchUser() }
     window.addEventListener('user_session_changed', onSess)
@@ -301,6 +351,7 @@ export default function PricingSection() {
                       onClick={async () => {
                         setBronzeStatus(null)
                         setPlataLink(null)
+                        if (bronzeRef && bronzeRefStatus !== 'valid') { setBronzeStatus({ error: msg(bronzeRefStatus === 'expired' ? 'ref_expired' : bronzeRefStatus === 'inactive' ? 'ref_inactive' : 'ref_invalid') }); return }
                         setBronzeLoading(true)
                         try {
                           const res = await fetch('/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: bronzeEmail, referralLink: bronzeRef }) })
@@ -317,6 +368,11 @@ export default function PricingSection() {
                     >
                       {bronzeLoading ? 'Registrando…' : plan.ctaLabel}
                     </button>
+                    {bronzeRef && (
+                      <div className="mt-2 text-xs text-cyan-200/80">
+                        {bronzeRefChecking ? 'Validando enlace…' : refStatusText}
+                      </div>
+                    )}
                     {bronzeStatus?.error && <div className="alert-bad mt-2">{bronzeStatus.error}</div>}
                     {bronzeStatus?.ok && (
                       <div className="success-chip mt-2">Registro completado</div>
