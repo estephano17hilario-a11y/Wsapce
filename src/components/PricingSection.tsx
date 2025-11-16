@@ -103,6 +103,9 @@ export default function PricingSection() {
               const uRes = await fetch('/api/user', { cache: 'no-store' })
               const uData = await uRes.json()
               if (uData?.user) setUser(uData.user)
+              try { localStorage.setItem('wspace_auth', JSON.stringify(uData.user)) } catch {}
+              try { localStorage.setItem('wspace_email', uData.user?.email || '') } catch {}
+              try { window.dispatchEvent(new CustomEvent('user_session_changed')) } catch {}
               window.setTimeout(() => {
                 try {
                   const nm = (n && n.trim()) ? n : (uData?.user?.email || '')
@@ -269,6 +272,9 @@ export default function PricingSection() {
                           if (!res.ok) { setBronzeStatus({ error: msg(data.error) }); return }
                           setBronzeStatus({ ok: true })
                           setUser(data.user)
+                          try { localStorage.setItem('wspace_auth', JSON.stringify(data.user)) } catch {}
+                          try { localStorage.setItem('wspace_email', data.user?.email || bronzeEmail) } catch {}
+                          try { window.dispatchEvent(new CustomEvent('user_session_changed')) } catch {}
                         } catch { setBronzeStatus({ error: msg('network_error') }) }
                         finally { setBronzeLoading(false) }
                       }}
@@ -310,6 +316,8 @@ export default function PricingSection() {
                               const data = await res.json()
                               if (!res.ok) { setPlataStatus({ error: msg(data.error) }); return }
                               setUser(data.user)
+                              try { localStorage.setItem('wspace_auth', JSON.stringify(data.user)) } catch {}
+                              try { window.dispatchEvent(new CustomEvent('user_session_changed')) } catch {}
                             } catch { setPlataStatus({ error: msg('network_error') }); return }
                           }
                           setPlataGenerating(true)

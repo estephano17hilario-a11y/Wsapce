@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import ProfileCircle from "@/components/ProfileCircle"
 import { preloadImages } from "@/lib/preload"
 
 export default function LoadingOverlay() {
@@ -44,6 +45,38 @@ export default function LoadingOverlay() {
     startAtRef.current = performance.now()
     const id = setTimeout(() => setTimeReady(true), 1200)
     return () => clearTimeout(id)
+  }, [])
+
+  useEffect(() => {
+    ;(async () => {
+      try {
+        const r = await fetch('/api/user', { cache: 'no-store' })
+        let d: unknown = null
+        try { d = await r.json() } catch {}
+        const u = (d as { user?: { id: string; email: string; plan: 'bronce' | 'plata' | 'oro' } }).user
+        if (u) {
+          try { localStorage.setItem('wspace_auth', JSON.stringify(u)) } catch {}
+          try { window.dispatchEvent(new CustomEvent('user_session_changed')) } catch {}
+        } else {
+          let email: string | null = null
+          try { email = JSON.parse(localStorage.getItem('wspace_auth') || 'null')?.email || null } catch {}
+          if (!email) {
+            try { email = localStorage.getItem('wspace_email') || null } catch {}
+          }
+          if (email) {
+            try {
+              const lr = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) })
+              const ld: unknown = await lr.json()
+              const uu = (ld as { user?: { id: string; email: string; plan: 'bronce' | 'plata' | 'oro' } }).user
+              if (lr.ok && uu) {
+                try { localStorage.setItem('wspace_auth', JSON.stringify(uu)) } catch {}
+                try { window.dispatchEvent(new CustomEvent('user_session_changed')) } catch {}
+              }
+            } catch {}
+          }
+        }
+      } catch {}
+    })()
   }, [])
 
   useEffect(() => {
@@ -171,6 +204,7 @@ export default function LoadingOverlay() {
       {visible && (
         <div className="fixed inset-0 z-[9999] bg-black text-white flex items-center justify-center">
           <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true" />
+          <ProfileCircle inlineName={name} />
           <div className="relative w-full max-w-lg md:max-w-xl mx-auto p-6 md:p-7 rounded-2xl bg-black/60 border border-white/10 shadow-lg">
             <div className="text-center text-lg md:text-xl font-semibold">¿Cuál es tu nombre?</div>
             <input
@@ -225,6 +259,8 @@ export default function LoadingOverlay() {
                       const d = await r.json()
                       if (!r.ok) { setLoginError(d.error || 'error'); return }
                       setLoginOk(true)
+                      try { localStorage.setItem('wspace_auth', JSON.stringify(d.user)) } catch {}
+                      try { localStorage.setItem('wspace_email', d.user?.email || loginEmail) } catch {}
                       try { window.dispatchEvent(new CustomEvent('user_session_changed')) } catch {}
                       try {
                         const url = new URL(window.location.href)
