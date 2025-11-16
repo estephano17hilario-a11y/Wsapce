@@ -10,6 +10,8 @@ export default function ProfileCircle({ inlineName }: { inlineName?: string }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const startedRef = useRef<number>(0)
+  const prevPlanRef = useRef<"bronce" | "plata" | "oro" | "guest" | null>(null)
+  const [flash, setFlash] = useState(false)
 
   const name = useMemo(() => {
     const n = inlineName && inlineName.trim() ? inlineName.trim() : (typeof window !== 'undefined' ? (localStorage.getItem('wspace_name') || "") : "")
@@ -22,7 +24,8 @@ export default function ProfileCircle({ inlineName }: { inlineName?: string }) {
     return ch ? ch.toUpperCase() : "—"
   }, [name, user?.email])
 
-  const planClass = user?.plan === "oro" ? "profile-oro" : user?.plan === "plata" ? "profile-plata" : "profile-bronce"
+  const currentPlan: "bronce" | "plata" | "oro" | "guest" = user?.plan ? user.plan : "guest"
+  const planClass = currentPlan === "oro" ? "profile-oro" : currentPlan === "plata" ? "profile-plata" : currentPlan === "bronce" ? "profile-bronce" : "profile-guest"
 
   const refresh = async () => {
     try {
@@ -34,6 +37,12 @@ export default function ProfileCircle({ inlineName }: { inlineName?: string }) {
         queueMicrotask(() => setUser(d.user))
         try { localStorage.setItem('wspace_auth', JSON.stringify(d.user)) } catch {}
         setLoading(false)
+        const newPlan: "bronce" | "plata" | "oro" | "guest" = d.user?.plan ? d.user.plan : "guest"
+        if (prevPlanRef.current && prevPlanRef.current !== newPlan) {
+          setFlash(true)
+          window.setTimeout(() => setFlash(false), 1200)
+        }
+        prevPlanRef.current = newPlan
       } else {
         let email: string | null = null
         try { email = JSON.parse(localStorage.getItem('wspace_auth') || 'null')?.email || null } catch {}
@@ -46,6 +55,12 @@ export default function ProfileCircle({ inlineName }: { inlineName?: string }) {
               queueMicrotask(() => setUser(ld.user))
               try { localStorage.setItem('wspace_auth', JSON.stringify(ld.user)) } catch {}
               setLoading(false)
+              const newPlan2: "bronce" | "plata" | "oro" | "guest" = ld.user?.plan ? ld.user.plan : "guest"
+              if (prevPlanRef.current && prevPlanRef.current !== newPlan2) {
+                setFlash(true)
+                window.setTimeout(() => setFlash(false), 1200)
+              }
+              prevPlanRef.current = newPlan2
             } else {
               setLoading(false)
             }
@@ -62,6 +77,15 @@ export default function ProfileCircle({ inlineName }: { inlineName?: string }) {
     const fn = () => { refresh() }
     window.addEventListener('user_session_changed', fn)
     return () => window.removeEventListener('user_session_changed', fn)
+  }, [])
+  useEffect(() => {
+    const onGold = () => { refresh() }
+    window.addEventListener('gold_purchased', onGold as EventListener)
+    return () => window.removeEventListener('gold_purchased', onGold as EventListener)
+  }, [])
+  useEffect(() => {
+    const id = window.setInterval(() => { if (!document.hidden) refresh() }, 20000)
+    return () => window.clearInterval(id)
   }, [])
 
   
@@ -82,7 +106,7 @@ export default function ProfileCircle({ inlineName }: { inlineName?: string }) {
 
   return (
     <div className={`profile-anchor`}>
-      <button className={`profile-circle ${planClass} ${loading ? 'is-loading' : ''} ${error ? 'profile-error' : ''}`} onClick={() => setOpen((o) => !o)}>
+      <button className={`profile-circle ${planClass} ${flash ? 'profile-flash' : ''} ${loading ? 'is-loading' : ''} ${error ? 'profile-error' : ''}`} onClick={() => setOpen((o) => !o)}>
         <span className="profile-initial">{initial}</span>
       </button>
       {open && (
@@ -90,7 +114,7 @@ export default function ProfileCircle({ inlineName }: { inlineName?: string }) {
           <div className="profile-title">Perfil</div>
           <div className="profile-row"><span>Nombre</span><span>{(name && name.trim()) ? name : '—'}</span></div>
           <div className="profile-row"><span>Email</span><span>{user?.email || '—'}</span></div>
-          <div className="profile-row"><span>Plan</span><span>{user?.plan ? user.plan.toUpperCase() : 'NO REGISTRADO'}</span></div>
+          <div className="profile-row"><span>Plan</span><span>{user?.plan ? user.plan.toUpperCase() : 'INVITADO'}</span></div>
           <div className="profile-row"><span>Registro</span><span>{user?.createdAt ? new Date(user.createdAt).toLocaleString() : '—'}</span></div>
           {error && <div className="profile-row"><span>Error</span><span>{error}</span></div>}
         </div>
