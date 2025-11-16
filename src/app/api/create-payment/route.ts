@@ -34,7 +34,8 @@ export async function POST(req: NextRequest) {
         auto_return: 'approved'
       }
     })
-    return new NextResponse(JSON.stringify({ preferenceId: result.id }), { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'private, no-store' } })
+    const initPoint = (result as unknown as { init_point?: string; sandbox_init_point?: string }).init_point || (result as unknown as { init_point?: string; sandbox_init_point?: string }).sandbox_init_point || null
+    return new NextResponse(JSON.stringify({ preferenceId: result.id, initPoint }), { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'private, no-store' } })
   } catch {
     return new NextResponse(JSON.stringify({ error: 'preference_error' }), { status: 500, headers: { 'Content-Type': 'application/json' } })
   }

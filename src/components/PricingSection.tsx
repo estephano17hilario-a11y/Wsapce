@@ -33,6 +33,7 @@ export default function PricingSection() {
   const [plataExpiresAt, setPlataExpiresAt] = useState<number | null>(null)
   const [bronzeFlash, setBronzeFlash] = useState(false)
   const [oroProcessing, setOroProcessing] = useState(false)
+  const [oroFlash, setOroFlash] = useState(false)
   const [oroStatus, setOroStatus] = useState<{ ok?: boolean; error?: string } | null>(null)
 
   const msg = (code?: string) => {
@@ -324,12 +325,21 @@ export default function PricingSection() {
                           try {
                             setOroProcessing(true)
                             setOroStatus(null)
+                            setOroFlash(true)
+                            setTimeout(() => setOroFlash(false), 900)
                             const r = await fetch('/api/create-payment', { method: 'POST' })
                             let d: unknown = null
                             try { d = await r.json() } catch {}
                             const preferenceId = (d as { preferenceId?: string } | null)?.preferenceId
+                            const initPoint = (d as { initPoint?: string | null } | null)?.initPoint || null
                             const err = (d as { error?: string } | null)?.error
                             if (!r.ok || !preferenceId) { setOroStatus({ error: msg(err || 'network_error') }); return }
+                            if (initPoint) {
+                              await new Promise((resolve) => setTimeout(resolve, 450))
+                              window.location.href = initPoint
+                              setOroStatus({ ok: true })
+                              return
+                            }
                             const pub = process.env.NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY ?? document.querySelector('meta[name="mp-public-key"]')?.getAttribute('content') ?? undefined
                             if (!pub) { setOroStatus({ error: 'Falta clave pública' }); return }
                             const ok = await ensureMercadoPago()
@@ -358,6 +368,9 @@ export default function PricingSection() {
                       )}
                       {plan.variant === 'starter' && (
                         <span aria-hidden className="cta-orbits cta-orbits--gold" />
+                      )}
+                      {plan.variant === 'starter' && oroFlash && (
+                        <span aria-hidden className="once-ripple-subtle once-ripple-subtle--blue" />
                       )}
                     </button>
                     {plan.variant === 'starter' && (
