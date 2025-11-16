@@ -1,20 +1,28 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import { preloadImages } from "@/lib/preload"
 
 export default function LoadingOverlay() {
   const [visible, setVisible] = useState(() => {
     try {
       if (typeof window !== 'undefined') {
         const sp = new URLSearchParams(window.location.search)
-        const hasName = !!localStorage.getItem('wspace_name')
         const cameFromMp = sp.has('payment_id') || sp.has('collection_id') || sp.has('status')
-        if (hasName || cameFromMp) return false
+        if (cameFromMp) return false
       }
     } catch {}
     return true
   })
-  const [name, setName] = useState("")
+  const [name, setName] = useState(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const n = localStorage.getItem('wspace_name')
+        return n || ""
+      }
+    } catch {}
+    return ""
+  })
   const [progress, setProgress] = useState(0)
   const [uiProgress, setUiProgress] = useState(0)
   const [nameDelayOk, setNameDelayOk] = useState(false)
@@ -112,16 +120,14 @@ export default function LoadingOverlay() {
   }, [])
 
   useEffect(() => {
-    let r = 0
-    const step = () => {
-      setProgress((p) => {
-        const inc = 0.03
-        return Math.min(1, p + inc)
-      })
-      r = requestAnimationFrame(step)
-    }
-    r = requestAnimationFrame(step)
-    return () => cancelAnimationFrame(r)
+    const urls = [
+      "/persona sun up - copia.webp",
+    ]
+    const total = urls.length
+    preloadImages(urls, (loaded) => {
+      const p = Math.min(1, loaded / Math.max(1, total))
+      setProgress(p)
+    }, 8000).catch(() => {})
   }, [])
 
   useEffect(() => {
