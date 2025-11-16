@@ -100,6 +100,10 @@ export default function LoadingOverlay() {
   }, [visible])
 
   useEffect(() => {
+    try { window.dispatchEvent(new CustomEvent('overlay_visible_changed', { detail: { visible } })) } catch {}
+  }, [visible])
+
+  useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext("2d")
@@ -279,10 +283,12 @@ export default function LoadingOverlay() {
                 ¿Comenzamos?
               </button>
             )}
-            <div className="mt-6 text-center">
-              <span className="text-xs md:text-sm text-neutral-300">¿ya tienes cuenta?</span>
-              <button type="button" className="ml-2 inline-flex items-center px-3 py-1.5 rounded-md border border-cyan-400/40 bg-neutral-900/70 text-cyan-200 text-xs md:text-sm hover:bg-neutral-800/80" onClick={() => { setLoginOpen(true); setLoginError(null); setLoginOk(false) }}>Iniciar sesión</button>
-            </div>
+            {!(hasCookieSession || !!savedEmail) && (
+              <div className="mt-6 text-center">
+                <span className="text-xs md:text-sm text-neutral-300">¿ya tienes cuenta?</span>
+                <button type="button" className="ml-2 inline-flex items-center px-3 py-1.5 rounded-md border border-cyan-400/40 bg-neutral-900/70 text-cyan-200 text-xs md:text-sm hover:bg-neutral-800/80" onClick={() => { setLoginOpen(true); setLoginError(null); setLoginOk(false) }}>Iniciar sesión</button>
+              </div>
+            )}
           </div>
           <div className="absolute left-4 bottom-3 text-white/70 text-xs md:text-sm">Wspace</div>
           {loginOpen && (

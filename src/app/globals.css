@@ -1266,6 +1266,20 @@ body {
 
 /* Blur suave para emails y datos sensibles */
 .blur-soft { filter: blur(0.3px); opacity: 0.92; }
+
+.profile-circle.is-loading::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 9999px;
+  border: 2px solid rgba(34,211,238,0.28);
+  border-left-color: rgba(253,224,71,0.65);
+  filter: drop-shadow(0 0 8px rgba(34,211,238,0.25));
+  animation: profileSpin 1.2s linear infinite;
+  pointer-events: none;
+}
+@keyframes profileSpin { to { transform: rotate(360deg) } }
+.profile-error { border-color: rgba(239,68,68,0.85) !important; box-shadow: 0 0 12px rgba(239,68,68,0.28) !important; }
 @keyframes btnShimmer {
   0% { transform: translateX(0); opacity: 0; }
   20% { opacity: 0.12; }
