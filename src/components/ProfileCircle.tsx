@@ -87,7 +87,7 @@ export default function ProfileCircle({ inlineName }: { inlineName?: string }) {
     let t: number | null = null
     if (loading) {
       t = window.setTimeout(() => {
-        if (loading && performance.now() - startedAt >= 30000) {
+        if (loading && performance.now() - (startedRef.current || 0) >= 30000) {
           setError('Tiempo de carga agotado')
           setLoading(false)
         }
