@@ -190,6 +190,7 @@ export default function LoadingOverlay() {
       if (clean) {
         localStorage.setItem("wspace_name", clean)
         window.dispatchEvent(new CustomEvent("user_name_set", { detail: { name: clean } }))
+        try { fetch('/api/profile/name', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: clean }) }) } catch {}
       }
     } catch {}
     document.documentElement.style.overflow = prevHtmlOverflowRef.current || ""
@@ -197,24 +198,82 @@ export default function LoadingOverlay() {
     setVisible(false)
   }
 
+  const accountDetected = hasCookieSession || !!savedEmail
+
   return (
     <>
       {visible && (
         <div className="fixed inset-0 z-[9999] bg-black text-white flex items-center justify-center">
           <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true" />
           <div className="relative w-full max-w-lg md:max-w-xl mx-auto p-6 md:p-7 rounded-2xl bg-black/60 border border-white/10 shadow-lg">
-            <div className="text-center text-lg md:text-xl font-semibold">¿Cuál es tu nombre?</div>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Escribe tu nombre"
-              className="mt-4 w-full rounded-md bg-neutral-900/70 border border-neutral-700 px-4 py-3 text-base focus:outline-none focus:ring-1 focus:ring-cyan-400"
-              aria-label="Nombre"
-              autoFocus
-              maxLength={80}
-              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); if (ready) start() } }}
-            />
+            {accountDetected ? (
+              <div className="mt-2">
+                <div className="text-center text-lg md:text-xl font-semibold">Cuenta detectada</div>
+                <div className="mt-4 grid gap-3">
+                  <button
+                    type="button"
+                    className="w-full rounded-md bg-neutral-100 text-black font-bold py-3.5 md:py-4 text-base hover:bg-white/90"
+                    onClick={async () => {
+                      if (loginLoading) return
+                      setLoginError(null)
+                      setLoginOk(false)
+                      setLoginLoading(true)
+                      try {
+                        let ok = false
+                        if (hasCookieSession) {
+                          ok = true
+                        } else if (savedEmail) {
+                          const r = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: savedEmail }) })
+                          const d = await r.json()
+                          if (r.ok) {
+                            ok = true
+                            try { localStorage.setItem('wspace_auth', JSON.stringify(d.user)) } catch {}
+                            try { localStorage.setItem('wspace_email', d.user?.email || savedEmail) } catch {}
+                            try { window.dispatchEvent(new CustomEvent('user_session_changed')) } catch {}
+                          } else {
+                            setLoginError(d?.error || 'error')
+                          }
+                        }
+                        if (ok) {
+                          const url = new URL(window.location.href)
+                          url.hash = 'pricing'
+                          history.replaceState({}, '', url.toString())
+                        }
+                      } catch {}
+                      document.documentElement.style.overflow = prevHtmlOverflowRef.current || ""
+                      document.body.style.overflow = prevBodyOverflowRef.current || ""
+                      setVisible(false)
+                      try { const el = document.getElementById('pricing'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }) } catch {}
+                      setLoginOk(true)
+                    }}
+                  >
+                    Entrar por cuenta <span className="ml-1 blur-soft">{(typeof window !== 'undefined' ? (JSON.parse(localStorage.getItem('wspace_auth') || 'null')?.email || localStorage.getItem('wspace_email') || savedEmail || '') : '') || 'detectada'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="w-full rounded-md border border-neutral-600 bg-neutral-900/70 text-neutral-200 font-semibold py-3.5 md:py-4 text-base hover:bg-neutral-800/80"
+                    onClick={() => { setLoginOpen(true); setLoginError(null); setLoginOk(false) }}
+                  >
+                    Entrar por otra cuenta
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="text-center text-lg md:text-xl font-semibold">¿Cuál es tu nombre?</div>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Escribe tu nombre"
+                  className="mt-4 w-full rounded-md bg-neutral-900/70 border border-neutral-700 px-4 py-3 text-base focus:outline-none focus:ring-1 focus:ring-cyan-400"
+                  aria-label="Nombre"
+                  autoFocus
+                  maxLength={80}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); if (ready) start() } }}
+                />
+              </>
+            )}
             <div className="mt-1 text-xs md:text-sm text-neutral-400">(luego descubriras el porqué)</div>
             <div className="mt-4">
               <div className="h-2.5 md:h-3 w-full rounded-full bg-neutral-700">
@@ -222,63 +281,10 @@ export default function LoadingOverlay() {
               </div>
               <div className="mt-2 text-sm md:text-base text-neutral-300">Precargando… {Math.round(uiProgress * 100)}%</div>
             </div>
-            {(hasCookieSession || !!savedEmail) && (
-              <div className="mt-5 text-center">
-                <button
-                  type="button"
-                  className={`inline-flex items-center px-3 py-2 rounded-md border border-cyan-400/40 bg-neutral-900/70 text-cyan-200 text-xs md:text-sm hover:bg-neutral-800/80 ${loginLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
-                  onClick={async () => {
-                    if (loginLoading) return
-                    setLoginError(null)
-                    setLoginOk(false)
-                    setLoginLoading(true)
-                    try {
-                      let ok = false
-                      if (hasCookieSession) {
-                        ok = true
-                      } else if (savedEmail) {
-                        const r = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: savedEmail }) })
-                        const d = await r.json()
-                        if (r.ok) {
-                          ok = true
-                          try { localStorage.setItem('wspace_auth', JSON.stringify(d.user)) } catch {}
-                          try { localStorage.setItem('wspace_email', d.user?.email || savedEmail) } catch {}
-                          try { window.dispatchEvent(new CustomEvent('user_session_changed')) } catch {}
-                        } else {
-                          setLoginError(d?.error || 'error')
-                        }
-                      }
-                      if (ok) {
-                        try {
-                          const url = new URL(window.location.href)
-                          url.hash = 'pricing'
-                          history.replaceState({}, '', url.toString())
-                        } catch {}
-                        document.documentElement.style.overflow = prevHtmlOverflowRef.current || ""
-                        document.body.style.overflow = prevBodyOverflowRef.current || ""
-                        setVisible(false)
-                        try {
-                          const el = document.getElementById('pricing')
-                          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                        } catch {}
-                      }
-                    } catch { setLoginError('network_error') }
-                    finally { setLoginLoading(false) }
-                  }}
-                >
-                  Entrar con <span className="ml-1 blur-soft">{savedEmail || (typeof window !== 'undefined' ? (JSON.parse(localStorage.getItem('wspace_auth') || 'null')?.email || '') : '')}</span>
-                </button>
-                <div className="mt-2">
-                  <button type="button" className="inline-flex items-center px-3 py-1.5 rounded-md border border-neutral-600 bg-neutral-900/70 text-neutral-200 text-xs md:text-sm hover:bg-neutral-800/80" onClick={() => { setLoginOpen(true); setLoginError(null); setLoginOk(false) }}>
-                    Entrar por otra cuenta
-                  </button>
-                </div>
-              </div>
-            )}
-            {progress >= 1 && timeReady && name.trim().length === 0 && (
+            {!accountDetected && progress >= 1 && timeReady && name.trim().length === 0 && (
               <div className="mt-3 text-xs md:text-sm text-red-300">Ingresa tu nombre para continuar</div>
             )}
-            {ready && (
+            {!accountDetected && ready && (
               <button
                 type="button"
                 className="mt-6 w-full rounded-md bg-neutral-100 text-black font-bold py-3.5 md:py-4 text-base hover:bg-white/90"
@@ -287,7 +293,7 @@ export default function LoadingOverlay() {
                 ¿Comenzamos?
               </button>
             )}
-            {!(hasCookieSession || !!savedEmail) && (
+            {!accountDetected && (
               <div className="mt-6 text-center">
                 <span className="text-xs md:text-sm text-neutral-300">¿ya tienes cuenta?</span>
                 <button type="button" className="ml-2 inline-flex items-center px-3 py-1.5 rounded-md border border-cyan-400/40 bg-neutral-900/70 text-cyan-200 text-xs md:text-sm hover:bg-neutral-800/80" onClick={() => { setLoginOpen(true); setLoginError(null); setLoginOk(false) }}>Iniciar sesión</button>
