@@ -460,7 +460,7 @@ export default function CinematicScroll() {
             className="object-cover object-center scene-image"
             priority
             sizes="100vw"
-            quality={80}
+            quality={60}
           />
           <div ref={text1Ref} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full px-6 opacity-0 pointer-events-none">
             <div className="relative text-center text-white">
@@ -487,7 +487,7 @@ export default function CinematicScroll() {
             className="object-cover object-center scene-image"
             loading="lazy"
             sizes="100vw"
-            quality={80}
+            quality={60}
           />
           <div ref={text2Ref} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full px-6 opacity-0 pointer-events-none">
             <div className="text-center text-white">

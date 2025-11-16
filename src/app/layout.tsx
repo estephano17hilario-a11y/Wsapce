@@ -31,12 +31,7 @@ export default function RootLayout({
         <meta name="google" content="notranslate" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="mp-public-key" content={process.env.MERCADO_PAGO_PUBLIC_KEY ?? process.env.NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY ?? ''} />
-        {/* Preload de imágenes críticas para primer render */}
-        <link rel="preload" as="image" href="/andromeda up - copia.webp" />
-        <link rel="preload" as="image" href="/espacio azul up - copia.webp" />
-        <link rel="preload" as="image" href="/persona sun up - copia.webp" />
-        <link rel="preload" as="image" href="/perxonas up - copia.webp" />
-        <link rel="preload" as="image" href="/tierra para implementar - copia - copia.webp" />
+        {/* Preload removido para minimizar Fast Data Transfer */}
         {process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN ? (
           <>
             <link rel="dns-prefetch" href="https://plausible.io" />
@@ -50,7 +45,6 @@ export default function RootLayout({
             src="https://plausible.io/js/script.tagged-events.js"
           />
         ) : null}
-        <Script src="https://sdk.mercadopago.com/js/v2" strategy="beforeInteractive" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black overflow-x-hidden notranslate`}

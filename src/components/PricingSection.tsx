@@ -22,6 +22,7 @@ type Plan = {
 
 export default function PricingSection() {
   const [user, setUser] = useState<{ id: string; email: string; plan: "bronce" | "plata" | "oro" } | null>(null)
+  const [displayName, setDisplayName] = useState<string>("")
   const [bronzeEmail, setBronzeEmail] = useState("")
   const [bronzeRef, setBronzeRef] = useState("")
   const [bronzeStatus, setBronzeStatus] = useState<{ ok?: boolean; error?: string } | null>(null)
@@ -60,6 +61,63 @@ export default function PricingSection() {
       } catch {}
     }
     load()
+  }, [])
+
+  async function ensureMercadoPago(): Promise<boolean> {
+    try {
+      type MPCtor = new (publicKey: string, options?: { locale?: string }) => { checkout: (opts: { preference: { id: string } }) => { render: (opts: { container: string; label: string }) => void } }
+      const has = (window as unknown as { MercadoPago?: MPCtor }).MercadoPago
+      if (typeof has === 'function') return true
+      await new Promise<void>((resolve, reject) => {
+        try {
+          const s = document.createElement('script')
+          s.src = 'https://sdk.mercadopago.com/js/v2'
+          s.async = true
+          s.onload = () => resolve()
+          s.onerror = () => reject(new Error('mp_sdk_error'))
+          document.head.appendChild(s)
+        } catch (e) { reject(e as Error) }
+      })
+      const ok = typeof (window as unknown as { MercadoPago?: MPCtor }).MercadoPago === 'function'
+      return ok
+    } catch { return false }
+  }
+
+  useEffect(() => {
+    try {
+      const n = typeof window !== 'undefined' ? localStorage.getItem('wspace_name') : ''
+      if (n) setDisplayName(n)
+      const sp = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
+      const pid = sp ? (sp.get('payment_id') || sp.get('collection_id') || sp.get('id')) : null
+      const status = sp ? sp.get('status') : null
+      if (pid && status === 'approved') {
+        ;(async () => {
+          try {
+            const r = await fetch(`/api/payments/confirm?id=${encodeURIComponent(pid)}`)
+            const d = await r.json()
+            if (d?.status === 'approved') {
+              const uRes = await fetch('/api/user', { cache: 'no-store' })
+              const uData = await uRes.json()
+              if (uData?.user) setUser(uData.user)
+              window.setTimeout(() => {
+                try {
+                  const nm = (n && n.trim()) ? n : (uData?.user?.email || '')
+                  window.dispatchEvent(new CustomEvent('gold_purchased', { detail: { email: uData?.user?.email, name: nm } }))
+                } catch {}
+              }, 2500)
+              setOroStatus({ ok: true })
+            }
+          } catch {}
+          finally {
+            try {
+              const url = new URL(window.location.href)
+              url.search = ''
+              history.replaceState({}, '', url.toString())
+            } catch {}
+          }
+        })()
+      }
+    } catch {}
   }, [])
 
 
@@ -173,6 +231,9 @@ export default function PricingSection() {
                   <span className={`price-value ${plan.id === "fundador-oro" ? "price-big" : ""}`}>{priceLabel(plan)}</span>
                   {plan.priceSuffix && <span className="price-suffix">{plan.priceSuffix}</span>}
                 </div>
+                {plan.variant === "starter" && user?.plan === 'oro' && (
+                  <div className="success-chip mt-2">Ahora formas parte de la élite, felicidades {displayName || (user?.email || '')}</div>
+                )}
                 {plan.variant === "enterprise" && (
                   <div className="pricing-email">
                     <input
@@ -271,14 +332,14 @@ export default function PricingSection() {
                             if (!r.ok || !preferenceId) { setOroStatus({ error: msg(err || 'network_error') }); return }
                             const pub = process.env.NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY ?? document.querySelector('meta[name="mp-public-key"]')?.getAttribute('content') ?? undefined
                             if (!pub) { setOroStatus({ error: 'Falta clave pública' }); return }
+                            const ok = await ensureMercadoPago()
+                            if (!ok) { setOroStatus({ error: 'No se pudo cargar Mercado Pago' }); return }
                             type MPCtor = new (publicKey: string, options?: { locale?: string }) => { checkout: (opts: { preference: { id: string } }) => { render: (opts: { container: string; label: string }) => void } }
-                            const MP = (window as unknown as { MercadoPago?: MPCtor }).MercadoPago
-                            if (typeof MP === 'function') {
-                              const mp = new MP(pub as string, { locale: 'es-PE' })
-                               const checkout = mp.checkout({ preference: { id: preferenceId } })
-                               checkout.render({ container: '#mp-checkout-gold', label: 'Pagar $1.00 USD' })
-                              setOroStatus({ ok: true })
-                            }
+                            const MP = (window as unknown as { MercadoPago?: MPCtor }).MercadoPago!
+                            const mp = new MP(pub as string, { locale: 'es-PE' })
+                            const checkout = mp.checkout({ preference: { id: preferenceId } })
+                            checkout.render({ container: '#mp-checkout-gold', label: 'Pagar $1.00 USD' })
+                            setOroStatus({ ok: true })
                           } catch {}
                           finally { setOroProcessing(false) }
                           return

@@ -35,6 +35,7 @@ export function preloadImages(
         i.decoding = "async";
         // Establece atributo de carga sin usar 'any'
         i.setAttribute("loading", "eager");
+        i.setAttribute("fetchpriority", "high");
         i.src = url;
         i.onload = () => inc();
         i.onerror = () => inc();

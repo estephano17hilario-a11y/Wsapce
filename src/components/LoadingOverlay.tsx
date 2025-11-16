@@ -1,13 +1,23 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { preloadImages } from "@/lib/preload"
 
 export default function LoadingOverlay() {
-  const [visible, setVisible] = useState(true)
+  const [visible, setVisible] = useState(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const sp = new URLSearchParams(window.location.search)
+        const hasName = !!localStorage.getItem('wspace_name')
+        const cameFromMp = sp.has('payment_id') || sp.has('collection_id') || sp.has('status')
+        if (hasName || cameFromMp) return false
+      }
+    } catch {}
+    return true
+  })
   const [name, setName] = useState("")
   const [progress, setProgress] = useState(0)
   const [uiProgress, setUiProgress] = useState(0)
+  const [nameDelayOk, setNameDelayOk] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const rafRef = useRef<number>(0)
   const startedRef = useRef(false)
@@ -15,12 +25,29 @@ export default function LoadingOverlay() {
   const prevBodyOverflowRef = useRef<string>("")
   const startAtRef = useRef<number>(0)
   const [timeReady, setTimeReady] = useState(false)
+  const nameDelayTimerRef = useRef<number | null>(null)
+  const typedAtRef = useRef<number>(0)
 
   useEffect(() => {
     startAtRef.current = performance.now()
     const id = setTimeout(() => setTimeReady(true), 1200)
     return () => clearTimeout(id)
   }, [])
+
+  useEffect(() => {
+    const hasText = name.trim().length > 0
+    if (hasText) {
+      typedAtRef.current = performance.now()
+      if (nameDelayTimerRef.current) { clearTimeout(nameDelayTimerRef.current); nameDelayTimerRef.current = null }
+      window.setTimeout(() => setNameDelayOk(false), 0)
+      nameDelayTimerRef.current = window.setTimeout(() => { setNameDelayOk(true) }, 1500)
+    } else {
+      typedAtRef.current = 0
+      if (nameDelayTimerRef.current) { clearTimeout(nameDelayTimerRef.current); nameDelayTimerRef.current = null }
+      window.setTimeout(() => setNameDelayOk(false), 0)
+    }
+    return () => { if (nameDelayTimerRef.current) { clearTimeout(nameDelayTimerRef.current); nameDelayTimerRef.current = null } }
+  }, [name])
 
   useEffect(() => {
     if (visible) {
@@ -85,18 +112,16 @@ export default function LoadingOverlay() {
   }, [])
 
   useEffect(() => {
-    const urls = [
-      "/andromeda up - copia.webp",
-      "/espacio azul up - copia.webp",
-      "/persona sun up - copia.webp",
-      "/perxonas up - copia.webp",
-      "/tierra para implementar - copia - copia.webp",
-    ]
-    const total = urls.length
-    preloadImages(urls, (loaded) => {
-      const p = Math.min(1, loaded / Math.max(1, total))
-      setProgress(p)
-    }).catch(() => {})
+    let r = 0
+    const step = () => {
+      setProgress((p) => {
+        const inc = 0.03
+        return Math.min(1, p + inc)
+      })
+      r = requestAnimationFrame(step)
+    }
+    r = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(r)
   }, [])
 
   useEffect(() => {
@@ -116,7 +141,7 @@ export default function LoadingOverlay() {
     return () => cancelAnimationFrame(r)
   }, [progress, visible])
 
-  const ready = progress >= 1 && timeReady
+  const ready = progress >= 1 && timeReady && name.trim().length > 0 && nameDelayOk
 
   const start = () => {
     try {
@@ -153,6 +178,9 @@ export default function LoadingOverlay() {
               </div>
               <div className="mt-2 text-sm md:text-base text-neutral-300">Precargando… {Math.round(uiProgress * 100)}%</div>
             </div>
+            {progress >= 1 && timeReady && name.trim().length === 0 && (
+              <div className="mt-3 text-xs md:text-sm text-red-300">Ingresa tu nombre para continuar</div>
+            )}
             {ready && (
               <button
                 type="button"

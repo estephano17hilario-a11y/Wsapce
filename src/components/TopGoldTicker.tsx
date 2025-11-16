@@ -84,9 +84,10 @@ export default function TopGoldTicker() {
     window.addEventListener('start_cosmic', onStartCosmic)
     const onGold = (e: Event) => {
       try {
-        const ev = e as CustomEvent<{ email?: string }>
+        const ev = e as CustomEvent<{ email?: string; name?: string }>
         const email: string | undefined = ev?.detail?.email
-        const label = email ? abbrEmail(email) : pickName()
+        const name: string | undefined = ev?.detail?.name
+        const label = name?.trim() ? name.trim() : (email ? abbrEmail(email) : pickName())
         setActive(true)
         setMsg(`${label} acaba de obtener la Insignia de Oro`)
         setShow(true)

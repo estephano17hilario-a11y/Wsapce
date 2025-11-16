@@ -24,26 +24,11 @@ export default function RankingsSection() {
         if (!mounted) return
         setItems(data.top as RankItem[])
         setUpdatedAt(Date.now())
-        try {
-          const [uRes, sRes] = await Promise.all([
-            fetch('/api/user', { cache: 'no-store' }),
-            fetch('/api/referrals/stats', { cache: 'no-store' })
-          ])
-          const uData = await uRes.json()
-          setMe(uData.user || null)
-          const sData = await sRes.json()
-          if (!sRes.ok) { setMyError(sData.error || 'error') }
-          else {
-            const referees = Array.isArray(sData.stats.referees) ? (sData.stats.referees as { email: string; plan: string }[]) : []
-            setMyStats({ totalInvites: sData.stats.totalInvites, byPlan: sData.stats.byPlan, referees })
-            setMyError(null)
-          }
-        } catch { setMyError('network_error') }
       } catch { if (!mounted) return; setError('network_error') }
       finally { if (!mounted) return; setLoading(false) }
     }
     load()
-    const id = setInterval(load, 60_000)
+    const id = setInterval(load, 600_000)
     return () => { mounted = false; clearInterval(id) }
   }, [])
 
@@ -143,7 +128,7 @@ export default function RankingsSection() {
                       }
                     } catch { setMyError('network_error') }
                   }}
-                >Actualizar</button>
+                >Refrescar</button>
               </div>
               <div className="mt-4 grid gap-4 md:grid-cols-3">
                 <div className="rounded-md p-4 bg-slate-900/50 border border-slate-700/40">

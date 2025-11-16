@@ -1,10 +1,10 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { MercadoPagoConfig, Preference } from 'mercadopago'
 import { decodeSession } from '@/lib/auth'
 import { getUserById } from '@/lib/referralDB'
 
-export async function POST() {
+export async function POST(req: NextRequest) {
   const accessToken = process.env.MERCADO_PAGO_ACCESS_TOKEN
   if (!accessToken) return NextResponse.json({ error: 'missing_access_token' }, { status: 500 })
   const title = 'PACK FUNDADOR (WSPACE.LIVE)'
@@ -15,16 +15,17 @@ export async function POST() {
   const store = await cookies()
   const uid = decodeSession(store.get('wspace_sess')?.value) || store.get('wspace_uid')?.value || ''
   const user = uid ? await getUserById(uid) : null
+  const origin = req.nextUrl.origin
   try {
     const result = await preference.create({
       body: {
         items: [{ id: 'wspace_gold_pack', title, unit_price: 1.0, quantity: 1, currency_id: 'USD' }],
         back_urls: {
-          success: `https://wspacelive.vercel.app/success`,
-          failure: `https://wspacelive.vercel.app/failure`,
-          pending: `https://wspacelive.vercel.app/pending`
+          success: `${origin}?status=approved`,
+          failure: `${origin}?status=failure`,
+          pending: `${origin}?status=pending`
         },
-        notification_url: `https://wspacelive.vercel.app/api/webhooks/mercadopago`,
+        notification_url: `${origin}/api/webhooks/mercadopago`,
         external_reference: uid || 'anon',
         metadata: uid ? { uid } : {},
         payer: user?.email ? { email: user.email } : undefined,
