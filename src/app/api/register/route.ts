@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { createUser, getUserByEmail, normalizeRefLink, readDB, recordRelation, getCodeStatus } from '@/lib/referralDB'
+import { createUser, getUserByEmail, normalizeRefLink, readDB, recordRelation, getCodeStatus, writeDB, now } from '@/lib/referralDB'
 import { encodeSession } from '@/lib/auth'
 
 function validEmail(e: string) {
@@ -20,8 +20,14 @@ export async function POST(req: NextRequest) {
   if (code) {
     const status = await getCodeStatus(code)
     if (status.status === 'not_found') return NextResponse.json({ error: 'ref_invalid' }, { status: 400 })
-    if (status.status === 'inactive') return NextResponse.json({ error: 'ref_inactive' }, { status: 400 })
-    if (status.status === 'expired') return NextResponse.json({ error: 'ref_expired' }, { status: 400 })
+    if (status.status === 'inactive' || status.status === 'expired') {
+      try {
+        const db2 = await readDB()
+        const link2 = db2.links.find(x => x.code.toUpperCase() === code.toUpperCase())
+        if (link2) { link2.lastStatus = status.status; link2.lastStatusAt = now(); await writeDB(db2) }
+      } catch {}
+      return NextResponse.json({ error: status.status === 'inactive' ? 'ref_inactive' : 'ref_expired' }, { status: 400 })
+    }
     const link = status.link!
     const db = await readDB()
     const referrer = db.users.find(u => u.id === link.userId)

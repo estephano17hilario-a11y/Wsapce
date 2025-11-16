@@ -25,9 +25,7 @@ export default function PricingSection() {
   const [displayName, setDisplayName] = useState<string>("")
   const [bronzeEmail, setBronzeEmail] = useState("")
   const [bronzeRef, setBronzeRef] = useState("")
-  const [bronzeRefStatus, setBronzeRefStatus] = useState<"unknown" | "valid" | "expired" | "inactive" | "not_found">("unknown")
-  const [bronzeRefExpiresAt, setBronzeRefExpiresAt] = useState<number | null>(null)
-  const [bronzeRefChecking, setBronzeRefChecking] = useState(false)
+  const [plataLinkStatus, setPlataLinkStatus] = useState<"unknown" | "valid" | "expired" | "inactive" | "not_found">("unknown")
   const [bronzeStatus, setBronzeStatus] = useState<{ ok?: boolean; error?: string } | null>(null)
   const [bronzeLoading, setBronzeLoading] = useState(false)
   const [plataLink, setPlataLink] = useState<string | null>(null)
@@ -67,50 +65,7 @@ export default function PricingSection() {
     } catch {}
   }
   useEffect(() => { fetchUser() }, [])
-  useEffect(() => {
-    const cache = (window as unknown as { __ref_cache?: Map<string, { status: string; expiresAt: number | null; at: number }> }).__ref_cache || new Map()
-    ;(window as unknown as { __ref_cache?: Map<string, { status: string; expiresAt: number | null; at: number }> }).__ref_cache = cache
-    let t: number | null = null
-    const run = async (value: string) => {
-      const key = value.trim()
-      if (!key || key.length < 8) { setBronzeRefStatus('unknown'); setBronzeRefExpiresAt(null); return }
-      const cached = cache.get(key)
-      const now = Date.now()
-      if (cached && now - cached.at < 60000) {
-        const stCached = (cached.status === 'valid' || cached.status === 'expired' || cached.status === 'inactive' || cached.status === 'not_found' ? cached.status : 'unknown') as 'unknown' | 'valid' | 'expired' | 'inactive' | 'not_found'
-        setBronzeRefStatus(stCached)
-        setBronzeRefExpiresAt(cached.expiresAt)
-        return
-      }
-      setBronzeRefChecking(true)
-      try {
-        const u = new URL(window.location.href)
-        u.pathname = '/api/referrals/validate'
-        u.search = `code=${encodeURIComponent(key)}`
-        const r = await fetch(u.toString(), { method: 'GET' })
-        if (r.status === 304) { return }
-        const d = await r.json()
-        const st = (d?.status || 'not_found') as typeof bronzeRefStatus
-        const ex = typeof d?.expiresAt === 'number' ? d.expiresAt : null
-        setBronzeRefStatus(st)
-        setBronzeRefExpiresAt(ex)
-        cache.set(key, { status: st, expiresAt: ex, at: now })
-      } catch { setBronzeRefStatus('unknown'); setBronzeRefExpiresAt(null) }
-      finally { setBronzeRefChecking(false) }
-    }
-    t = window.setTimeout(() => { run(bronzeRef) }, 420)
-    return () => { if (t) window.clearTimeout(t) }
-  }, [bronzeRef])
-
-  const refStatusText = useMemo(() => {
-    switch (bronzeRefStatus) {
-      case 'valid': return bronzeRefExpiresAt ? `Válido, expira: ${new Date(bronzeRefExpiresAt).toLocaleDateString()}` : 'Válido'
-      case 'expired': return 'Enlace caducado'
-      case 'inactive': return 'Enlace inactivo'
-      case 'not_found': return 'Enlace inválido'
-      default: return ''
-    }
-  }, [bronzeRefStatus, bronzeRefExpiresAt])
+  
   useEffect(() => {
     const onSess = () => { fetchUser() }
     window.addEventListener('user_session_changed', onSess)
@@ -118,22 +73,20 @@ export default function PricingSection() {
   }, [])
 
   useEffect(() => {
-    if (user?.plan === 'plata' && !plataLink && !plataGenerating) {
+    if (user?.plan === 'plata') {
       ;(async () => {
         try {
-          setPlataGenerating(true)
           setPlataStatus(null)
-          const res = await fetch('/api/referrals/generate', { method: 'POST' })
-          const data = await res.json()
-          if (!res.ok) { setPlataStatus({ error: msg(data.error) }); return }
-          setPlataStatus({ ok: true })
-          setPlataLink(data.link as string)
-          setPlataExpiresAt(typeof data.expiresAt === 'number' ? data.expiresAt : null)
+          const r = await fetch('/api/referrals/status', { cache: 'no-store' })
+          const d = await r.json()
+          if (!r.ok) { setPlataStatus({ error: msg(d.error) }); return }
+          setPlataLinkStatus((d?.status || 'unknown') as typeof plataLinkStatus)
+          setPlataLink(typeof d?.code === 'string' ? d.code : null)
+          setPlataExpiresAt(typeof d?.expiresAt === 'number' ? d.expiresAt : null)
         } catch { setPlataStatus({ error: msg('network_error') }) }
-        finally { setPlataGenerating(false) }
       })()
     }
-  }, [user?.plan, plataLink, plataGenerating])
+  }, [user?.plan])
 
   async function ensureMercadoPago(): Promise<boolean> {
     try {
@@ -351,7 +304,6 @@ export default function PricingSection() {
                       onClick={async () => {
                         setBronzeStatus(null)
                         setPlataLink(null)
-                        if (bronzeRef && bronzeRefStatus !== 'valid') { setBronzeStatus({ error: msg(bronzeRefStatus === 'expired' ? 'ref_expired' : bronzeRefStatus === 'inactive' ? 'ref_inactive' : 'ref_invalid') }); return }
                         setBronzeLoading(true)
                         try {
                           const res = await fetch('/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: bronzeEmail, referralLink: bronzeRef }) })
@@ -368,11 +320,7 @@ export default function PricingSection() {
                     >
                       {bronzeLoading ? 'Registrando…' : plan.ctaLabel}
                     </button>
-                    {bronzeRef && (
-                      <div className="mt-2 text-xs text-cyan-200/80">
-                        {bronzeRefChecking ? 'Validando enlace…' : refStatusText}
-                      </div>
-                    )}
+                    
                     {bronzeStatus?.error && <div className="alert-bad mt-2">{bronzeStatus.error}</div>}
                     {bronzeStatus?.ok && (
                       <div className="success-chip mt-2">Registro completado</div>
@@ -395,10 +343,10 @@ export default function PricingSection() {
                               'pricing-cta',
                               plan.variant === 'creator' ? 'cta-secondary' : 'cta-primary',
                               { 'btn-loading': plan.variant === 'creator' && plataGenerating },
-                              { 'opacity-60 cursor-not-allowed': plan.variant === 'creator' && !!plataLink }
+                              { 'opacity-60 cursor-not-allowed': plan.variant === 'creator' && !!plataLink && plataLinkStatus === 'valid' }
                             )
                       }
-                      disabled={plan.variant === 'creator' && !!plataLink}
+                      disabled={plan.variant === 'creator' && !!plataLink && plataLinkStatus === 'valid'}
                       onClick={async () => {
                         if (plan.variant === 'creator') {
                           setPlataStatus(null)
@@ -495,7 +443,9 @@ export default function PricingSection() {
                     )}
                     {plan.variant === 'creator' && (
                       <div className="mt-2 text-xs text-cyan-200/80">
-                        {user?.plan === 'plata' ? 'Tu plan: PLATA' : user?.plan === 'bronce' ? 'Tu plan: BRONCE (se requiere subir a PLATA para generar link)' : 'Regístrate en BRONCE para continuar'}
+                        {user?.plan === 'plata' ? (
+                          plataLinkStatus === 'valid' ? 'Tu plan: PLATA — Enlace activo' : plataLinkStatus === 'expired' ? 'Tu plan: PLATA — Enlace caducado (genera uno nuevo)' : plataLinkStatus === 'inactive' ? 'Tu plan: PLATA — Enlace inactivo (genera uno nuevo)' : 'Tu plan: PLATA — Aún no has generado enlace'
+                        ) : user?.plan === 'bronce' ? 'Tu plan: BRONCE (se requiere subir a PLATA para generar link)' : 'Regístrate en BRONCE para continuar'}
                       </div>
                     )}
                     {plan.variant === 'creator' && plataGenerating && (
@@ -504,7 +454,7 @@ export default function PricingSection() {
                         <div className="text-cyan-200/80 mt-1">Generando tu enlace único…</div>
                       </div>
                     )}
-                    {plan.variant === 'creator' && plataLink && (
+                    {plan.variant === 'creator' && plataLink && plataLinkStatus === 'valid' && (
                       <div className="mt-3 text-xs">
                         <div className="text-emerald-300">Enlace generado:</div>
                         <div className="break-all text-cyan-200/90">{plataLink}</div>
