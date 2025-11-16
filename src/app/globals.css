@@ -69,7 +69,7 @@ body {
   background:
     radial-gradient(closest-side, rgba(34, 211, 238, 0.10), transparent),
     radial-gradient(1200px 900px at 45% 40%, rgba(167,139,250,0.08), transparent 60%);
-  filter: blur(22px);
+  filter: blur(8px);
   will-change: filter, opacity;
 }
 
@@ -77,7 +77,7 @@ body {
   background:
     linear-gradient(180deg, rgba(34, 211, 238, 0.08), transparent),
     linear-gradient(180deg, rgba(168,85,247,0.10), transparent);
-  filter: blur(18px);
+  filter: blur(6px);
   will-change: filter, opacity;
 }
 
@@ -137,7 +137,7 @@ body {
 .lux-card {
   padding: 14px;
   border-radius: 16px;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(3px);
   background:
     radial-gradient(120% 90% at 12% 14%, rgba(16, 37, 84, 0.40), transparent 60%),
     radial-gradient(120% 90% at 88% 86%, rgba(30, 64, 175, 0.35), transparent 62%),
@@ -150,8 +150,8 @@ body {
 .gradient-ring {
   border-radius: 24px;
   background: conic-gradient(from 140deg, rgba(34, 211, 238, 0.25), rgba(168,85,247,0.25), transparent 70%);
-  filter: blur(30px);
-  animation: spin 18s linear infinite;
+  filter: blur(12px);
+  animation: spin 40s linear infinite;
 }
 
 .hover-tilt {
@@ -166,9 +166,9 @@ body {
 /* Ruido premium y subrayado de lujo para títulos */
 .premium-noise {
   background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
-  background-size: 3px 3px;
-  opacity: 0.19;
-  mix-blend-mode: soft-light;
+  background-size: 8px 8px;
+  opacity: 0.08;
+  mix-blend-mode: normal;
 }
 
 .title-underline {

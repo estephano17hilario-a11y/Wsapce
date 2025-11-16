@@ -13,10 +13,11 @@ type PixelCanvasProps = {
   showShip?: boolean
   // Señal para generar una bandera ondeante
   spawnFlagSignal?: number
+  active?: boolean
 }
 
 // Canvas cósmico con estrellas, estrella fugaz y pixel art de nave
-export default function PixelCanvas({ width = 420, height = 300, explodeSignal = 0, paintable = false, showShip = true, spawnFlagSignal = 0 }: PixelCanvasProps) {
+export default function PixelCanvas({ width = 420, height = 300, explodeSignal = 0, paintable = false, showShip = true, spawnFlagSignal = 0, active = true }: PixelCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const startExplosionRef = useRef<(() => void) | null>(null)
 
@@ -34,7 +35,7 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
 
     // Estrellas de fondo
-    const STAR_COUNT = 120
+    const STAR_COUNT = 60
     const stars = Array.from({ length: STAR_COUNT }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
@@ -74,7 +75,8 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
     let hue = 190
     let t = 0
     let raf = 0
-    let running = true
+    let running = !!active
+    let lastFrame = 0
     let isInView = true
     let shipDestroyed = false
     let isExploding = false
@@ -690,8 +692,11 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
       ctx.restore()
     }
 
-    const render = () => {
+    const render = (now?: number) => {
       if (!running) return
+      const n = typeof now === 'number' ? now : performance.now()
+      if (n - lastFrame < 33) { raf = requestAnimationFrame(render); return }
+      lastFrame = n
       t++
 
       // Actualiza progreso de animación sincronizada y escala global
@@ -813,7 +818,7 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
     // Pausar cuando el canvas no esté visible para ahorrar CPU
     const io = new IntersectionObserver(([entry]) => {
       isInView = entry.isIntersecting
-      running = isInView && !document.hidden
+      running = isInView && !document.hidden && !!active
       if (running && !raf) {
         raf = requestAnimationFrame(render)
       } else if (!running && raf) {
@@ -824,7 +829,7 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
     io.observe(canvas)
 
     const onVisibility = () => {
-      running = isInView && !document.hidden
+      running = isInView && !document.hidden && !!active
       if (running && !raf) {
         raf = requestAnimationFrame(render)
       } else if (!running && raf) {

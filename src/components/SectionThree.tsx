@@ -36,6 +36,7 @@ export default function SectionThree() {
   const [flagChatOnce, setFlagChatOnce] = useState(false)
   const [explosionDone, setExplosionDone] = useState(false)
   const [guardDialogOpen, setGuardDialogOpen] = useState(false)
+  const [active, setActive] = useState(false)
 
   const handleSend = () => {
     const text = inputRef.current?.innerText || ''
@@ -84,6 +85,16 @@ export default function SectionThree() {
       tl.scrollTrigger?.kill()
       tl.kill()
     }
+  }, [])
+
+  useEffect(() => {
+    const el = sectionRef.current
+    if (!el) return
+    const io = new IntersectionObserver(([entry]) => {
+      setActive(entry.isIntersecting)
+    }, { root: null, threshold: 0.15 })
+    io.observe(el)
+    return () => io.disconnect()
   }, [])
 
   // Auto-scroll del chat hacia abajo cuando llegan nuevos mensajes (instantáneo para rendimiento)
@@ -182,7 +193,7 @@ export default function SectionThree() {
             <div className="absolute -inset-4 -z-10 gradient-ring" />
             {/* Lienzo cósmico interactivo (Canvas API, no HTML grid) */}
             <div className="flex items-center justify-center">
-              <PixelCanvas width={360} height={240} explodeSignal={explodeTick} />
+              <PixelCanvas width={360} height={240} explodeSignal={explodeTick} active={active} />
             </div>
             <div className="mt-4 flex justify-center relative">
               {/* Overlay global rojo (sin límites), solo primer clic */}
@@ -232,7 +243,7 @@ export default function SectionThree() {
             <div className="absolute -inset-4 -z-10 gradient-ring" />
             {/* Lienzo cósmico pintable por celdas (mockup 2 sin destrucción) */}
             <div className="flex items-center justify-center">
-              <PixelCanvas width={360} height={240} paintable showShip={false} spawnFlagSignal={flagSpawnTick} />
+              <PixelCanvas width={360} height={240} paintable showShip={false} spawnFlagSignal={flagSpawnTick} active={active} />
             </div>
             <div className="mt-4 flex justify-center">
               <button
