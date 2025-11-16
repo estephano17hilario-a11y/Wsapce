@@ -28,7 +28,11 @@ export async function GET(req: NextRequest) {
         upgraded = true
       }
     }
-    return new NextResponse(JSON.stringify({ status, upgraded }), { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'private, no-store' } })
+    const res = new NextResponse(JSON.stringify({ status, upgraded }), { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'private, no-store' } })
+    if (status === 'approved') {
+      try { res.cookies.set('wspace_plan', 'oro', { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' }) } catch {}
+    }
+    return res
   } catch {
     return new NextResponse(JSON.stringify({ error: 'payment_lookup_failed' }), { status: 500, headers: { 'Content-Type': 'application/json' } })
   }

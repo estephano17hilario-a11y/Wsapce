@@ -35,6 +35,11 @@ export default function LoadingOverlay() {
   const [timeReady, setTimeReady] = useState(false)
   const nameDelayTimerRef = useRef<number | null>(null)
   const typedAtRef = useRef<number>(0)
+  const [loginOpen, setLoginOpen] = useState(false)
+  const [loginEmail, setLoginEmail] = useState('')
+  const [loginLoading, setLoginLoading] = useState(false)
+  const [loginError, setLoginError] = useState<string | null>(null)
+  const [loginOk, setLoginOk] = useState(false)
 
   useEffect(() => {
     startAtRef.current = performance.now()
@@ -196,8 +201,38 @@ export default function LoadingOverlay() {
                 ¿Comenzamos?
               </button>
             )}
+            <div className="mt-6 text-center">
+              <span className="text-xs md:text-sm text-neutral-300">¿ya tienes cuenta?</span>
+              <button type="button" className="ml-2 inline-flex items-center px-3 py-1.5 rounded-md border border-cyan-400/40 bg-neutral-900/70 text-cyan-200 text-xs md:text-sm hover:bg-neutral-800/80" onClick={() => { setLoginOpen(true); setLoginError(null); setLoginOk(false) }}>Iniciar sesión</button>
+            </div>
           </div>
           <div className="absolute left-4 bottom-3 text-white/70 text-xs md:text-sm">Wspace</div>
+          {loginOpen && (
+            <div className="absolute inset-0 z-[10000] grid place-items-center bg-black/60">
+              <div className="lux-card p-5 w-[92%] max-w-sm bg-neutral-900/80 border border-cyan-400/30">
+                <div className="text-center text-lg font-bold">Inicia sesión</div>
+                <input type="email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} placeholder="Tu Gmail" className="mt-4 w-full rounded-md bg-neutral-900 border border-neutral-700 px-4 py-3 text-base focus:outline-none focus:ring-1 focus:ring-cyan-400" aria-label="Tu Gmail" />
+                {loginError && <div className="mt-2 text-xs text-red-400">{loginError}</div>}
+                {loginOk && <div className="mt-2 text-xs text-emerald-300">Sesión iniciada</div>}
+                <div className="mt-4 flex items-center justify-end gap-2">
+                  <button type="button" className="px-3 py-1.5 rounded-md text-xs md:text-sm bg-neutral-800 text-white" onClick={() => setLoginOpen(false)}>Cerrar</button>
+                  <button type="button" className={`px-3 py-1.5 rounded-md text-xs md:text-sm ${loginLoading ? 'opacity-60 cursor-not-allowed' : 'bg-cyan-500 text-black hover:bg-cyan-400'}`} onClick={async () => {
+                    if (loginLoading) return
+                    setLoginError(null)
+                    setLoginOk(false)
+                    setLoginLoading(true)
+                    try {
+                      const r = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: loginEmail }) })
+                      const d = await r.json()
+                      if (!r.ok) { setLoginError(d.error || 'error'); return }
+                      setLoginOk(true)
+                    } catch { setLoginError('network_error') }
+                    finally { setLoginLoading(false) }
+                  }}>Entrar</button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
       

@@ -17,12 +17,20 @@ export async function POST(req: NextRequest) {
   if (plan === 'plata') {
     if (user.plan !== 'bronce') return NextResponse.json({ error: 'must_be_bronce' }, { status: 400 })
     const updated = await upgradeUserToPlata(uid)
-    return NextResponse.json({ ok: true, user: updated })
+    const res = NextResponse.json({ ok: true, user: updated })
+    try {
+      res.cookies.set('wspace_plan', updated?.plan || 'plata', { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
+    } catch {}
+    return res
   }
   if (plan === 'oro') {
     if (user.plan === 'oro') return NextResponse.json({ ok: true, user })
     const updated = await upgradeUserToOro(uid)
-    return NextResponse.json({ ok: true, user: updated })
+    const res = NextResponse.json({ ok: true, user: updated })
+    try {
+      res.cookies.set('wspace_plan', updated?.plan || 'oro', { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
+    } catch {}
+    return res
   }
   return NextResponse.json({ error: 'plan_invalid' }, { status: 400 })
 }
