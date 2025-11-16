@@ -53,15 +53,18 @@ export default function PricingSection() {
     }
   }
 
+  const fetchUser = async () => {
+    try {
+      const res = await fetch('/api/user', { cache: 'no-store' })
+      const data = await res.json()
+      if (data.user) setUser(data.user)
+    } catch {}
+  }
+  useEffect(() => { fetchUser() }, [])
   useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await fetch('/api/user', { cache: 'no-store' })
-        const data = await res.json()
-        if (data.user) setUser(data.user)
-      } catch {}
-    }
-    load()
+    const onSess = () => { fetchUser() }
+    window.addEventListener('user_session_changed', onSess)
+    return () => window.removeEventListener('user_session_changed', onSess)
   }, [])
 
   async function ensureMercadoPago(): Promise<boolean> {

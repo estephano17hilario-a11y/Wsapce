@@ -7,9 +7,8 @@ export default function LoadingOverlay() {
   const [visible, setVisible] = useState(() => {
     try {
       if (typeof window !== 'undefined') {
-        const sp = new URLSearchParams(window.location.search)
-        const cameFromMp = sp.has('payment_id') || sp.has('collection_id') || sp.has('status')
-        if (cameFromMp) return false
+        const skip = sessionStorage.getItem('skip_overlay_once') === '1'
+        if (skip) { sessionStorage.removeItem('skip_overlay_once'); return false }
       }
     } catch {}
     return true
@@ -226,6 +225,20 @@ export default function LoadingOverlay() {
                       const d = await r.json()
                       if (!r.ok) { setLoginError(d.error || 'error'); return }
                       setLoginOk(true)
+                      try { window.dispatchEvent(new CustomEvent('user_session_changed')) } catch {}
+                      try {
+                        const url = new URL(window.location.href)
+                        url.hash = 'pricing'
+                        history.replaceState({}, '', url.toString())
+                      } catch {}
+                      setLoginOpen(false)
+                      document.documentElement.style.overflow = prevHtmlOverflowRef.current || ""
+                      document.body.style.overflow = prevBodyOverflowRef.current || ""
+                      setVisible(false)
+                      try {
+                        const el = document.getElementById('pricing')
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                      } catch {}
                     } catch { setLoginError('network_error') }
                     finally { setLoginLoading(false) }
                   }}>Entrar</button>
