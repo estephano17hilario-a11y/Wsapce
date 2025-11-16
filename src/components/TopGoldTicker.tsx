@@ -19,12 +19,6 @@ export default function TopGoldTicker() {
   
 
   useEffect(() => {
-    function pickName() {
-      const names = ['nova','strix','zephyr','lyra','orion','vega','kael','astra','nox','raven','ember','onyx','echo','quake','blaze','flare','vertex','delta','sigma','omega','sol','luna','arix','kira','zane','ivy','nero','pax','quinn','vex']
-      const n = names[Math.floor(Math.random() * names.length)]
-      const num = Math.floor(Math.random() * 900) + 100
-      return `${n}${num}`
-    }
     function abbrEmail(e?: string | null) {
       if (!e) return '—'
       const parts = e.split('@')
@@ -49,24 +43,6 @@ export default function TopGoldTicker() {
       if (flashTimerRef.current) { clearTimeout(flashTimerRef.current); flashTimerRef.current = null }
       flashTimerRef.current = window.setTimeout(() => { setFlash(false) }, 500)
     }
-
-    function scheduleNext(initialDelay?: number) {
-      if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null }
-      const delay = typeof initialDelay === 'number' ? initialDelay : (Math.floor(10 + Math.random() * 30) * 1000)
-      timerRef.current = window.setTimeout(() => {
-        const name = pickName()
-        setMsg(`${name} acaba de obtener la Insignia de Oro`)
-        setShow(true)
-        doFlash()
-        kickCompactCycle()
-        if (!stickyRef.current) {
-          if (hideRef.current) { clearTimeout(hideRef.current); hideRef.current = null }
-          hideRef.current = window.setTimeout(() => { setShow(false); scheduleNext() }, 6000)
-        } else {
-          scheduleNext()
-        }
-      }, delay)
-    }
     const onStartCosmic = () => {
       window.setTimeout(() => {
         setActive(true)
@@ -75,10 +51,7 @@ export default function TopGoldTicker() {
         setShow(true)
         doFlash()
         kickCompactCycle()
-        if (!startedRef.current) {
-          startedRef.current = true
-          scheduleNext(1500)
-        }
+        startedRef.current = true
       }, 2700)
     }
     window.addEventListener('start_cosmic', onStartCosmic)
@@ -87,24 +60,46 @@ export default function TopGoldTicker() {
         const ev = e as CustomEvent<{ email?: string; name?: string }>
         const email: string | undefined = ev?.detail?.email
         const name: string | undefined = ev?.detail?.name
-        const label = name?.trim() ? name.trim() : (email ? abbrEmail(email) : pickName())
+        const label = name?.trim() ? name.trim() : (email ? abbrEmail(email) : '')
         setActive(true)
-        setMsg(`${label} acaba de obtener la Insignia de Oro`)
+        setMsg(label ? `${label} acaba de obtener la Insignia de Oro` : `Insignia de Oro confirmada`)
         setShow(true)
         doFlash()
         kickCompactCycle()
         if (!stickyRef.current) {
           if (hideRef.current) { clearTimeout(hideRef.current); hideRef.current = null }
-          hideRef.current = window.setTimeout(() => { setShow(false); scheduleNext(10_000) }, 6000)
-        } else {
-          scheduleNext(10_000)
+          hideRef.current = window.setTimeout(() => { setShow(false) }, 6000)
         }
       } catch {}
     }
     window.addEventListener('gold_purchased', onGold)
+    const poll = () => {
+      try {
+        const since = Math.floor(Date.now() - 60_000)
+        fetch(`/api/gold/events/recent?limit=3&since=${since}`).then(r => r.json()).then(d => {
+          const arr = (d?.events || []) as { email?: string; name?: string }[]
+          if (arr.length > 0) {
+            const ev = arr[0]
+            const label = (ev.name && ev.name.trim()) ? ev.name.trim() : (ev.email ? abbrEmail(ev.email) : '')
+            setActive(true)
+            setMsg(label ? `${label} acaba de obtener la Insignia de Oro` : `Insignia de Oro confirmada`)
+            setShow(true)
+            doFlash()
+            kickCompactCycle()
+            if (!stickyRef.current) {
+              if (hideRef.current) { clearTimeout(hideRef.current); hideRef.current = null }
+              hideRef.current = window.setTimeout(() => { setShow(false) }, 6000)
+            }
+          }
+        }).catch(() => {})
+      } catch {}
+    }
+    poll()
+    const id = window.setInterval(() => poll(), 8000)
     return () => {
       window.removeEventListener('start_cosmic', onStartCosmic)
       window.removeEventListener('gold_purchased', onGold)
+      window.clearInterval(id)
     }
   }, [])
 
@@ -113,11 +108,15 @@ export default function TopGoldTicker() {
   }, [sticky])
 
   useEffect(() => {
+    const t = timerRef.current
+    const h = hideRef.current
+    const c = compactTimerRef.current
+    const f = flashTimerRef.current
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current)
-      if (hideRef.current) clearTimeout(hideRef.current)
-      if (compactTimerRef.current) clearTimeout(compactTimerRef.current)
-      if (flashTimerRef.current) clearTimeout(flashTimerRef.current)
+      if (t) clearTimeout(t)
+      if (h) clearTimeout(h)
+      if (c) clearTimeout(c)
+      if (f) clearTimeout(f)
     }
   }, [])
 

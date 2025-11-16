@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { getUserById, upgradeUserToPlata, upgradeUserToOro } from '@/lib/referralDB'
+import { getUserById, upgradeUserToPlata } from '@/lib/referralDB'
 import { decodeSession } from '@/lib/auth'
 
 export async function POST(req: NextRequest) {
@@ -24,13 +24,7 @@ export async function POST(req: NextRequest) {
     return res
   }
   if (plan === 'oro') {
-    if (user.plan === 'oro') return NextResponse.json({ ok: true, user })
-    const updated = await upgradeUserToOro(uid)
-    const res = NextResponse.json({ ok: true, user: updated })
-    try {
-      res.cookies.set('wspace_plan', updated?.plan || 'oro', { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
-    } catch {}
-    return res
+    return NextResponse.json({ error: 'must_use_payment' }, { status: 403 })
   }
   return NextResponse.json({ error: 'plan_invalid' }, { status: 400 })
 }
