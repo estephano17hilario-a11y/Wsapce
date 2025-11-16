@@ -113,6 +113,8 @@ export default function PricingSection() {
       const n = typeof window !== 'undefined' ? localStorage.getItem('wspace_name') : ''
       if (n) setDisplayName(n)
       const sp = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
+      const ref = sp ? (sp.get('ref') || '') : ''
+      if (ref && ref.trim().length >= 8) setBronzeRef(ref.trim())
       const pid = sp ? (sp.get('payment_id') || sp.get('collection_id') || sp.get('id')) : null
       const status = sp ? sp.get('status') : null
       if (pid && status === 'approved') {

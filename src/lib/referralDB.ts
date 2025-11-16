@@ -77,7 +77,7 @@ export function addDays(ms: number, days: number) { return ms + days * 24 * 60 *
 export function normalizeRefLink(input: string | undefined | null): string | null {
   if (!input) return null
   const trimmed = input.trim()
-  const urlMatch = trimmed.match(/[?&]ref=([A-Za-z0-9_-]{8,})/i)
+  const urlMatch = trimmed.match(/[?#&]ref=([A-Za-z0-9_-]{8,})/i)
   if (urlMatch) return urlMatch[1]
   const codeOnly = trimmed.match(/^[A-Za-z0-9_-]{8,}$/)
   if (codeOnly) return trimmed.toUpperCase()
