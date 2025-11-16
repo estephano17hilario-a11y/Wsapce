@@ -138,12 +138,20 @@ export async function getActiveLinkByUser(userId: string): Promise<ReferralLink 
 export async function generateLinkForUser(userId: string): Promise<ReferralLink> {
   const db = await readDB()
   const nowMs = now()
-  const existing = db.links.find(l => l.userId === userId)
-  if (existing) {
-    const last = existing.lastStatus ?? 'valid'
-    const stillValid = existing.active && existing.expiresAt > nowMs && last === 'valid'
-    if (stillValid) return existing
-    existing.active = false
+  const list = db.links.filter(l => l.userId === userId)
+  const latest = list.length > 0 ? list.slice().sort((a, b) => b.createdAt - a.createdAt)[0] : null
+  if (latest) {
+    const last = latest.lastStatus ?? 'valid'
+    const stillValid = latest.active && latest.expiresAt > nowMs && last === 'valid'
+    if (stillValid) return latest
+    latest.code = genCode()
+    latest.createdAt = nowMs
+    latest.expiresAt = addDays(nowMs, Math.max(90, db.config.ttlDays))
+    latest.active = true
+    latest.lastStatus = 'valid'
+    latest.lastStatusAt = nowMs
+    await writeDB(db)
+    return latest
   }
   const code = genCode()
   const expiresAt = addDays(nowMs, Math.max(90, db.config.ttlDays))
