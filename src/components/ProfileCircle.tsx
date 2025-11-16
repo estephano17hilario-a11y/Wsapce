@@ -8,7 +8,6 @@ export default function ProfileCircle({ inlineName }: { inlineName?: string }) {
   const [user, setUser] = useState<User | null>(null)
   const [open, setOpen] = useState(false)
   const [hiddenByCinematic, setHiddenByCinematic] = useState(false)
-  const [overlayVisible, setOverlayVisible] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const startedRef = useRef<number>(0)
@@ -69,19 +68,11 @@ export default function ProfileCircle({ inlineName }: { inlineName?: string }) {
   useEffect(() => {
     const el = typeof window !== 'undefined' ? document.getElementById('cinematic-zone') : null
     if (!el) return
-    const obs = new IntersectionObserver(([entry]) => { try { queueMicrotask(() => setHiddenByCinematic(entry.isIntersecting)) } catch {} }, { threshold: 0.15 })
+    const obs = new IntersectionObserver(([entry]) => { try { queueMicrotask(() => setHiddenByCinematic(entry.isIntersecting)) } catch {} }, { threshold: 0.55 })
     obs.observe(el)
     return () => { try { obs.disconnect() } catch {} }
   }, [])
 
-  useEffect(() => {
-    const onOverlay = (e: Event) => {
-      const v = (e as CustomEvent<{ visible: boolean }>).detail?.visible ?? false
-      queueMicrotask(() => setOverlayVisible(v))
-    }
-    window.addEventListener('overlay_visible_changed', onOverlay as EventListener)
-    return () => window.removeEventListener('overlay_visible_changed', onOverlay as EventListener)
-  }, [])
 
   useEffect(() => {
     let t: number | null = null
@@ -97,7 +88,7 @@ export default function ProfileCircle({ inlineName }: { inlineName?: string }) {
   }, [loading])
 
   return (
-    <div className={`profile-anchor ${hiddenByCinematic && !overlayVisible ? 'hidden' : ''}`}>
+    <div className={`profile-anchor ${hiddenByCinematic && !loading ? 'hidden' : ''}`}>
       <button className={`profile-circle ${planClass} ${loading ? 'is-loading' : ''} ${error ? 'profile-error' : ''}`} onClick={() => setOpen((o) => !o)}>
         <span className="profile-initial">{initial}</span>
       </button>
