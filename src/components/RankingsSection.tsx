@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from 'react'
+import { fetchETagJSON } from '@/lib/utils'
 
 type RankItem = { user: { email: string } | null; count: number }
 
@@ -19,9 +20,12 @@ export default function RankingsSection() {
     let mounted = true
     const load = async () => {
       try {
-        const res = await fetch('/api/rankings/top?limit=50', { cache: 'no-store' })
-        const data = await res.json()
-        if (!res.ok) { if (!mounted) return; setError(data.error || 'error'); return }
+        const r = await fetchETagJSON<{ ok: boolean; top: RankItem[]; error?: string }>(
+          '/api/rankings/top?limit=50',
+          { cacheKey: 'rankings_top_50', maxAgeSeconds: 120 }
+        )
+        const data = r.json || { ok: false, top: [] }
+        if (!r.ok) { if (!mounted) return; setError((data as { error?: string }).error || 'error'); return }
         if (!mounted) return
         setItems(data.top as RankItem[])
         setUpdatedAt(Date.now())
@@ -29,8 +33,10 @@ export default function RankingsSection() {
       finally { if (!mounted) return; setLoading(false) }
     }
     load()
-    const id = setInterval(load, 600_000)
-    return () => { mounted = false; clearInterval(id) }
+    const id = setInterval(() => { if (document.visibilityState === 'visible') load() }, 600_000)
+    const onVis = () => { if (document.visibilityState === 'visible') load() }
+    document.addEventListener('visibilitychange', onVis)
+    return () => { mounted = false; clearInterval(id); document.removeEventListener('visibilitychange', onVis) }
   }, [])
 
   function abbrEmail(e?: string | null) {

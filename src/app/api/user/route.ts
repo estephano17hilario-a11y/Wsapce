@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { getUserById, readDB, writeDB } from '@/lib/referralDB'
 import { decodeSession, encodeSession } from '@/lib/auth'
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const store = await cookies()
   const uid = decodeSession(store.get('wspace_sess')?.value) || ''
   let user = uid ? await getUserById(uid) : null
@@ -31,10 +31,15 @@ export async function GET() {
       }
     } catch {}
   }
+  const etag = '"' + (user ? (user.id + ':' + user.plan + ':' + (user.email || '')) : 'guest') + '"'
+  const inm = req.headers.get('if-none-match')
+  const res304 = inm && inm === etag ? new NextResponse(null, { status: 304, headers: { 'ETag': etag, 'Cache-Control': 'private, max-age=10, stale-while-revalidate=60' } }) : null
+  if (res304) return res304
   const res = new NextResponse(JSON.stringify({ user }), {
     headers: {
       'Content-Type': 'application/json',
-      'Cache-Control': 'private, no-store'
+      'Cache-Control': 'private, max-age=10, stale-while-revalidate=60',
+      'ETag': etag
     }
   })
   if (newUid) {

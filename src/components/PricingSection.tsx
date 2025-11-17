@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react"
 import clsx from 'clsx'
+import { fetchETagJSON } from '@/lib/utils'
  
 
 type Plan = {
@@ -60,9 +61,11 @@ export default function PricingSection() {
 
   const fetchUser = async () => {
     try {
-      const res = await fetch('/api/user', { cache: 'no-store' })
-      const data = await res.json()
-      if (data.user) setUser(data.user)
+      const r = await fetchETagJSON<{ user?: { id: string; email: string; plan: 'bronce' | 'plata' | 'oro' } }>(
+        '/api/user',
+        { maxAgeSeconds: 8 }
+      )
+      if (r.json?.user) setUser(r.json.user)
     } catch {}
   }
   useEffect(() => { fetchUser() }, [])
@@ -78,9 +81,12 @@ export default function PricingSection() {
       ;(async () => {
         try {
           setPlataStatus(null)
-          const r = await fetch('/api/referrals/status', { cache: 'no-store' })
-          const d = await r.json()
-          if (!r.ok) { setPlataStatus({ error: msg(d.error) }); return }
+          const r = await fetchETagJSON<{ ok?: boolean; status?: string; rawLink?: string; code?: string; totalInvites?: number; error?: string }>(
+            '/api/referrals/status',
+            { maxAgeSeconds: 10 }
+          )
+          const d = r.json || {}
+          if (!r.ok) { setPlataStatus({ error: msg((d as { error?: string }).error) }); return }
           setPlataLinkStatus((d?.status || 'unknown') as typeof plataLinkStatus)
           const rl = typeof d?.rawLink === 'string' ? d.rawLink : null
           const code = typeof d?.code === 'string' ? d.code : null
@@ -124,11 +130,14 @@ export default function PricingSection() {
       if (pid && status === 'approved') {
         ;(async () => {
           try {
-            const r = await fetch(`/api/payments/confirm?id=${encodeURIComponent(pid)}`)
-            const d = await r.json()
+            const r0 = await fetch(`/api/payments/confirm?id=${encodeURIComponent(pid)}`)
+            const d = await r0.json()
             if (d?.status === 'approved') {
-              const uRes = await fetch('/api/user', { cache: 'no-store' })
-              const uData = await uRes.json()
+              const uRes = await fetchETagJSON<{ user?: { id: string; email: string; plan: 'bronce' | 'plata' | 'oro' } }>(
+                '/api/user',
+                { maxAgeSeconds: 0 }
+              )
+              const uData = uRes.json || {}
               if (uData?.user) setUser(uData.user)
               try { localStorage.setItem('wspace_auth', JSON.stringify(uData.user)) } catch {}
               try { localStorage.setItem('wspace_email', uData.user?.email || '') } catch {}

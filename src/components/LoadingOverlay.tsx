@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { preloadImages } from "@/lib/preload"
+import { fetchETagJSON } from "@/lib/utils"
 
 export default function LoadingOverlay() {
   const [visible, setVisible] = useState(() => {
@@ -51,9 +52,11 @@ export default function LoadingOverlay() {
   useEffect(() => {
     ;(async () => {
       try {
-        const r = await fetch('/api/user', { cache: 'no-store' })
-        let d: unknown = null
-        try { d = await r.json() } catch {}
+        const r = await fetchETagJSON<{ user?: { id: string; email: string; plan: 'bronce' | 'plata' | 'oro' } }>(
+          '/api/user',
+          { maxAgeSeconds: 8 }
+        )
+        const d = r.json || {}
         const u = (d as { user?: { id: string; email: string; plan: 'bronce' | 'plata' | 'oro' } }).user
         if (u) {
           try { localStorage.setItem('wspace_auth', JSON.stringify(u)) } catch {}
