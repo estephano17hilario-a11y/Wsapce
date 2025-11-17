@@ -4,7 +4,7 @@ import { kv } from '@vercel/kv'
 
 type Plan = 'bronce' | 'plata' | 'oro'
 
-export type User = { id: string; email: string; plan: Plan; createdAt: number; referredByCode?: string; name?: string }
+export type User = { id: string; email: string; plan: Plan; createdAt: number; referredByCode?: string; name?: string; referralCode?: string }
 export type ReferralLink = { code: string; userId: string; createdAt: number; expiresAt: number; active: boolean; lastStatus?: 'valid' | 'expired' | 'inactive'; lastStatusAt?: number }
 export type ReferralRelation = { referrerId: string; refereeId: string; code: string; createdAt: number }
 
@@ -138,22 +138,23 @@ export async function getActiveLinkByUser(userId: string): Promise<ReferralLink 
 export async function generateLinkForUser(userId: string): Promise<ReferralLink> {
   const db = await readDB()
   const nowMs = now()
+  const user = db.users.find(u => u.id === userId)
   const list = db.links.filter(l => l.userId === userId)
   const latest = list.length > 0 ? list.slice().sort((a, b) => b.createdAt - a.createdAt)[0] : null
+  // Enforce permanent code: once assigned to user.referralCode, never change
+  const code = (user?.referralCode && user.referralCode.trim().length >= 8) ? user.referralCode : genCode()
+  if (user && user.referralCode !== code) user.referralCode = code
   if (latest) {
-    const last = latest.lastStatus ?? 'valid'
-    const stillValid = latest.active && latest.expiresAt > nowMs && last === 'valid'
-    if (stillValid) return latest
-    latest.code = genCode()
-    latest.createdAt = nowMs
-    latest.expiresAt = addDays(nowMs, Math.max(90, db.config.ttlDays))
+    // Keep the same code forever; ensure a single record reflects it
+    latest.code = code
+    latest.createdAt = latest.createdAt || nowMs
+    latest.expiresAt = latest.expiresAt || addDays(nowMs, Math.max(90, db.config.ttlDays))
     latest.active = true
-    latest.lastStatus = 'valid'
-    latest.lastStatusAt = nowMs
+    latest.lastStatus = latest.lastStatus ?? 'valid'
+    latest.lastStatusAt = latest.lastStatusAt ?? nowMs
     await writeDB(db)
     return latest
   }
-  const code = genCode()
   const expiresAt = addDays(nowMs, Math.max(90, db.config.ttlDays))
   const link: ReferralLink = { code, userId, createdAt: nowMs, expiresAt, active: true }
   db.links.push(link)
@@ -164,13 +165,25 @@ export async function generateLinkForUser(userId: string): Promise<ReferralLink>
 export async function validateCode(code: string): Promise<ReferralLink | null> {
   const db = await readDB()
   const nowMs = now()
-  const l = db.links.find(x => x.code.toUpperCase() === code.toUpperCase() && x.active && x.expiresAt > nowMs)
+  let l = db.links.find(x => x.code.toUpperCase() === code.toUpperCase()) || null
+  if (!l) {
+    const owner = db.users.find(u => (u.referralCode || '').toUpperCase() === code.toUpperCase()) || null
+    if (owner) {
+      const created = await generateLinkForUser(owner.id)
+      l = created
+    }
+  }
+  if (l && l.active && l.expiresAt > nowMs) return l
   return l || null
 }
 
 export async function getCodeStatus(code: string): Promise<{ status: 'valid' | 'expired' | 'inactive' | 'not_found'; link?: ReferralLink }> {
   const db = await readDB()
-  const match = db.links.find(x => x.code.toUpperCase() === code.toUpperCase()) || null
+  let match = db.links.find(x => x.code.toUpperCase() === code.toUpperCase()) || null
+  if (!match) {
+    const owner = db.users.find(u => (u.referralCode || '').toUpperCase() === code.toUpperCase()) || null
+    if (owner) match = await generateLinkForUser(owner.id)
+  }
   if (!match) return { status: 'not_found' }
   if (!match.active) return { status: 'inactive', link: match }
   const nowMs = now()

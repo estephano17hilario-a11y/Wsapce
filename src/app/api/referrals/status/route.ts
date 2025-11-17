@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { readDB } from '@/lib/referralDB'
+import { readDB, generateLinkForUser } from '@/lib/referralDB'
 
 export async function GET() {
   try {
@@ -10,8 +10,9 @@ export async function GET() {
     const db = await readDB()
     const links = db.links.filter(l => l.userId === uid)
     if (links.length === 0) {
+      const link = await generateLinkForUser(uid)
       const totalInvites = db.relations.filter(r => r.referrerId === uid).length
-      return NextResponse.json({ ok: true, status: 'not_found', totalInvites })
+      return NextResponse.json({ ok: true, status: 'valid', code: link.code, expiresAt: link.expiresAt, totalInvites })
     }
     const latest = links.slice().sort((a, b) => b.createdAt - a.createdAt)[0]
     const status = latest.lastStatus ?? 'valid'
