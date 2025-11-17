@@ -84,6 +84,23 @@ export function normalizeRefLink(input: string | undefined | null): string | nul
   return null
 }
 
+export function isValidEmail(e: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)
+}
+
+export function isRealEmail(e: string) {
+  const email = (e || '').trim().toLowerCase()
+  if (!isValidEmail(email)) return false
+  const parts = email.split('@')
+  const domain = parts[1] || ''
+  const tld = domain.split('.').pop() || ''
+  const badDomains = new Set(['demo.local','example.com','example.org','example.net'])
+  const badTlds = new Set(['local','test','invalid'])
+  if (badDomains.has(domain)) return false
+  if (badTlds.has(tld)) return false
+  return true
+}
+
 export async function getUserByEmail(email: string) {
   const db = await readDB()
   return db.users.find(u => u.email.toLowerCase() === email.toLowerCase()) || null
@@ -239,8 +256,16 @@ export async function getStatsForUser(userId: string) {
 export async function getTopRankings(limit = 10) {
   const db = await readDB()
   const counts = new Map<string, number>()
-  for (const u of db.users) counts.set(u.id, 0)
-  for (const r of db.relations) counts.set(r.referrerId, (counts.get(r.referrerId) || 0) + 1)
+  for (const u of db.users) {
+    if (isRealEmail(u.email)) counts.set(u.id, 0)
+  }
+  for (const r of db.relations) {
+    const ref = db.users.find(u => u.id === r.referrerId)
+    const rec = db.users.find(u => u.id === r.refereeId)
+    if (!ref || !rec) continue
+    if (!isRealEmail(ref.email) || !isRealEmail(rec.email)) continue
+    counts.set(r.referrerId, (counts.get(r.referrerId) || 0) + 1)
+  }
   const pairs = Array.from(counts.entries()).sort((a, b) => {
     const diff = b[1] - a[1]
     return diff !== 0 ? diff : a[0].localeCompare(b[0])

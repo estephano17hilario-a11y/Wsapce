@@ -46,13 +46,7 @@ export default function RankingsSection() {
     return `${nameMask}@${providerMask}${tld ? `.${tld}` : ''}`
   }
 
-  function generateFakeItems(limit: number): RankItem[] {
-    const names = ['nova','strix','zephyr','lyra','orion','vega','kael','astra','nox','raven','ember','onyx','echo','quake','blaze','flare','vertex','delta','sigma','omega']
-    const items = Array.from({ length: limit }, (_, i) => ({ user: { email: `${names[i % names.length]}${i + 1}@demo.local` }, count: Math.floor(Math.random() * 9) }))
-    for (let i = 0; i < Math.min(3, items.length); i++) items[i].count = 0
-    items.sort((a, b) => b.count - a.count)
-    return items
-  }
+  
 
   function renderRankItem(it: RankItem, idx: number, list: RankItem[]) {
     const rank = idx + 1
@@ -99,7 +93,7 @@ export default function RankingsSection() {
           <div className="md:col-span-2">
             {loading && <div className="loading-dots" />}
             {!loading && (() => {
-              const src = items.length > 0 ? items.slice(0, limit) : generateFakeItems(limit)
+              const src = items.slice(0, limit)
               return src.map((it, idx) => renderRankItem(it, idx, src))
             })()}
           </div>
