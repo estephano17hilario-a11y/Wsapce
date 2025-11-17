@@ -21,8 +21,18 @@ async function ensureFile() {
     await fs.mkdir(dataDir, { recursive: true })
     await fs.access(dataFile)
   } catch {
-    const initial: DB = { users: [], links: [], relations: [], goldEvents: [], config: { ttlDays: 90, inviteLimit: 500, plataThreshold: 5 } }
     await fs.mkdir(dataDir, { recursive: true })
+    try {
+      const seedPath = path.join(process.cwd(), 'data', 'referrals.json')
+      const rawSeed = await fs.readFile(seedPath, 'utf8')
+      const parsed = JSON.parse(rawSeed) as Partial<DB>
+      if (!Array.isArray(parsed.goldEvents)) parsed.goldEvents = []
+      if (!parsed.config) parsed.config = { ttlDays: 90, inviteLimit: 500, plataThreshold: 5 }
+      if (typeof parsed.config.plataThreshold !== 'number') parsed.config.plataThreshold = 5
+      await fs.writeFile(dataFile, JSON.stringify(parsed, null, 2), 'utf8')
+      return
+    } catch {}
+    const initial: DB = { users: [], links: [], relations: [], goldEvents: [], config: { ttlDays: 90, inviteLimit: 500, plataThreshold: 5 } }
     await fs.writeFile(dataFile, JSON.stringify(initial, null, 2), 'utf8')
   }
 }
@@ -61,8 +71,21 @@ export async function readDB(): Promise<DB> {
     } catch {}
   }
   await ensureFile()
-  const raw = await fs.readFile(dataFile, 'utf8')
-  const parsed = JSON.parse(raw) as Partial<DB>
+  let parsed: Partial<DB> = {}
+  try {
+    const raw = await fs.readFile(dataFile, 'utf8')
+    parsed = JSON.parse(raw) as Partial<DB>
+  } catch {
+    // Último intento: sembrar desde repo y reintentar
+    try {
+      const seedPath = path.join(process.cwd(), 'data', 'referrals.json')
+      const rawSeed = await fs.readFile(seedPath, 'utf8')
+      parsed = JSON.parse(rawSeed) as Partial<DB>
+      await fs.writeFile(dataFile, JSON.stringify(parsed, null, 2), 'utf8')
+    } catch {
+      parsed = { users: [], links: [], relations: [], goldEvents: [], config: { ttlDays: 90, inviteLimit: 500, plataThreshold: 5 } }
+    }
+  }
   if (!Array.isArray(parsed.goldEvents)) parsed.goldEvents = []
   if (!parsed.config) parsed.config = { ttlDays: 90, inviteLimit: 500, plataThreshold: 5 }
   if (typeof parsed.config.plataThreshold !== 'number') parsed.config.plataThreshold = 5
