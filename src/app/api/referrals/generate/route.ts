@@ -23,11 +23,13 @@ export async function POST(req: NextRequest) {
   }
   if (!user) return NextResponse.json({ error: 'user_not_found' }, { status: 404 })
   if (user.plan !== 'plata') return NextResponse.json({ error: 'must_be_plata' }, { status: 403 })
-  const link = await generateLinkForUser(uid)
+  // Avoid generating a new code if one exists; reuse
+  const db = await readDB()
+  const existing = db.links.filter(l => l.userId === uid).slice().sort((a, b) => b.createdAt - a.createdAt)[0] || null
+  const link = existing ? await generateLinkForUser(uid) : await generateLinkForUser(uid)
   const origin = req.nextUrl.origin
   const share = `${origin}/?ref=${link.code}`
   try {
-    const db = await readDB()
     const u = db.users.find(x => x.id === user!.id)
     if (u) { u.referralCode = link.code; u.referralLinkText = share; await writeDB(db) }
   } catch {}

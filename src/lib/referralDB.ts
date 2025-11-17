@@ -141,8 +141,11 @@ export async function generateLinkForUser(userId: string): Promise<ReferralLink>
   const user = db.users.find(u => u.id === userId)
   const list = db.links.filter(l => l.userId === userId)
   const latest = list.length > 0 ? list.slice().sort((a, b) => b.createdAt - a.createdAt)[0] : null
-  // Enforce permanent code: once assigned to user.referralCode, never change
-  const code = (user?.referralCode && user.referralCode.trim().length >= 8) ? user.referralCode : genCode()
+  // Prefer existing code from latest record to avoid drifting, else user.referralCode, else new
+  const existingCode = latest ? latest.code : ''
+  const code = (existingCode && existingCode.trim().length >= 8)
+    ? existingCode
+    : ((user?.referralCode && user.referralCode.trim().length >= 8) ? user.referralCode : genCode())
   if (user && user.referralCode !== code) user.referralCode = code
   if (latest) {
     // Keep the same code forever; ensure a single record reflects it
