@@ -176,8 +176,15 @@ export async function validateCode(code: string): Promise<ReferralLink | null> {
       l = created
     }
   }
-  if (l && l.active && l.expiresAt > nowMs) return l
-  return l || null
+  if (!l) return null
+  if (!l.active || l.expiresAt <= nowMs) {
+    l.active = true
+    l.expiresAt = addDays(nowMs, Math.max(36500, db.config.ttlDays))
+    l.lastStatus = 'valid'
+    l.lastStatusAt = nowMs
+    await writeDB(db)
+  }
+  return l
 }
 
 export async function getCodeStatus(code: string): Promise<{ status: 'valid' | 'expired' | 'inactive' | 'not_found'; link?: ReferralLink }> {
@@ -188,9 +195,14 @@ export async function getCodeStatus(code: string): Promise<{ status: 'valid' | '
     if (owner) match = await generateLinkForUser(owner.id)
   }
   if (!match) return { status: 'not_found' }
-  if (!match.active) return { status: 'inactive', link: match }
   const nowMs = now()
-  if (match.expiresAt <= nowMs) return { status: 'expired', link: match }
+  if (!match.active || match.expiresAt <= nowMs) {
+    match.active = true
+    match.expiresAt = addDays(nowMs, Math.max(36500, db.config.ttlDays))
+    match.lastStatus = 'valid'
+    match.lastStatusAt = nowMs
+    await writeDB(db)
+  }
   return { status: 'valid', link: match }
 }
 
