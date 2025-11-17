@@ -35,7 +35,27 @@ export async function readDB(): Promise<DB> {
         if (!Array.isArray(r.goldEvents)) (r as unknown as DB).goldEvents = []
         return r
       }
-      const initial: DB = { users: [], links: [], relations: [], goldEvents: [], config: { ttlDays: 90, inviteLimit: 500, plataThreshold: 5 } }
+      let seed: DB | null = null
+      try {
+        const seedPath = path.join(process.cwd(), 'data', 'referrals.json')
+        const rawSeed = await fs.readFile(seedPath, 'utf8')
+        const parsed = JSON.parse(rawSeed) as Partial<DB>
+        if (!Array.isArray(parsed.goldEvents)) parsed.goldEvents = []
+        if (!parsed.config) parsed.config = { ttlDays: 90, inviteLimit: 500, plataThreshold: 5 }
+        if (typeof parsed.config.plataThreshold !== 'number') parsed.config.plataThreshold = 5
+        seed = parsed as DB
+      } catch {}
+      if (!seed) {
+        try {
+          const rawTmp = await fs.readFile(dataFile, 'utf8')
+          const parsed = JSON.parse(rawTmp) as Partial<DB>
+          if (!Array.isArray(parsed.goldEvents)) parsed.goldEvents = []
+          if (!parsed.config) parsed.config = { ttlDays: 90, inviteLimit: 500, plataThreshold: 5 }
+          if (typeof parsed.config.plataThreshold !== 'number') parsed.config.plataThreshold = 5
+          seed = parsed as DB
+        } catch {}
+      }
+      const initial: DB = seed || { users: [], links: [], relations: [], goldEvents: [], config: { ttlDays: 90, inviteLimit: 500, plataThreshold: 5 } }
       await kv.set('wspace:referrals', initial)
       return initial
     } catch {}
