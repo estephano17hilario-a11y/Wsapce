@@ -4,7 +4,7 @@ import { kv } from '@vercel/kv'
 
 type Plan = 'bronce' | 'plata' | 'oro'
 
-export type User = { id: string; email: string; plan: Plan; createdAt: number; referredByCode?: string; name?: string; referralCode?: string }
+export type User = { id: string; email: string; plan: Plan; createdAt: number; referredByCode?: string; name?: string; referralCode?: string; referralLinkText?: string }
 export type ReferralLink = { code: string; userId: string; createdAt: number; expiresAt: number; active: boolean; lastStatus?: 'valid' | 'expired' | 'inactive'; lastStatusAt?: number }
 export type ReferralRelation = { referrerId: string; refereeId: string; code: string; createdAt: number }
 

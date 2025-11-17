@@ -82,7 +82,9 @@ export default function PricingSection() {
           const d = await r.json()
           if (!r.ok) { setPlataStatus({ error: msg(d.error) }); return }
           setPlataLinkStatus((d?.status || 'unknown') as typeof plataLinkStatus)
-          setPlataLink(typeof d?.code === 'string' ? d.code : null)
+          const rl = typeof d?.rawLink === 'string' ? d.rawLink : null
+          const code = typeof d?.code === 'string' ? d.code : null
+          setPlataLink(rl || (code ? (() => { try { const u = new URL(window.location.origin); return `${u.origin}/?ref=${code}` } catch { return `/?ref=${code}` } })() : null))
           setPlataExpiresAt(typeof d?.expiresAt === 'number' ? d.expiresAt : null)
           setPlataInvites(typeof d?.totalInvites === 'number' ? d.totalInvites : 0)
         } catch { setPlataStatus({ error: msg('network_error') }) }
@@ -372,7 +374,7 @@ export default function PricingSection() {
                             const data = await res.json()
                             if (!res.ok) { setPlataStatus({ error: msg(data.error) }); if (data.error === 'must_be_plata') { setBronzeFlash(true); setTimeout(() => setBronzeFlash(false), 1200) } return }
                             setPlataStatus({ ok: true })
-                            setPlataLink(typeof data.code === 'string' ? data.code : (data.link as string))
+                            setPlataLink(typeof data.link === 'string' ? data.link : (typeof data.code === 'string' ? (() => { try { const u = new URL(window.location.origin); return `${u.origin}/?ref=${data.code}` } catch { return `/?ref=${data.code}` } })() : null))
                             setPlataExpiresAt(typeof data.expiresAt === 'number' ? data.expiresAt : null)
                             setPlataLinkStatus('valid')
                           } catch { setPlataStatus({ error: msg('network_error') }) }

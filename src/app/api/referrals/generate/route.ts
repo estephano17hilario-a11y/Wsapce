@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { getUserById, generateLinkForUser, createUser, upgradeUserToPlata } from '@/lib/referralDB'
+import { getUserById, generateLinkForUser, createUser, upgradeUserToPlata, readDB, writeDB } from '@/lib/referralDB'
 import { decodeSession, encodeSession } from '@/lib/auth'
 
 export async function POST(req: NextRequest) {
@@ -26,12 +26,18 @@ export async function POST(req: NextRequest) {
   const link = await generateLinkForUser(uid)
   const origin = req.nextUrl.origin
   const share = `${origin}/?ref=${link.code}`
+  try {
+    const db = await readDB()
+    const u = db.users.find(x => x.id === user!.id)
+    if (u) { u.referralCode = link.code; u.referralLinkText = share; await writeDB(db) }
+  } catch {}
   const res = NextResponse.json({ ok: true, link: share, code: link.code, expiresAt: link.expiresAt })
   if (newUid) {
     try {
       res.cookies.set('wspace_sess', encodeSession(newUid), { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
       res.cookies.set('wspace_uid', newUid, { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
       res.cookies.set('wspace_ref_code', link.code, { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
+      res.cookies.set('wspace_ref_link', share, { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
     } catch {}
   }
   return res
