@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { getUserById, upgradeUserToPlata } from '@/lib/referralDB'
-import { decodeSession } from '@/lib/auth'
+import { decodeSession, encodeSession } from '@/lib/auth'
 
 export async function POST(req: NextRequest) {
   const store = await cookies()
@@ -20,6 +20,8 @@ export async function POST(req: NextRequest) {
     const res = NextResponse.json({ ok: true, user: updated })
     try {
       res.cookies.set('wspace_plan', updated?.plan || 'plata', { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
+      res.cookies.set('wspace_sess', encodeSession(uid), { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
+      res.cookies.set('wspace_uid', uid, { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
     } catch {}
     return res
   }

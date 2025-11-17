@@ -4,7 +4,7 @@ import { kv } from '@vercel/kv'
 
 type Plan = 'bronce' | 'plata' | 'oro'
 
-export type User = { id: string; email: string; plan: Plan; createdAt: number; referredByCode?: string; name?: string; referralCode?: string; referralLinkText?: string }
+export type User = { id: string; email: string; plan: Plan; createdAt: number; referredByCode?: string; name?: string; referralCode?: string; referralLinkText?: string; referralTotal?: number }
 export type ReferralLink = { code: string; userId: string; createdAt: number; expiresAt: number; active: boolean; lastStatus?: 'valid' | 'expired' | 'inactive'; lastStatusAt?: number }
 export type ReferralRelation = { referrerId: string; refereeId: string; code: string; createdAt: number }
 
@@ -210,6 +210,7 @@ export async function recordRelation(code: string, refereeEmail: string): Promis
   if (referrer.plan === 'bronce' && count >= (db.config.plataThreshold || 5)) {
     referrer.plan = 'plata'
   }
+  referrer.referralTotal = (referrer.referralTotal || 0) + 1
   await writeDB(db)
   return relation
 }
@@ -217,9 +218,10 @@ export async function recordRelation(code: string, refereeEmail: string): Promis
 export async function getStatsForUser(userId: string) {
   const db = await readDB()
   const relations = db.relations.filter(r => r.referrerId === userId)
+  const user = db.users.find(u => u.id === userId) || null
   const referees = relations.map(r => db.users.find(u => u.id === r.refereeId)).filter(Boolean) as User[]
   const byPlan = referees.reduce<Record<string, number>>((acc, u) => { acc[u.plan] = (acc[u.plan] || 0) + 1; return acc }, {})
-  return { totalInvites: relations.length, byPlan, referees }
+  return { totalInvites: user?.referralTotal ?? relations.length, byPlan, referees }
 }
 
 export async function getTopRankings(limit = 10) {

@@ -352,7 +352,7 @@ export default function PricingSection() {
                               { 'opacity-60 cursor-not-allowed': plan.variant === 'creator' && !!plataLink && plataLinkStatus === 'valid' }
                             )
                       }
-                      disabled={plan.variant === 'creator' && !!plataLink && plataLinkStatus === 'valid'}
+                      disabled={(plan.variant === 'creator' && !!plataLink && plataLinkStatus === 'valid') || (plan.variant === 'creator' && (!user || plataGenerating))}
                       onClick={async () => {
                         if (plan.variant === 'creator') {
                           setPlataStatus(null)
