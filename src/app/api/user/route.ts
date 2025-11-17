@@ -33,12 +33,12 @@ export async function GET(req: NextRequest) {
   }
   const etag = '"' + (user ? (user.id + ':' + user.plan + ':' + (user.email || '')) : 'guest') + '"'
   const inm = req.headers.get('if-none-match')
-  const res304 = inm && inm === etag ? new NextResponse(null, { status: 304, headers: { 'ETag': etag, 'Cache-Control': 'private, max-age=10, stale-while-revalidate=60' } }) : null
+  const res304 = inm && inm === etag ? new NextResponse(null, { status: 304, headers: { 'ETag': etag, 'Cache-Control': 'private, no-store' } }) : null
   if (res304) return res304
   const res = new NextResponse(JSON.stringify({ user }), {
     headers: {
       'Content-Type': 'application/json',
-      'Cache-Control': 'private, max-age=10, stale-while-revalidate=60',
+      'Cache-Control': 'private, no-store',
       'ETag': etag
     }
   })

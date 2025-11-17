@@ -83,7 +83,7 @@ export default function PricingSection() {
           setPlataStatus(null)
           const r = await fetchETagJSON<{ ok?: boolean; status?: string; rawLink?: string; code?: string; totalInvites?: number; error?: string }>(
             '/api/referrals/status',
-            { maxAgeSeconds: 10 }
+            { maxAgeSeconds: 4 }
           )
           const d = r.json || {}
           if (!r.ok) { setPlataStatus({ error: msg((d as { error?: string }).error) }); return }
@@ -329,6 +329,7 @@ export default function PricingSection() {
                           try { localStorage.setItem('wspace_auth', JSON.stringify(data.user)) } catch {}
                           try { localStorage.setItem('wspace_email', data.user?.email || bronzeEmail) } catch {}
                           try { window.dispatchEvent(new CustomEvent('user_session_changed')) } catch {}
+                          try { window.dispatchEvent(new CustomEvent('rankings_refresh')) } catch {}
                         } catch { setBronzeStatus({ error: msg('network_error') }) }
                         finally { setBronzeLoading(false) }
                       }}

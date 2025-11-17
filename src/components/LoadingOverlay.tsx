@@ -54,7 +54,7 @@ export default function LoadingOverlay() {
       try {
         const r = await fetchETagJSON<{ user?: { id: string; email: string; plan: 'bronce' | 'plata' | 'oro' } }>(
           '/api/user',
-          { maxAgeSeconds: 8 }
+          { maxAgeSeconds: 0 }
         )
         const d = r.json || {}
         const u = (d as { user?: { id: string; email: string; plan: 'bronce' | 'plata' | 'oro' } }).user

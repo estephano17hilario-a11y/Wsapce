@@ -22,7 +22,7 @@ export default function RankingsSection() {
       try {
         const r = await fetchETagJSON<{ ok: boolean; top: RankItem[]; error?: string }>(
           '/api/rankings/top?limit=50',
-          { cacheKey: 'rankings_top_50', maxAgeSeconds: 120 }
+          { cacheKey: 'rankings_top_50', maxAgeSeconds: 4 }
         )
         const data = r.json || { ok: false, top: [] }
         if (!r.ok) { if (!mounted) return; setError((data as { error?: string }).error || 'error'); return }
@@ -33,10 +33,14 @@ export default function RankingsSection() {
       finally { if (!mounted) return; setLoading(false) }
     }
     load()
-    const id = setInterval(() => { if (document.visibilityState === 'visible') load() }, 600_000)
+    const id = setInterval(() => { if (document.visibilityState === 'visible') load() }, 20_000)
     const onVis = () => { if (document.visibilityState === 'visible') load() }
+    const onBurst = () => { load(); const t = setInterval(load, 5_000); setTimeout(() => clearInterval(t), 30_000) }
     document.addEventListener('visibilitychange', onVis)
-    return () => { mounted = false; clearInterval(id); document.removeEventListener('visibilitychange', onVis) }
+    window.addEventListener('user_session_changed', onBurst)
+    window.addEventListener('gold_purchased', onBurst as EventListener)
+    window.addEventListener('rankings_refresh', onBurst)
+    return () => { mounted = false; clearInterval(id); document.removeEventListener('visibilitychange', onVis); window.removeEventListener('user_session_changed', onBurst); window.removeEventListener('gold_purchased', onBurst as EventListener); window.removeEventListener('rankings_refresh', onBurst) }
   }, [])
 
   function abbrEmail(e?: string | null) {
