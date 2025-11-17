@@ -13,7 +13,9 @@ export async function GET() {
     const db = await readDB()
     const user = await getUserById(uid)
     const links = db.links.filter(l => l.userId === uid)
-    const totalInvites = (user?.referralTotal ?? db.relations.filter(r => r.referrerId === uid).length)
+    const cookieTotal = parseInt(store.get('wspace_ref_total')?.value || '0') || 0
+    const totalRel = db.relations.filter(r => r.referrerId === uid).length
+    const totalInvites = user?.referralTotal ?? (totalRel || cookieTotal)
     if (!user) {
       if (cookieRawLink || cookieCode) {
         const code = cookieCode || (cookieRawLink.match(/[?#&]ref=([A-Za-z0-9_-]{8,})/i)?.[1] || '')
