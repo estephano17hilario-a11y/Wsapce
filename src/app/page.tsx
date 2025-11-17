@@ -6,7 +6,6 @@ import HypeSectionClient from '@/components/HypeSectionClient'
 const WarmupHeroSection = dynamic(() => import('@/components/WarmupHeroSection'))
 import PricingSectionClient from '@/components/PricingSectionClient'
 const Footer = dynamic(() => import('@/components/Footer'))
-const RankingsSection = dynamic(() => import('@/components/RankingsSection'))
 const PerfPanel = dynamic(() => import('@/components/PerfPanel'))
 
 export default function Home() {
@@ -19,7 +18,6 @@ export default function Home() {
       <HypeSectionClient />
       <WarmupHeroSection />
       <PricingSectionClient />
-      <RankingsSection />
       <Footer />
       <PerfPanel />
   </main>

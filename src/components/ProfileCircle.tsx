@@ -16,7 +16,6 @@ export default function ProfileCircle({ inlineName }: { inlineName?: string }) {
   const startedRef = useRef<number>(0)
   const prevPlanRef = useRef<"bronce" | "plata" | "oro" | "guest" | null>(null)
   const [flash, setFlash] = useState(false)
-  const [refStatus, setRefStatus] = useState<{ status: "unknown" | "valid" | "expired" | "inactive" | "not_found"; code?: string | null; expiresAt?: number | null } | null>(null)
 
   const name = useMemo(() => {
     const n = inlineName && inlineName.trim() ? inlineName.trim() : (typeof window !== 'undefined' ? (localStorage.getItem('wspace_name') || "") : "")
@@ -48,15 +47,7 @@ export default function ProfileCircle({ inlineName }: { inlineName?: string }) {
           window.setTimeout(() => setFlash(false), 1200)
         }
         prevPlanRef.current = newPlan
-        if (newPlan === 'plata') {
-          try {
-            const rs = await fetch('/api/referrals/status', { cache: 'no-store' })
-            const rd = await rs.json()
-            if (rs.ok) setRefStatus({ status: (rd?.status || 'unknown'), code: (rd?.code || null), expiresAt: (typeof rd?.expiresAt === 'number' ? rd.expiresAt : null) })
-          } catch {}
-        } else {
-          setRefStatus(null)
-        }
+        
       } else {
         let email: string | null = null
         try { email = JSON.parse(localStorage.getItem('wspace_auth') || 'null')?.email || null } catch {}
@@ -126,9 +117,6 @@ export default function ProfileCircle({ inlineName }: { inlineName?: string }) {
           <div className="profile-row"><span>Email</span><span>{user?.email || '—'}</span></div>
           <div className="profile-row"><span>Plan</span><span>{user?.plan ? user.plan.toUpperCase() : 'INVITADO'}</span></div>
           <div className="profile-row"><span>Registro</span><span>{user?.createdAt ? new Date(user.createdAt).toLocaleString() : '—'}</span></div>
-          {refStatus && (
-            <div className="profile-row"><span>Referidos</span><span>{refStatus.status === 'valid' ? 'Enlace activo' : 'Sin enlace'}</span></div>
-          )}
           {error && <div className="profile-row"><span>Error</span><span>{error}</span></div>}
         </div>
       )}

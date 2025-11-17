@@ -25,16 +25,9 @@ export default function PricingSection() {
   const [user, setUser] = useState<{ id: string; email: string; plan: "bronce" | "plata" | "oro" } | null>(null)
   const [displayName, setDisplayName] = useState<string>("")
   const [bronzeEmail, setBronzeEmail] = useState("")
-  const [bronzeRef, setBronzeRef] = useState("")
-  const [plataLinkStatus, setPlataLinkStatus] = useState<"unknown" | "valid" | "expired" | "inactive" | "not_found">("unknown")
   const [bronzeStatus, setBronzeStatus] = useState<{ ok?: boolean; error?: string } | null>(null)
   const [bronzeLoading, setBronzeLoading] = useState(false)
-  const [plataLink, setPlataLink] = useState<string | null>(null)
-  const [plataStatus, setPlataStatus] = useState<{ ok?: boolean; error?: string } | null>(null)
-  const [plataGenerating, setPlataGenerating] = useState(false)
-  
-  const [plataInvites, setPlataInvites] = useState<number>(0)
-  const [bronzeFlash, setBronzeFlash] = useState(false)
+  const [bronzeFlash] = useState(false)
   const [oroProcessing, setOroProcessing] = useState(false)
   const [oroFlash, setOroFlash] = useState(false)
   const [oroStatus, setOroStatus] = useState<{ ok?: boolean; error?: string } | null>(null)
@@ -77,25 +70,7 @@ export default function PricingSection() {
   }, [])
 
   useEffect(() => {
-    if (user?.plan === 'plata') {
-      ;(async () => {
-        try {
-          setPlataStatus(null)
-          const r = await fetchETagJSON<{ ok?: boolean; status?: string; rawLink?: string; code?: string; totalInvites?: number; error?: string }>(
-            '/api/referrals/status',
-            { maxAgeSeconds: 4 }
-          )
-          const d = r.json || {}
-          if (!r.ok) { setPlataStatus({ error: msg((d as { error?: string }).error) }); return }
-          setPlataLinkStatus((d?.status || 'unknown') as typeof plataLinkStatus)
-          const rl = typeof d?.rawLink === 'string' ? d.rawLink : null
-          const code = typeof d?.code === 'string' ? d.code : null
-          setPlataLink(rl || (code ? (() => { try { const u = new URL(window.location.origin); return `${u.origin}/?ref=${code}` } catch { return `/?ref=${code}` } })() : null))
-          
-          setPlataInvites(typeof d?.totalInvites === 'number' ? d.totalInvites : 0)
-        } catch { setPlataStatus({ error: msg('network_error') }) }
-      })()
-    }
+    // no-op: referidos removidos
   }, [user?.plan])
 
   async function ensureMercadoPago(): Promise<boolean> {
@@ -123,8 +98,6 @@ export default function PricingSection() {
       const n = typeof window !== 'undefined' ? localStorage.getItem('wspace_name') : ''
       if (n) setDisplayName(n)
       const sp = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
-      const ref = sp ? (sp.get('ref') || '') : ''
-      if (ref && ref.trim().length >= 8) setBronzeRef(ref.trim())
       const pid = sp ? (sp.get('payment_id') || sp.get('collection_id') || sp.get('id')) : null
       const status = sp ? sp.get('status') : null
       if (pid && status === 'approved') {
@@ -202,23 +175,6 @@ export default function PricingSection() {
         ctaLabel: "¡FUNDADOR DE ORO ($1.00)!",
         variant: "starter",
       },
-      {
-        id: "heraldo-plata",
-        name: "HERALDO DE PLATA",
-        priceMonthly: 0,
-        priceText: "GRATIS (CON 5 RECLUTAS)",
-        priceSuffix: "",
-        limitsTitle: "",
-        featuresTitle: "TU VENTAJA",
-        limits: [],
-        features: [
-          "✅ ¡ACCESO TÁCTICO: 18 HORAS ANTES!",
-          "✅ ¡ASEGURA TU TERRITORIO!",
-          "✅ Insignia de PLATA",
-        ],
-        ctaLabel: "Pagar con Sangre (Generar mi Link)",
-        variant: "creator",
-      },
     ],
     []
   )
@@ -254,19 +210,6 @@ export default function PricingSection() {
         {user && (
           <div className="mt-3 text-xs md:text-sm">
             <div className="text-emerald-300">Ya te has registrado: <span className="text-cyan-200/90">{user.email}</span></div>
-            {user.plan === 'plata' && (
-              <div className="mt-2">
-                <div className="text-emerald-300">Ya eres PLATA</div>
-                {plataLink ? (
-                  <div className="break-all text-cyan-200/90 mt-1">Tu enlace único: {plataLink}</div>
-                ) : (
-                  <div className="mt-1 text-cyan-200/80">
-                    <div className="loading-dots" />
-                    <div className="mt-1">Generando tu enlace único…</div>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         )}
       </div>
@@ -306,22 +249,13 @@ export default function PricingSection() {
                       value={bronzeEmail}
                       onChange={(e) => setBronzeEmail(e.target.value)}
                     />
-                    <input
-                      type="text"
-                      className="pricing-email__input mt-2"
-                      placeholder="Coloca enlace de invitación (opcional)"
-                      aria-label="Enlace de invitación"
-                      value={bronzeRef}
-                      onChange={(e) => setBronzeRef(e.target.value)}
-                    />
                     <button
                       className={`pricing-cta cta-secondary mt-3 ${bronzeLoading ? 'btn-loading' : ''}`}
                       onClick={async () => {
                         setBronzeStatus(null)
-                        setPlataLink(null)
                         setBronzeLoading(true)
                         try {
-                          const res = await fetch('/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: bronzeEmail, referralLink: bronzeRef }) })
+                          const res = await fetch('/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: bronzeEmail }) })
                           const data = await res.json()
                           if (!res.ok) { setBronzeStatus({ error: msg(data.error) }); return }
                           setBronzeStatus({ ok: true })
@@ -329,7 +263,6 @@ export default function PricingSection() {
                           try { localStorage.setItem('wspace_auth', JSON.stringify(data.user)) } catch {}
                           try { localStorage.setItem('wspace_email', data.user?.email || bronzeEmail) } catch {}
                           try { window.dispatchEvent(new CustomEvent('user_session_changed')) } catch {}
-                          try { window.dispatchEvent(new CustomEvent('rankings_refresh')) } catch {}
                         } catch { setBronzeStatus({ error: msg('network_error') }) }
                         finally { setBronzeLoading(false) }
                       }}
@@ -350,47 +283,13 @@ export default function PricingSection() {
                   <div className="mt-3">
                     <button
                       className={
-                        plan.variant === 'starter'
-                          ? clsx(
-                              'btn-glow-once btn-glow-once--subtle cta-premium cta-blink cta-ambient cta-border-wave px-8 md:px-14 py-5 md:py-6 text-lg md:text-2xl rounded-2xl bg-neutral-900/70 hover:bg-neutral-800/80 text-white shadow-xl relative',
-                              { 'btn-loading': oroProcessing }
-                            )
-                          : clsx(
-                              'pricing-cta',
-                              plan.variant === 'creator' ? 'cta-secondary' : 'cta-primary',
-                              { 'btn-loading': plan.variant === 'creator' && plataGenerating },
-                              { 'opacity-60 cursor-not-allowed': plan.variant === 'creator' && !!plataLink && plataLinkStatus === 'valid' }
-                            )
+                        clsx(
+                          'btn-glow-once btn-glow-once--subtle cta-premium cta-blink cta-ambient cta-border-wave px-8 md:px-14 py-5 md:py-6 text-lg md:text-2xl rounded-2xl bg-neutral-900/70 hover:bg-neutral-800/80 text-white shadow-xl relative',
+                          { 'btn-loading': oroProcessing }
+                        )
                       }
-                      disabled={(plan.variant === 'creator' && !!plataLink && plataLinkStatus === 'valid') || (plan.variant === 'creator' && (!user || plataGenerating))}
+                      disabled={oroProcessing}
                       onClick={async () => {
-                        if (plan.variant === 'creator') {
-                          setPlataStatus(null)
-                          if (plataLink && plataLinkStatus === 'valid') { return }
-                          if (!user) { setPlataStatus({ error: msg('debes_registrarte_en_bronce') }); setBronzeFlash(true); setTimeout(() => setBronzeFlash(false), 1200); return }
-                          if (user.plan === 'bronce') {
-                            try {
-                              const res = await fetch('/api/upgrade', { method: 'POST' })
-                              const data = await res.json()
-                              if (!res.ok) { setPlataStatus({ error: msg(data.error) }); return }
-                              setUser(data.user)
-                              try { localStorage.setItem('wspace_auth', JSON.stringify(data.user)) } catch {}
-                              try { window.dispatchEvent(new CustomEvent('user_session_changed')) } catch {}
-                            } catch { setPlataStatus({ error: msg('network_error') }); return }
-                          }
-                          setPlataGenerating(true)
-                          try {
-                            const res = await fetch('/api/referrals/generate', { method: 'POST' })
-                            const data = await res.json()
-                            if (!res.ok) { setPlataStatus({ error: msg(data.error) }); if (data.error === 'must_be_plata') { setBronzeFlash(true); setTimeout(() => setBronzeFlash(false), 1200) } return }
-                            setPlataStatus({ ok: true })
-                            setPlataLink(typeof data.link === 'string' ? data.link : (typeof data.code === 'string' ? (() => { try { const u = new URL(window.location.origin); return `${u.origin}/?ref=${data.code}` } catch { return `/?ref=${data.code}` } })() : null))
-                            
-                            setPlataLinkStatus('valid')
-                          } catch { setPlataStatus({ error: msg('network_error') }) }
-                          finally { setPlataGenerating(false) }
-                          return
-                        }
                         if (plan.variant === 'starter') {
                           try {
                             setOroProcessing(true)
@@ -437,7 +336,7 @@ export default function PricingSection() {
                         }
                       }}
                       >
-                      {plan.variant === 'creator' ? (plataGenerating ? 'Generando enlace…' : plan.ctaLabel) : plan.ctaLabel}
+                      {plan.ctaLabel}
                       {plan.variant === 'starter' && (
                         <span aria-hidden className="cta-stars" />
                       )}
@@ -457,28 +356,6 @@ export default function PricingSection() {
                     {plan.variant === 'starter' && (
                       <div id="mp-checkout-gold" />
                     )}
-                    {plan.variant === 'creator' && (
-                      <div className="mt-2 text-xs text-cyan-200/80">
-                        {user?.plan === 'plata' ? (
-                          plataLink ? 'Tu plan: PLATA — Enlace activo' : 'Tu plan: PLATA — Aún no has generado enlace'
-                        ) : user?.plan === 'bronce' ? 'Tu plan: BRONCE (se requiere subir a PLATA para generar link)' : 'Regístrate en BRONCE para continuar'}
-                      </div>
-                    )}
-                    {plan.variant === 'creator' && plataGenerating && (
-                      <div className="mt-3 text-xs">
-                        <div className="loading-dots" />
-                        <div className="text-cyan-200/80 mt-1">Generando tu enlace único…</div>
-                      </div>
-                    )}
-                    {plan.variant === 'creator' && plataLink && (
-                      <div className="mt-3 text-xs">
-                        <div className="text-emerald-300">Enlace generado:</div>
-                        <div className="break-all text-cyan-200/90">{plataLink}</div>
-                        
-                        <div className="text-cyan-200/70 mt-1">Referidos totales: {plataInvites}</div>
-                      </div>
-                    )}
-                    {plan.variant === 'creator' && plataStatus?.error && <div className="alert-bad mt-2">{plataStatus.error}</div>}
                     {plan.variant === 'starter' && oroStatus?.error && <div className="alert-bad mt-2">{oroStatus.error}</div>}
                   </div>
                 )}

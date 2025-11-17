@@ -1,46 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
-import { getUserById, generateLinkForUser, createUser, upgradeUserToPlata, readDB, writeDB } from '@/lib/referralDB'
-import { decodeSession, encodeSession } from '@/lib/auth'
+import { NextResponse } from 'next/server'
 
-export async function POST(req: NextRequest) {
-  const store = await cookies()
-  const uid = decodeSession(store.get('wspace_sess')?.value) || ''
-  if (!uid) return NextResponse.json({ error: 'not_authenticated' }, { status: 401 })
-  let user = await getUserById(uid)
-  let newUid: string | null = null
-  if (!user) {
-    try {
-      const email = store.get('wspace_email')?.value || ''
-      const plan = (store.get('wspace_plan')?.value || 'bronce') as 'bronce' | 'plata' | 'oro'
-      if (email) {
-        const created = await createUser(email)
-        if (plan === 'plata') await upgradeUserToPlata(created.id)
-        user = await getUserById(created.id) || created
-        newUid = created.id
-      }
-    } catch {}
-  }
-  if (!user) return NextResponse.json({ error: 'user_not_found' }, { status: 404 })
-  if (user.plan !== 'plata') return NextResponse.json({ error: 'must_be_plata' }, { status: 403 })
-  // Avoid generating a new code if one exists; reuse
-  const db = await readDB()
-  const existing = db.links.filter(l => l.userId === uid).slice().sort((a, b) => b.createdAt - a.createdAt)[0] || null
-  const link = existing ? await generateLinkForUser(uid) : await generateLinkForUser(uid)
-  const origin = req.nextUrl.origin
-  const share = `${origin}/?ref=${link.code}`
-  try {
-    const u = db.users.find(x => x.id === user!.id)
-    if (u) { u.referralCode = link.code; u.referralLinkText = share; await writeDB(db) }
-  } catch {}
-  const res = NextResponse.json({ ok: true, link: share, code: link.code, expiresAt: link.expiresAt })
-  if (newUid) {
-    try {
-      res.cookies.set('wspace_sess', encodeSession(newUid), { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
-      res.cookies.set('wspace_uid', newUid, { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
-      res.cookies.set('wspace_ref_code', link.code, { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
-      res.cookies.set('wspace_ref_link', share, { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
-    } catch {}
-  }
-  return res
-}
+export async function GET() { return new NextResponse(null, { status: 405 }) }
+export async function POST() { return new NextResponse(JSON.stringify({ error: 'endpoint_removed' }), { status: 410, headers: { 'Content-Type': 'application/json' } }) }
