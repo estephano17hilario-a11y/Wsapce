@@ -16,16 +16,22 @@ export async function POST(req: NextRequest) {
   const existing = await getUserByEmail(email)
   if (existing) return NextResponse.json({ error: 'user_exists' }, { status: 409 })
 
-  const code = normalizeRefLink(referralLink)
+  let code = normalizeRefLink(referralLink)
   if (code) {
     const status = await getCodeStatus(code)
-    if (status.status === 'not_found') return NextResponse.json({ error: 'ref_invalid' }, { status: 400 })
-    const link = status.link!
-    const db = await readDB()
-    const referrer = db.users.find(u => u.id === link.userId)
-    if (referrer && referrer.email.toLowerCase() === email) return NextResponse.json({ error: 'self_referral_not_allowed' }, { status: 400 })
-    const currentCount = db.relations.filter(r => r.referrerId === link.userId).length
-    if (currentCount >= db.config.inviteLimit) return NextResponse.json({ error: 'invite_limit_reached' }, { status: 403 })
+    if (status.status === 'not_found') {
+      code = null
+    } else {
+      const link = status.link!
+      const db = await readDB()
+      const referrer = db.users.find(u => u.id === link.userId)
+      if (referrer && referrer.email.toLowerCase() === email) {
+        code = null
+      } else {
+        const currentCount = db.relations.filter(r => r.referrerId === link.userId).length
+        if (currentCount >= db.config.inviteLimit) code = null
+      }
+    }
   }
 
   const user = await createUser(email, code || undefined)

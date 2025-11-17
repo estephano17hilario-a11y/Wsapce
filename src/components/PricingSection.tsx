@@ -473,7 +473,7 @@ export default function PricingSection() {
                     {plan.variant === 'creator' && plataLink && (
                       <div className="mt-3 text-xs">
                         <div className="text-emerald-300">Enlace generado:</div>
-                        <div className="break-all text-cyan-200/90">{(() => { try { const u = new URL(window.location.origin); return `${u.origin}/?ref=${plataLink}` } catch { return plataLink } })()}</div>
+                        <div className="break-all text-cyan-200/90">{plataLink}</div>
                         
                         <div className="text-cyan-200/70 mt-1">Referidos totales: {plataInvites}</div>
                       </div>
