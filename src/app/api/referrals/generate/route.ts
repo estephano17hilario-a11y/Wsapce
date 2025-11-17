@@ -5,7 +5,7 @@ import { decodeSession, encodeSession } from '@/lib/auth'
 
 export async function POST(req: NextRequest) {
   const store = await cookies()
-  const uid = decodeSession(store.get('wspace_sess')?.value) || store.get('wspace_uid')?.value || ''
+  const uid = decodeSession(store.get('wspace_sess')?.value) || ''
   if (!uid) return NextResponse.json({ error: 'not_authenticated' }, { status: 401 })
   let user = await getUserById(uid)
   let newUid: string | null = null

@@ -5,7 +5,7 @@ import { decodeSession, encodeSession } from '@/lib/auth'
 
 export async function GET() {
   const store = await cookies()
-  const uid = decodeSession(store.get('wspace_sess')?.value) || store.get('wspace_uid')?.value || ''
+  const uid = decodeSession(store.get('wspace_sess')?.value) || ''
   let user = uid ? await getUserById(uid) : null
   let newUid: string | null = null
   if (!user) {

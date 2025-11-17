@@ -31,7 +31,7 @@ export default function PricingSection() {
   const [plataLink, setPlataLink] = useState<string | null>(null)
   const [plataStatus, setPlataStatus] = useState<{ ok?: boolean; error?: string } | null>(null)
   const [plataGenerating, setPlataGenerating] = useState(false)
-  const [plataExpiresAt, setPlataExpiresAt] = useState<number | null>(null)
+  
   const [plataInvites, setPlataInvites] = useState<number>(0)
   const [bronzeFlash, setBronzeFlash] = useState(false)
   const [oroProcessing, setOroProcessing] = useState(false)
@@ -85,7 +85,7 @@ export default function PricingSection() {
           const rl = typeof d?.rawLink === 'string' ? d.rawLink : null
           const code = typeof d?.code === 'string' ? d.code : null
           setPlataLink(rl || (code ? (() => { try { const u = new URL(window.location.origin); return `${u.origin}/?ref=${code}` } catch { return `/?ref=${code}` } })() : null))
-          setPlataExpiresAt(typeof d?.expiresAt === 'number' ? d.expiresAt : null)
+          
           setPlataInvites(typeof d?.totalInvites === 'number' ? d.totalInvites : 0)
         } catch { setPlataStatus({ error: msg('network_error') }) }
       })()
@@ -375,7 +375,7 @@ export default function PricingSection() {
                             if (!res.ok) { setPlataStatus({ error: msg(data.error) }); if (data.error === 'must_be_plata') { setBronzeFlash(true); setTimeout(() => setBronzeFlash(false), 1200) } return }
                             setPlataStatus({ ok: true })
                             setPlataLink(typeof data.link === 'string' ? data.link : (typeof data.code === 'string' ? (() => { try { const u = new URL(window.location.origin); return `${u.origin}/?ref=${data.code}` } catch { return `/?ref=${data.code}` } })() : null))
-                            setPlataExpiresAt(typeof data.expiresAt === 'number' ? data.expiresAt : null)
+                            
                             setPlataLinkStatus('valid')
                           } catch { setPlataStatus({ error: msg('network_error') }) }
                           finally { setPlataGenerating(false) }
@@ -450,7 +450,7 @@ export default function PricingSection() {
                     {plan.variant === 'creator' && (
                       <div className="mt-2 text-xs text-cyan-200/80">
                         {user?.plan === 'plata' ? (
-                          plataLinkStatus === 'valid' ? 'Tu plan: PLATA — Enlace activo' : plataLinkStatus === 'expired' ? 'Tu plan: PLATA — Enlace caducado (genera uno nuevo)' : plataLinkStatus === 'inactive' ? 'Tu plan: PLATA — Enlace inactivo (genera uno nuevo)' : 'Tu plan: PLATA — Aún no has generado enlace'
+                          plataLink ? 'Tu plan: PLATA — Enlace activo' : 'Tu plan: PLATA — Aún no has generado enlace'
                         ) : user?.plan === 'bronce' ? 'Tu plan: BRONCE (se requiere subir a PLATA para generar link)' : 'Regístrate en BRONCE para continuar'}
                       </div>
                     )}
@@ -460,14 +460,11 @@ export default function PricingSection() {
                         <div className="text-cyan-200/80 mt-1">Generando tu enlace único…</div>
                       </div>
                     )}
-                    {plan.variant === 'creator' && plataLink && plataLinkStatus === 'valid' && (
+                    {plan.variant === 'creator' && plataLink && (
                       <div className="mt-3 text-xs">
                         <div className="text-emerald-300">Enlace generado:</div>
                         <div className="break-all text-cyan-200/90">{(() => { try { const u = new URL(window.location.origin); return `${u.origin}/?ref=${plataLink}` } catch { return plataLink } })()}</div>
-                        {plataExpiresAt && (
-                          <div className="text-cyan-200/70 mt-1">Expira: {new Date(plataExpiresAt).toLocaleDateString()}</div>
-                        )}
-                        <div className="text-cyan-200/70 mt-1">Este enlace es único de tu cuenta y queda bloqueado 90 días.</div>
+                        
                         <div className="text-cyan-200/70 mt-1">Referidos totales: {plataInvites}</div>
                       </div>
                     )}

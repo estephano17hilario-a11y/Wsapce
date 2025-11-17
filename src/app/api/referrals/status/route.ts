@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { readDB, getUserById } from '@/lib/referralDB'
+import { decodeSession } from '@/lib/auth'
 
 export async function GET() {
   try {
     const store = await cookies()
-    const uid = store.get('wspace_uid')?.value || ''
+    const uid = decodeSession(store.get('wspace_sess')?.value) || ''
     const cookieRawLink = store.get('wspace_ref_link')?.value || ''
     const cookieCode = store.get('wspace_ref_code')?.value || ''
     if (!uid) return NextResponse.json({ error: 'not_authenticated' }, { status: 401 })

@@ -127,7 +127,7 @@ export default function ProfileCircle({ inlineName }: { inlineName?: string }) {
           <div className="profile-row"><span>Plan</span><span>{user?.plan ? user.plan.toUpperCase() : 'INVITADO'}</span></div>
           <div className="profile-row"><span>Registro</span><span>{user?.createdAt ? new Date(user.createdAt).toLocaleString() : '—'}</span></div>
           {refStatus && (
-            <div className="profile-row"><span>Referidos</span><span>{refStatus.status === 'valid' ? 'Enlace activo' : refStatus.status === 'expired' ? 'Enlace caducado' : refStatus.status === 'inactive' ? 'Enlace inactivo' : 'Sin enlace'}{refStatus.expiresAt ? ` · expira ${new Date(refStatus.expiresAt).toLocaleDateString()}` : ''}</span></div>
+            <div className="profile-row"><span>Referidos</span><span>{refStatus.status === 'valid' ? 'Enlace activo' : 'Sin enlace'}</span></div>
           )}
           {error && <div className="profile-row"><span>Error</span><span>{error}</span></div>}
         </div>

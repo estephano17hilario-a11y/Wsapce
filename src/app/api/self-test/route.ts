@@ -4,6 +4,9 @@ import { normalizeRefLink, createUser, generateLinkForUser, validateCode, getCod
 import { planClassFor } from '@/components/ProfileCircle'
 
 export async function GET() {
+  if (process.env.NODE_ENV === 'production') {
+    return new NextResponse(JSON.stringify({ ok: false, error: 'disabled_in_production' }), { status: 403, headers: { 'Content-Type': 'application/json' } })
+  }
   const results: Record<string, boolean> = {}
   const metrics: Record<string, number> = {}
   try {
