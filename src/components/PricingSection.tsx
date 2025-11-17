@@ -374,6 +374,7 @@ export default function PricingSection() {
                             setPlataStatus({ ok: true })
                             setPlataLink(typeof data.code === 'string' ? data.code : (data.link as string))
                             setPlataExpiresAt(typeof data.expiresAt === 'number' ? data.expiresAt : null)
+                            setPlataLinkStatus('valid')
                           } catch { setPlataStatus({ error: msg('network_error') }) }
                           finally { setPlataGenerating(false) }
                           return
