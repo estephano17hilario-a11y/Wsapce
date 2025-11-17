@@ -13,6 +13,7 @@ export default function RankingsSection() {
   const [me, setMe] = useState<{ id: string; email: string; plan: string } | null>(null)
   const [myStats, setMyStats] = useState<{ totalInvites: number; byPlan: Record<string, number>; referees: { email: string; plan: string }[] } | null>(null)
   const [myError, setMyError] = useState<string | null>(null)
+  const [myRefreshing, setMyRefreshing] = useState(false)
 
   useEffect(() => {
     let mounted = true
@@ -110,23 +111,57 @@ export default function RankingsSection() {
                   <div className="text-xs text-cyan-200/80">{me ? `Tu usuario: ${abbrEmail(me.email)}` : 'No autenticado'}</div>
                 </div>
                 <button
-                  className="pricing-cta cta-secondary"
+                  className={`pricing-cta cta-secondary ${myRefreshing ? 'btn-loading' : ''}`}
+                  disabled={myRefreshing}
                   onClick={async () => {
+                    if (myRefreshing) return
+                    setMyRefreshing(true)
                     setMyError(null)
                     try {
-                      const [uRes, sRes] = await Promise.all([
-                        fetch('/api/user', { cache: 'no-store' }),
-                        fetch('/api/referrals/stats', { cache: 'no-store' })
-                      ])
-                      const uData = await uRes.json()
-                      setMe(uData.user || null)
+                      let cached: { stats?: { totalInvites: number; byPlan: Record<string, number>; referees: { email: string; plan: string }[] }; user?: { id: string; email: string; plan: string } } | null = null
+                      try { const raw = localStorage.getItem('wspace_stats_cache'); cached = raw ? JSON.parse(raw) : null } catch {}
+                      if (cached && cached.stats) {
+                        setMyStats({ totalInvites: cached.stats.totalInvites, byPlan: cached.stats.byPlan, referees: cached.stats.referees })
+                        if (cached.user) setMe(cached.user)
+                      }
+                      let etag: string | null = null
+                      try { etag = localStorage.getItem('wspace_stats_etag') } catch {}
+                      const sRes = await fetch('/api/referrals/stats', { cache: 'no-store', headers: etag ? { 'If-None-Match': etag } : undefined })
+                      if (sRes.status === 304) { setMyError(null); setMyRefreshing(false); return }
                       const sData = await sRes.json()
-                      if (!sRes.ok) { setMyError(sData.error || 'error') }
-                      else {
+                      if (!sRes.ok) {
+                        if (sData.error === 'not_authenticated' || sData.error === 'user_not_found') {
+                          const uRes = await fetch('/api/user', { cache: 'no-store' })
+                          await uRes.json()
+                          const retry = await fetch('/api/referrals/stats', { cache: 'no-store', headers: etag ? { 'If-None-Match': etag } : undefined })
+                          if (retry.status === 304) { setMyError(null); setMyRefreshing(false); return }
+                          const rData = await retry.json()
+                          if (!retry.ok) { setMyError(rData.error || 'error') }
+                          else {
+                            const referees = Array.isArray(rData.stats.referees) ? (rData.stats.referees as { email: string; plan: string }[]) : []
+                            setMyStats({ totalInvites: rData.stats.totalInvites, byPlan: rData.stats.byPlan, referees })
+                            setMe(rData.user || null)
+                            try {
+                              const et = retry.headers.get('ETag') || null
+                              if (et) localStorage.setItem('wspace_stats_etag', et)
+                              localStorage.setItem('wspace_stats_cache', JSON.stringify({ stats: rData.stats, user: rData.user || null }))
+                            } catch {}
+                          }
+                        } else {
+                          setMyError(sData.error || 'error')
+                        }
+                      } else {
                         const referees = Array.isArray(sData.stats.referees) ? (sData.stats.referees as { email: string; plan: string }[]) : []
                         setMyStats({ totalInvites: sData.stats.totalInvites, byPlan: sData.stats.byPlan, referees })
+                        setMe(sData.user || null)
+                        try {
+                          const et = sRes.headers.get('ETag') || null
+                          if (et) localStorage.setItem('wspace_stats_etag', et)
+                          localStorage.setItem('wspace_stats_cache', JSON.stringify({ stats: sData.stats, user: sData.user || null }))
+                        } catch {}
                       }
                     } catch { setMyError('network_error') }
+                    finally { setMyRefreshing(false) }
                   }}
                 >Refrescar</button>
               </div>
