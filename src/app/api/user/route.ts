@@ -43,3 +43,4 @@ export async function GET(req: NextRequest) {
   }
   return res
 }
+export const dynamic = 'force-dynamic'
