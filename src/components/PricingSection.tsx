@@ -37,6 +37,7 @@ export default function PricingSection() {
   const [eventsRefreshing, setEventsRefreshing] = useState(false)
   const [lastEventsFetch, setLastEventsFetch] = useState<number | null>(null)
   const lastAnnounceTsRef = React.useRef<number>(0)
+  const [hoverIndex, setHoverIndex] = useState<number | null>(null)
 
   const msg = (code?: string) => {
     switch (code) {
@@ -81,11 +82,11 @@ export default function PricingSection() {
         const r = await fetch('/api/gold/events/recent?limit=1', { cache: 'no-store' })
         const d = await r.json()
         const total = typeof d?.total === 'number' ? d.total : 0
-        setGoldTotal(Math.max(0, Math.min(100, total)))
+        setGoldTotal(Math.max(0, Math.min(1000, total)))
       } catch {}
     }
     fetchCount()
-    const onGold = () => { setGoldTotal((x) => Math.min(100, x + 1)) }
+    const onGold = () => { setGoldTotal((x) => Math.min(1000, x + 1)) }
     window.addEventListener('gold_purchased', onGold as EventListener)
     return () => window.removeEventListener('gold_purchased', onGold as EventListener)
   }, [])
@@ -101,6 +102,19 @@ export default function PricingSection() {
     const tld = domParts.slice(1).join('.')
     const providerMask = provider ? `${provider.slice(0, 1)}***` : ''
     return `${nameMask}@${providerMask}${tld ? `.${tld}` : ''}`
+  }
+
+  const initialFor = (nm?: string | null, em?: string | null) => {
+    const base = (nm && nm.trim()) ? nm.trim() : (em || '')
+    const ch = base.trim().charAt(0)
+    return ch ? ch.toUpperCase() : '—'
+  }
+
+  const colorFor = (nm?: string | null, em?: string | null) => {
+    const s = ((nm || '') + (em || '')).trim()
+    let h = 0
+    for (let i = 0; i < s.length; i++) h = (h + s.charCodeAt(i)) % 360
+    return `hsl(${h} 85% 60%)`
   }
 
   const fetchGoldEvents = async () => {
@@ -318,10 +332,10 @@ export default function PricingSection() {
                   <div className="mt-3">
                     <div className="flex items-center justify-between text-xs md:text-sm text-cyan-100/80">
                       <span>Fundadores disponibles</span>
-                      <span>{goldTotal} / 100</span>
+                      <span>{goldTotal} / 1000</span>
                     </div>
                     <div className="mt-1 h-2.5 md:h-3 w-full rounded-full bg-neutral-700">
-                      <div className="h-full rounded-full bg-amber-400" style={{ width: `${Math.round((goldTotal / 100) * 100)}%` }} />
+                      <div className="h-full rounded-full bg-amber-400" style={{ width: `${Math.min(100, Math.round((goldTotal / 1000) * 100))}%` }} />
                     </div>
                   </div>
                 )}
@@ -490,31 +504,56 @@ export default function PricingSection() {
               <span aria-hidden className="absolute -inset-8 bg-gradient-to-r from-amber-400/10 via-cyan-400/8 to-yellow-300/10 blur-2xl mix-blend-screen" />
               <span aria-hidden className="pointer-events-none absolute inset-0 ring-1 ring-amber-300/45 rounded-3xl" />
               <div className="grid place-items-center" style={{ gridTemplateColumns: 'repeat(20,minmax(0,1fr))' }}>
-                {Array.from({ length: 100 }).map((_, i) => (
-                  <button
-                    key={i}
-                    className={
-                      clsx(
-                        'relative w-7 h-7 md:w-8 md:h-8 rounded-xl border bg-neutral-900/70 shadow-sm overflow-hidden transition-transform',
-                        'hover:scale-[1.01]',
-                        captureCells[i] ? 'border-amber-400/60 ring-2 ring-amber-300/60 bg-amber-500/10' : 'border-neutral-700/60'
-                      )
-                    }
-                    onClick={() => {
-                      setCaptureCells((prev) => {
-                        const next = prev.slice()
-                        next[i] = !next[i]
-                        return next
-                      })
-                    }}
-                  >
-                    <span aria-hidden className="absolute inset-0 pointer-events-none"><span className="stars-soft" /></span>
-                    {captureCells[i] && <span aria-hidden className="once-ripple-subtle once-ripple-subtle--blue" />}
-                  </button>
-                ))}
+                {Array.from({ length: 100 }).map((_, i) => {
+                  const occ = goldEvents[i]
+                  const has = !!occ
+                  return (
+                    <button
+                      key={i}
+                      className={
+                        clsx(
+                          'relative w-7 h-7 md:w-8 md:h-8 rounded-xl border bg-neutral-900/70 shadow-sm overflow-hidden transition-transform',
+                          'hover:scale-[1.01]',
+                          has ? 'border-amber-400/60 ring-2 ring-amber-300/60 bg-amber-500/10' : (captureCells[i] ? 'border-amber-400/60 ring-2 ring-amber-300/60 bg-amber-500/10' : 'border-neutral-700/60')
+                        )
+                      }
+                      onMouseEnter={() => setHoverIndex(i)}
+                      onMouseLeave={() => setHoverIndex((v) => (v === i ? null : v))}
+                      onClick={() => {
+                        if (has) return
+                        setCaptureCells((prev) => {
+                          const next = prev.slice()
+                          next[i] = !next[i]
+                          return next
+                        })
+                      }}
+                    >
+                      <span aria-hidden className="absolute inset-0 pointer-events-none"><span className="stars-soft" /></span>
+                      {has ? (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div
+                            className="w-6 h-6 md:w-7 md:h-7 rounded-full bg-neutral-900/90 text-amber-100 text-xs md:text-sm font-bold flex items-center justify-center border-2"
+                            style={{ borderColor: colorFor(occ?.name || null, occ?.email || null) }}
+                          >
+                            {initialFor(occ?.name || null, occ?.email || null)}
+                          </div>
+                          {hoverIndex === i && (
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 pointer-events-none rounded-md border border-amber-400/40 bg-neutral-900/90 text-amber-50 px-2 py-1 text-[10px] md:text-xs shadow-xl">
+                              <div>{(occ?.name && occ.name.trim()) ? occ.name.trim() : '—'}</div>
+                              <div className="text-cyan-200/90">{maskEmail(occ?.email)}</div>
+                              <div className="text-neutral-400">{occ?.createdAt ? new Date(occ.createdAt).toLocaleString() : '—'}</div>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        captureCells[i] && <span aria-hidden className="once-ripple-subtle once-ripple-subtle--blue" />
+                      )}
+                    </button>
+                  )
+                })}
               </div>
               <div className="mt-4 flex items-center justify-between">
-                <div className="text-xs md:text-sm text-amber-100/80">Capturadas: {captureCells.filter(Boolean).length} / 100</div>
+                <div className="text-xs md:text-sm text-amber-100/80">Fundadores colocados: {Math.min(100, goldEvents.length)} / 100</div>
                 <button
                   className="inline-flex items-center px-3 py-1.5 rounded-md border border-amber-400/40 bg-neutral-900/70 text-amber-200 text-xs md:text-sm hover:bg-neutral-800/80"
                   onClick={() => setCaptureCells(Array.from({ length: 100 }, () => false))}
