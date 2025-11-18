@@ -17,6 +17,20 @@ function VerifyPayment() {
         const d = await r.json()
         setStatus(typeof d.status === 'string' ? d.status : null)
         setUpgraded(!!d.upgraded)
+        if (d?.status === 'approved') {
+          try {
+            const ur = await fetch('/api/user', { cache: 'no-store' })
+            const ud = await ur.json()
+            try { localStorage.setItem('wspace_auth', JSON.stringify(ud.user)) } catch {}
+            try { localStorage.setItem('wspace_email', ud.user?.email || '') } catch {}
+            try { window.dispatchEvent(new CustomEvent('user_session_changed')) } catch {}
+            const nm = (ud?.user?.name && ud.user.name.trim()) ? ud.user.name.trim() : (ud?.user?.email || '')
+            window.setTimeout(async () => {
+              try { window.dispatchEvent(new CustomEvent('gold_purchased', { detail: { email: ud?.user?.email, name: nm } })) } catch {}
+              try { await fetch('/api/gold/announce', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: nm }) }) } catch {}
+            }, 1000)
+          } catch {}
+        }
       } catch {}
       finally { setChecked(true) }
     })()

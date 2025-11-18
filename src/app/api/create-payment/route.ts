@@ -5,7 +5,7 @@ import { decodeSession } from '@/lib/auth'
 import { getUserById } from '@/lib/referralDB'
 
 export async function POST(req: NextRequest) {
-  const accessToken = process.env.MERCADO_PAGO_ACCESS_TOKEN
+  const accessToken = process.env.MP_ACCESS_TOKEN || process.env.MERCADOPAGO_ACCESS_TOKEN || process.env.MERCADO_PAGO_ACCESS_TOKEN || process.env.MP_TOKEN || process.env.MERCADOPAGO_TOKEN
   if (!accessToken) return NextResponse.json({ error: 'missing_access_token' }, { status: 500 })
   const title = 'PACK FUNDADOR (WSPACE.LIVE)'
   const binaryMode = process.env.MP_BINARY_MODE ? process.env.MP_BINARY_MODE === 'true' : true
@@ -21,9 +21,9 @@ export async function POST(req: NextRequest) {
       body: {
         items: [{ id: 'wspace_gold_pack', title, unit_price: 1.0, quantity: 1, currency_id: 'USD' }],
         back_urls: {
-          success: `${origin}?status=approved#pricing`,
-          failure: `${origin}?status=failure#pricing`,
-          pending: `${origin}?status=pending#pricing`
+          success: `${origin}/success`,
+          failure: `${origin}/pending`,
+          pending: `${origin}/pending`
         },
         notification_url: `${origin}/api/webhooks/mercadopago`,
         external_reference: uid || 'anon',

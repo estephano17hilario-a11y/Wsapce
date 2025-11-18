@@ -13,7 +13,7 @@ export async function fetchETagJSON<T = unknown>(url: string, options: FetchETag
   const now = Date.now()
   let cached: { etag: string; ts: number; json: T } | null = null
   try {
-    const raw = sessionStorage.getItem('etag_cache:' + key)
+    const raw = typeof window !== 'undefined' ? sessionStorage.getItem('etag_cache:' + key) : null
     if (raw) cached = JSON.parse(raw)
   } catch {}
   const ttl = typeof options.maxAgeSeconds === 'number' ? Math.max(0, options.maxAgeSeconds) * 1000 : 8000
@@ -30,7 +30,7 @@ export async function fetchETagJSON<T = unknown>(url: string, options: FetchETag
   try { json = await res.json() as T } catch { json = null }
   const etag = res.headers.get('ETag')
   if (etag && json !== null) {
-    try { sessionStorage.setItem('etag_cache:' + key, JSON.stringify({ etag, ts: now, json })) } catch {}
+    try { if (typeof window !== 'undefined') sessionStorage.setItem('etag_cache:' + key, JSON.stringify({ etag, ts: now, json })) } catch {}
   }
   return { ok: res.ok, status: res.status, json, fromCache: false, etag }
 }
