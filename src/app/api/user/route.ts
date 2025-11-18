@@ -13,11 +13,17 @@ export async function GET(req: NextRequest) {
       const email = store.get('wspace_email')?.value || ''
       const plan = (store.get('wspace_plan')?.value || 'bronce') as 'bronce' | 'plata' | 'oro'
       if (email) {
-        const u = await getUserById(uid)
-        if (!u) {
-          const { createUser, upgradeUserToPlata } = await import('@/lib/referralDB')
+        const { createUser, upgradeUserToPlata, upgradeUserToOro, getUserByEmail } = await import('@/lib/referralDB')
+        const existing = await getUserByEmail(email)
+        if (existing) {
+          user = existing
+          if (plan === 'plata' && user.plan === 'bronce') user = (await upgradeUserToPlata(user.id)) || user
+          if (plan === 'oro' && user.plan !== 'oro') user = (await upgradeUserToOro(user.id)) || user
+          newUid = user.id
+        } else {
           const created = await createUser(email)
           if (plan === 'plata') await upgradeUserToPlata(created.id)
+          if (plan === 'oro') await upgradeUserToOro(created.id)
           user = await getUserById(created.id)
           newUid = created.id
         }

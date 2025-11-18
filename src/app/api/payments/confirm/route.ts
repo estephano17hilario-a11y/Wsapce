@@ -23,9 +23,20 @@ export async function GET(req: NextRequest) {
     const ref = info?.external_reference || null
     const metaUid = (info as unknown as { metadata?: { uid?: string } })?.metadata?.uid || null
     let upgraded = false
-    const payUid = (ref && ref !== 'anon') ? ref : (metaUid || null)
+    const payUid = (ref && ref !== 'anon') ? ref : (metaUid || uid || null)
     if (status === 'approved' && payUid) {
-      const user = await getUserById(payUid)
+      let user = await getUserById(payUid)
+      if (!user) {
+        try {
+          const email = store.get('wspace_email')?.value || ''
+          if (email) {
+            const { createUser, getUserByEmail } = await import('@/lib/referralDB')
+            let ex = await getUserByEmail(email)
+            if (!ex) ex = await createUser(email)
+            user = ex
+          }
+        } catch {}
+      }
       let updated = user
       if (user && user.plan !== 'oro') {
         updated = await upgradeUserToOro(payUid)
