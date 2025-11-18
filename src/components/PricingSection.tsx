@@ -430,8 +430,9 @@ export default function PricingSection() {
                               try { sessionStorage.setItem('gold_test_done', '1') } catch {}
                               setOroStatus({ ok: true })
                             } catch {}
-                            finally { setOroProcessing(false) }
-                            return
+                            finally {
+                              // Continuar con el flujo normal (redirigir) aunque estemos en prueba
+                            }
                           }
                           try {
                             setOroProcessing(true)
