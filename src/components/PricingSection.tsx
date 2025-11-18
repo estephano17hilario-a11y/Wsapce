@@ -424,18 +424,22 @@ export default function PricingSection() {
         <div className="mt-14">
           <div className="text-center">
             <h3 className="text-2xl md:text-4xl font-black tracking-tight shine-text">Zona de Captura</h3>
-            <p className="mt-2 text-sm md:text-base text-cyan-200/80">Cuadro 5 × 20 con celdas modernas</p>
+            <p className="mt-2 text-sm md:text-base text-cyan-200/80">Cuadro 20 × 5 con celdas premium</p>
           </div>
           <div className="mt-6 flex items-center justify-center">
-            <div className="lux-card p-4 md:p-6">
-              <div className="grid grid-cols-5 gap-2 md:gap-2.5">
+            <div className="relative rounded-2xl p-5 md:p-6 bg-neutral-950/60 border border-cyan-400/25 shadow-[0_0_40px_rgba(34,211,238,0.25)] overflow-hidden">
+              <span aria-hidden className="absolute -inset-6 bg-gradient-to-r from-cyan-500/10 via-purple-500/10 to-emerald-500/10 blur-2xl mix-blend-screen" />
+              <div
+                className="grid gap-1.5 md:gap-2"
+                style={{ gridTemplateColumns: 'repeat(20,minmax(0,1fr))' }}
+              >
                 {Array.from({ length: 100 }).map((_, i) => (
                   <button
                     key={i}
                     className={
                       clsx(
-                        'relative w-12 h-12 md:w-14 md:h-14 rounded-md border bg-neutral-950/60 shadow-sm overflow-hidden transition-transform',
-                        'hover:scale-[1.03]',
+                        'relative w-9 h-9 md:w-10 md:h-10 rounded-xl border bg-neutral-900/70 shadow-sm overflow-hidden transition-transform',
+                        'hover:scale-[1.02]',
                         captureCells[i] ? 'border-cyan-400/60 ring-2 ring-cyan-300/60 bg-cyan-500/10' : 'border-neutral-700/60'
                       )
                     }

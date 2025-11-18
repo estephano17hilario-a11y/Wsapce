@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState } from "react"
+import { fetchETagJSON } from '@/lib/utils'
 
 type User = { id: string; email: string; plan: "bronce" | "plata" | "oro"; createdAt?: number; name?: string }
 
@@ -42,11 +43,12 @@ export default function ProfileCircle({ inlineName }: { inlineName?: string }) {
     try {
       setLoading(true)
       setError(null)
-      const r = await fetch('/api/user', { cache: 'no-store' })
-      const d = await r.json()
-      if (d?.user) {
-        queueMicrotask(() => setUser(d.user))
-        try { localStorage.setItem('wspace_auth', JSON.stringify(d.user)) } catch {}
+      const r = await fetchETagJSON<{ user?: User }>('/api/user', { maxAgeSeconds: 20 })
+      const d = r.json || {}
+      if ((d as { user?: User }).user) {
+        const u = (d as { user?: User }).user
+        queueMicrotask(() => setUser(u || null))
+        try { if (u) localStorage.setItem('wspace_auth', JSON.stringify(u)) } catch {}
         setLoading(false)
         const newPlan: "bronce" | "plata" | "oro" | "guest" = d.user?.plan ? d.user.plan : "guest"
         if (prevPlanRef.current && prevPlanRef.current !== newPlan) {
