@@ -5,24 +5,8 @@ import { preloadImages } from "@/lib/preload"
 import { fetchETagJSON } from "@/lib/utils"
 
 export default function LoadingOverlay() {
-  const [visible, setVisible] = useState(() => {
-    try {
-      if (typeof window !== 'undefined') {
-        const skip = sessionStorage.getItem('skip_overlay_once') === '1'
-        if (skip) { sessionStorage.removeItem('skip_overlay_once'); return false }
-      }
-    } catch {}
-    return true
-  })
-  const [name, setName] = useState(() => {
-    try {
-      if (typeof window !== 'undefined') {
-        const n = localStorage.getItem('wspace_name')
-        return n || ""
-      }
-    } catch {}
-    return ""
-  })
+  const [visible, setVisible] = useState(true)
+  const [name, setName] = useState("")
   const [progress, setProgress] = useState(0)
   const [uiProgress, setUiProgress] = useState(0)
   const [nameDelayOk, setNameDelayOk] = useState(false)
@@ -50,6 +34,16 @@ export default function LoadingOverlay() {
   }, [])
 
   useEffect(() => {
+    try {
+      const skip = typeof window !== 'undefined' ? (sessionStorage.getItem('skip_overlay_once') === '1') : false
+      if (skip) {
+        try { sessionStorage.removeItem('skip_overlay_once') } catch {}
+        setVisible(false)
+      }
+    } catch {}
+  }, [])
+
+  useEffect(() => {
     ;(async () => {
       try {
         const r = await fetchETagJSON<{ user?: { id: string; email: string; plan: 'bronce' | 'plata' | 'oro' } }>(
@@ -73,6 +67,15 @@ export default function LoadingOverlay() {
         }
       } catch {}
     })()
+  }, [])
+
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const n = localStorage.getItem('wspace_name')
+        if (n) setName(n)
+      }
+    } catch {}
   }, [])
 
   useEffect(() => {

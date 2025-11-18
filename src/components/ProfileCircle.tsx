@@ -17,16 +17,23 @@ export default function ProfileCircle({ inlineName }: { inlineName?: string }) {
   const prevPlanRef = useRef<"bronce" | "plata" | "oro" | "guest" | null>(null)
   const [flash, setFlash] = useState(false)
 
-  const name = useMemo(() => {
-    const n = inlineName && inlineName.trim() ? inlineName.trim() : (typeof window !== 'undefined' ? (localStorage.getItem('wspace_name') || "") : "")
-    return n
+  const [name, setName] = useState<string>(() => (inlineName && inlineName.trim()) ? inlineName.trim() : "")
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      if (inlineName && inlineName.trim()) { setName(inlineName.trim()); return }
+      try { const n = typeof window !== 'undefined' ? (localStorage.getItem('wspace_name') || "") : ""; setName(n) } catch {}
+    }, 0)
+    return () => { window.clearTimeout(id) }
   }, [inlineName])
+  const [hydrated, setHydrated] = useState(false)
+  useEffect(() => { const id = window.setTimeout(() => setHydrated(true), 0); return () => window.clearTimeout(id) }, [])
 
   const initial = useMemo(() => {
+    if (!hydrated) return "—"
     const base = (name && name.trim()) ? name.trim() : (user?.email || "")
     const ch = (base || "").trim().charAt(0)
     return ch ? ch.toUpperCase() : "—"
-  }, [name, user?.email])
+  }, [hydrated, name, user?.email])
 
   const currentPlan: "bronce" | "plata" | "oro" | "guest" = user?.plan ? user.plan : "guest"
   const planClass = planClassFor(currentPlan)
@@ -108,7 +115,7 @@ export default function ProfileCircle({ inlineName }: { inlineName?: string }) {
   return (
     <div className={`profile-anchor`}>
       <button className={`profile-circle ${planClass} ${flash ? 'profile-flash' : ''} ${loading ? 'is-loading' : ''} ${error ? 'profile-error' : ''}`} onClick={() => setOpen((o) => !o)}>
-        <span className="profile-initial">{initial}</span>
+        <span className="profile-initial" suppressHydrationWarning>{initial}</span>
       </button>
       {open && (
         <div className="profile-panel">
