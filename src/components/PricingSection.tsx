@@ -38,7 +38,16 @@ export default function PricingSection() {
   const [lastEventsFetch, setLastEventsFetch] = useState<number | null>(null)
   const lastAnnounceTsRef = React.useRef<number>(0)
   const [hoverIndex, setHoverIndex] = useState<number | null>(null)
-  const GOLD_TEST_MODE = typeof process !== 'undefined' ? (process.env.NEXT_PUBLIC_GOLD_TEST_MODE === '1') : false
+  const GOLD_TEST_MODE = (() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const sp = new URLSearchParams(window.location.search)
+        if (sp.get('gold_test') === '1') return true
+        try { if (localStorage.getItem('gold_test_enable') === '1') return true } catch {}
+      }
+    } catch {}
+    return (typeof process !== 'undefined' ? (process.env.NEXT_PUBLIC_GOLD_TEST_MODE === '1') : false)
+  })()
   const [testGoldDone, setTestGoldDone] = useState<boolean>(() => {
     try { return typeof window !== 'undefined' ? (sessionStorage.getItem('gold_test_done') === '1') : false } catch { return false }
   })
