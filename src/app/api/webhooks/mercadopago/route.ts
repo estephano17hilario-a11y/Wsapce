@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { MercadoPagoConfig, Payment } from 'mercadopago'
 import { getUserById, upgradeUserToOro } from '@/lib/referralDB'
+import { kv } from '@vercel/kv'
 
 async function handlePayment(id: string) {
   const env = process.env
@@ -15,7 +16,15 @@ async function handlePayment(id: string) {
     if (status === 'approved' && ref) {
       const user = await getUserById(ref)
       if (user && user.plan !== 'oro') {
-        await upgradeUserToOro(ref)
+        const updated = await upgradeUserToOro(ref)
+        try {
+          const ev = { email: (updated?.email || user.email), name: (updated?.name || user.name || ''), ts: Date.now() }
+          await kv.set('wspace:gold:last_announce', ev)
+          await kv.incr('wspace:gold:announce_seq')
+          const g = (globalThis as unknown as { __wspaceGold?: { seq: number; last: unknown } })
+          const cur = g.__wspaceGold?.seq || 0
+          g.__wspaceGold = { seq: cur + 1, last: ev }
+        } catch {}
       }
     }
     return { ok: true }

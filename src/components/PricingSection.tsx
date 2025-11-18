@@ -32,6 +32,7 @@ export default function PricingSection() {
   const [oroFlash, setOroFlash] = useState(false)
   const [oroStatus, setOroStatus] = useState<{ ok?: boolean; error?: string } | null>(null)
   const [goldTotal, setGoldTotal] = useState(0)
+  const [captureCells, setCaptureCells] = useState<boolean[]>(() => Array.from({ length: 100 }, () => false))
 
   const msg = (code?: string) => {
     switch (code) {
@@ -131,13 +132,16 @@ export default function PricingSection() {
               try { localStorage.setItem('wspace_auth', JSON.stringify(uData.user)) } catch {}
               try { localStorage.setItem('wspace_email', uData.user?.email || '') } catch {}
               try { window.dispatchEvent(new CustomEvent('user_session_changed')) } catch {}
+              const nm = (n && n.trim()) ? n : (uData?.user?.email || '')
               window.setTimeout(() => {
                 try {
-                  const nm = (n && n.trim()) ? n : (uData?.user?.email || '')
                   window.dispatchEvent(new CustomEvent('gold_purchased', { detail: { email: uData?.user?.email, name: nm } }))
                 } catch {}
               }, 2500)
               setOroStatus({ ok: true })
+              try {
+                await fetch('/api/gold/announce', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: nm }) })
+              } catch {}
             }
           } catch {}
           finally {
@@ -416,6 +420,49 @@ export default function PricingSection() {
               </article>
             </div>
           ))}
+        </div>
+        <div className="mt-14">
+          <div className="text-center">
+            <h3 className="text-2xl md:text-4xl font-black tracking-tight shine-text">Zona de Captura</h3>
+            <p className="mt-2 text-sm md:text-base text-cyan-200/80">Cuadro 5 × 20 con celdas modernas</p>
+          </div>
+          <div className="mt-6 flex items-center justify-center">
+            <div className="lux-card p-4 md:p-6">
+              <div className="grid grid-cols-5 gap-2 md:gap-2.5">
+                {Array.from({ length: 100 }).map((_, i) => (
+                  <button
+                    key={i}
+                    className={
+                      clsx(
+                        'relative w-12 h-12 md:w-14 md:h-14 rounded-md border bg-neutral-950/60 shadow-sm overflow-hidden transition-transform',
+                        'hover:scale-[1.03]',
+                        captureCells[i] ? 'border-cyan-400/60 ring-2 ring-cyan-300/60 bg-cyan-500/10' : 'border-neutral-700/60'
+                      )
+                    }
+                    onClick={() => {
+                      setCaptureCells((prev) => {
+                        const next = prev.slice()
+                        next[i] = !next[i]
+                        return next
+                      })
+                    }}
+                  >
+                    <span aria-hidden className="absolute inset-0 pointer-events-none"><span className="stars-soft" /></span>
+                    {captureCells[i] && <span aria-hidden className="once-ripple-subtle once-ripple-subtle--blue" />}
+                  </button>
+                ))}
+              </div>
+              <div className="mt-4 flex items-center justify-between">
+                <div className="text-xs md:text-sm text-cyan-100/80">Capturadas: {captureCells.filter(Boolean).length} / 100</div>
+                <button
+                  className="inline-flex items-center px-3 py-1.5 rounded-md border border-cyan-400/40 bg-neutral-900/70 text-cyan-200 text-xs md:text-sm hover:bg-neutral-800/80"
+                  onClick={() => setCaptureCells(Array.from({ length: 100 }, () => false))}
+                >
+                  Reiniciar
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

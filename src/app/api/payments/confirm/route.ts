@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { MercadoPagoConfig, Payment } from 'mercadopago'
 import { decodeSession } from '@/lib/auth'
 import { getUserById, upgradeUserToOro } from '@/lib/referralDB'
+import { kv } from '@vercel/kv'
 
 export async function GET(req: NextRequest) {
   const id = req.nextUrl.searchParams.get('id') || req.nextUrl.searchParams.get('payment_id') || req.nextUrl.searchParams.get('collection_id')
@@ -24,7 +25,15 @@ export async function GET(req: NextRequest) {
     if (status === 'approved' && ref && uid && ref === uid) {
       const user = await getUserById(uid)
       if (user && user.plan !== 'oro') {
-        await upgradeUserToOro(uid)
+        const updated = await upgradeUserToOro(uid)
+        try {
+          const ev = { email: (updated?.email || user.email), name: (updated?.name || user.name || ''), ts: Date.now() }
+          await kv.set('wspace:gold:last_announce', ev)
+          await kv.incr('wspace:gold:announce_seq')
+          const g = (globalThis as unknown as { __wspaceGold?: { seq: number; last: unknown } })
+          const cur = g.__wspaceGold?.seq || 0
+          g.__wspaceGold = { seq: cur + 1, last: ev }
+        } catch {}
         upgraded = true
       }
     }

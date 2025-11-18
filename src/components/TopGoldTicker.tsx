@@ -73,33 +73,29 @@ export default function TopGoldTicker() {
       } catch {}
     }
     window.addEventListener('gold_purchased', onGold)
-    const poll = () => {
-      try {
-        const since = Math.floor(Date.now() - 60_000)
-        fetch(`/api/gold/events/recent?limit=3&since=${since}`).then(r => r.json()).then(d => {
-          const arr = (d?.events || []) as { email?: string; name?: string }[]
-          if (arr.length > 0) {
-            const ev = arr[0]
-            const label = (ev.name && ev.name.trim()) ? ev.name.trim() : (ev.email ? abbrEmail(ev.email) : '')
-            setActive(true)
-            setMsg(label ? `${label} acaba de obtener la Insignia de Oro` : `Insignia de Oro confirmada`)
-            setShow(true)
-            doFlash()
-            kickCompactCycle()
-            if (!stickyRef.current) {
-              if (hideRef.current) { clearTimeout(hideRef.current); hideRef.current = null }
-              hideRef.current = window.setTimeout(() => { setShow(false) }, 6000)
-            }
+    let es: EventSource | null = null
+    try {
+      es = new EventSource('/api/gold/stream')
+      es.onmessage = (e) => {
+        try {
+          const d = JSON.parse(e.data) as { email?: string; name?: string }
+          const label = (d.name && d.name.trim()) ? d.name.trim() : (d.email ? abbrEmail(d.email) : '')
+          setActive(true)
+          setMsg(label ? `${label} acaba de obtener la Insignia de Oro` : `Insignia de Oro confirmada`)
+          setShow(true)
+          doFlash()
+          kickCompactCycle()
+          if (!stickyRef.current) {
+            if (hideRef.current) { clearTimeout(hideRef.current); hideRef.current = null }
+            hideRef.current = window.setTimeout(() => { setShow(false) }, 6000)
           }
-        }).catch(() => {})
-      } catch {}
-    }
-    poll()
-    const id = window.setInterval(() => poll(), 8000)
+        } catch {}
+      }
+    } catch {}
     return () => {
       window.removeEventListener('start_cosmic', onStartCosmic)
       window.removeEventListener('gold_purchased', onGold)
-      window.clearInterval(id)
+      try { es?.close() } catch {}
     }
   }, [])
 

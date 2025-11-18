@@ -253,7 +253,7 @@ export default function LoadingOverlay() {
                       setLoginOk(true)
                     }}
                   >
-                    Entrar por cuenta <span className="ml-1 blur-soft">{(typeof window !== 'undefined' ? (JSON.parse(localStorage.getItem('wspace_auth') || 'null')?.email || localStorage.getItem('wspace_email') || savedEmail || '') : '') || 'detectada'}</span>
+                    Entrar por cuenta <span className="ml-1 blur-soft">{savedEmail || 'detectada'}</span>
                   </button>
                   <button
                     type="button"
