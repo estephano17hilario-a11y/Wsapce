@@ -33,6 +33,9 @@ export default function PricingSection() {
   const [oroStatus, setOroStatus] = useState<{ ok?: boolean; error?: string } | null>(null)
   const [goldTotal, setGoldTotal] = useState(0)
   const [captureCells, setCaptureCells] = useState<boolean[]>(() => Array.from({ length: 100 }, () => false))
+  const [goldEvents, setGoldEvents] = useState<{ email?: string; name?: string; createdAt?: number }[]>([])
+  const [eventsRefreshing, setEventsRefreshing] = useState(false)
+  const [lastEventsFetch, setLastEventsFetch] = useState<number | null>(null)
 
   const msg = (code?: string) => {
     switch (code) {
@@ -84,6 +87,39 @@ export default function PricingSection() {
     const onGold = () => { setGoldTotal((x) => Math.min(100, x + 1)) }
     window.addEventListener('gold_purchased', onGold as EventListener)
     return () => window.removeEventListener('gold_purchased', onGold as EventListener)
+  }, [])
+
+  const maskEmail = (e?: string | null) => {
+    if (!e) return '—'
+    const parts = e.split('@')
+    const name = parts[0] || ''
+    const domain = parts[1] || ''
+    const nameMask = name.length <= 3 ? `${name.slice(0, 1)}***` : `${name.slice(0, 3)}***`
+    const domParts = domain.split('.')
+    const provider = domParts[0] || ''
+    const tld = domParts.slice(1).join('.')
+    const providerMask = provider ? `${provider.slice(0, 1)}***` : ''
+    return `${nameMask}@${providerMask}${tld ? `.${tld}` : ''}`
+  }
+
+  const fetchGoldEvents = async () => {
+    try {
+      setEventsRefreshing(true)
+      const r = await fetchETagJSON<{ ok?: boolean; events?: { email?: string; name?: string; createdAt?: number }[] }>(
+        '/api/gold/events/recent?limit=50',
+        { maxAgeSeconds: 25 }
+      )
+      const arr = (r.json?.events || []) as { email?: string; name?: string; createdAt?: number }[]
+      setGoldEvents(arr)
+      setLastEventsFetch(Date.now())
+    } catch {}
+    finally { setEventsRefreshing(false) }
+  }
+
+  useEffect(() => {
+    fetchGoldEvents()
+    const id = window.setInterval(() => fetchGoldEvents(), 30000)
+    return () => window.clearInterval(id)
   }, [])
 
   useEffect(() => {
@@ -426,14 +462,11 @@ export default function PricingSection() {
             <h3 className="text-2xl md:text-4xl font-black tracking-tight shine-text">Zona de Captura</h3>
             <p className="mt-2 text-sm md:text-base text-cyan-200/80">Cuadro 20 × 5 con celdas premium</p>
           </div>
-          <div className="mt-6 flex items-center justify-center">
-            <div className="relative mx-auto rounded-3xl p-5 md:p-6 bg-neutral-950/70 border border-cyan-400/30 shadow-[0_0_50px_rgba(34,211,238,0.25)] overflow-hidden">
-              <span aria-hidden className="absolute -inset-10 bg-gradient-to-r from-cyan-500/10 via-sky-500/10 to-purple-500/10 blur-3xl mix-blend-screen" />
-              <span aria-hidden className="pointer-events-none absolute inset-0 ring-1 ring-cyan-300/40 rounded-3xl" />
-              <div
-                className="grid place-items-center"
-                style={{ gridTemplateColumns: 'repeat(20,minmax(0,1fr))' }}
-              >
+          <div className="mt-6 grid md:grid-cols-2 gap-8 items-start justify-items-center md:justify-items-start">
+            <div className="relative md:justify-self-start mx-auto md:ml-0 md:mr-auto rounded-3xl p-5 md:p-6 bg-neutral-950/70 border border-amber-400/35 shadow-[0_0_60px_rgba(255,200,0,0.25)] overflow-hidden">
+              <span aria-hidden className="absolute -inset-10 bg-gradient-to-r from-amber-400/12 via-yellow-300/12 to-orange-400/12 blur-3xl mix-blend-screen" />
+              <span aria-hidden className="pointer-events-none absolute inset-0 ring-1 ring-amber-300/45 rounded-3xl" />
+              <div className="grid place-items-center" style={{ gridTemplateColumns: 'repeat(20,minmax(0,1fr))' }}>
                 {Array.from({ length: 100 }).map((_, i) => (
                   <button
                     key={i}
@@ -441,7 +474,7 @@ export default function PricingSection() {
                       clsx(
                         'relative w-7 h-7 md:w-8 md:h-8 rounded-xl border bg-neutral-900/70 shadow-sm overflow-hidden transition-transform',
                         'hover:scale-[1.01]',
-                        captureCells[i] ? 'border-cyan-400/60 ring-2 ring-cyan-300/60 bg-cyan-500/10' : 'border-neutral-700/60'
+                        captureCells[i] ? 'border-amber-400/60 ring-2 ring-amber-300/60 bg-amber-500/10' : 'border-neutral-700/60'
                       )
                     }
                     onClick={() => {
@@ -458,13 +491,43 @@ export default function PricingSection() {
                 ))}
               </div>
               <div className="mt-4 flex items-center justify-between">
-                <div className="text-xs md:text-sm text-cyan-100/80">Capturadas: {captureCells.filter(Boolean).length} / 100</div>
+                <div className="text-xs md:text-sm text-amber-100/80">Capturadas: {captureCells.filter(Boolean).length} / 100</div>
                 <button
-                  className="inline-flex items-center px-3 py-1.5 rounded-md border border-cyan-400/40 bg-neutral-900/70 text-cyan-200 text-xs md:text-sm hover:bg-neutral-800/80"
+                  className="inline-flex items-center px-3 py-1.5 rounded-md border border-amber-400/40 bg-neutral-900/70 text-amber-200 text-xs md:text-sm hover:bg-neutral-800/80"
                   onClick={() => setCaptureCells(Array.from({ length: 100 }, () => false))}
                 >
                   Reiniciar
                 </button>
+              </div>
+            </div>
+            <div className="w-full max-w-xl md:justify-self-end">
+              <div className="flex items-center justify-between">
+                <div className="text-sm md:text-base text-amber-100/90 font-semibold">Fundadores Oro (Validados)</div>
+                <button
+                  className={clsx('inline-flex items-center px-3 py-1.5 rounded-md border text-xs md:text-sm', eventsRefreshing ? 'border-amber-400/40 bg-neutral-900/70 text-amber-200 opacity-70 cursor-not-allowed' : 'border-amber-400/40 bg-neutral-900/70 text-amber-200 hover:bg-neutral-800/80')}
+                  onClick={() => { if (!eventsRefreshing) fetchGoldEvents() }}
+                >
+                  Refresh
+                </button>
+              </div>
+              <div className="mt-3 lux-card p-3 md:p-4 bg-neutral-950/70 border border-amber-400/30">
+                <div className="grid grid-cols-3 text-xs md:text-sm text-neutral-300">
+                  <div>Nombre</div>
+                  <div>Email</div>
+                  <div>Fecha</div>
+                </div>
+                <div className="mt-2 divide-y divide-neutral-800/60">
+                  {goldEvents.length === 0 ? (
+                    <div className="py-3 text-xs md:text-sm text-neutral-400">Sin registros</div>
+                  ) : goldEvents.slice(0, 20).map((ev, idx) => (
+                    <div key={idx} className="py-2 grid grid-cols-3 items-center text-xs md:text-sm">
+                      <div className="text-neutral-200">{(ev.name && ev.name.trim()) ? ev.name.trim() : '—'}</div>
+                      <div className="text-neutral-300">{maskEmail(ev.email)}</div>
+                      <div className="text-neutral-400">{ev.createdAt ? new Date(ev.createdAt).toLocaleString() : '—'}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-2 text-[10px] md:text-xs text-neutral-500">{lastEventsFetch ? `Actualizado: ${new Date(lastEventsFetch).toLocaleTimeString()}` : ''}</div>
               </div>
             </div>
           </div>
