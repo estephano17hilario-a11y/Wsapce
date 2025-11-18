@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { kv } from '@vercel/kv'
+import { readDB } from '@/lib/referralDB'
 
 export const dynamic = 'force-dynamic'
 
@@ -7,6 +8,7 @@ export async function GET() {
   const enc = new TextEncoder()
   let running = true
   let lastSeq = 0
+  let lastTs = 0
   try { lastSeq = (await kv.get<number>('wspace:gold:announce_seq')) || 0 } catch { 
     try { lastSeq = (globalThis as unknown as { __wspaceGold?: { seq: number } }).__wspaceGold?.seq || 0 } catch {}
   }
@@ -27,6 +29,17 @@ export async function GET() {
               try { last = await kv.get<{ email?: string; name?: string; ts?: number }>('wspace:gold:last_announce') } catch {}
               if (!last) { try { last = (globalThis as unknown as { __wspaceGold?: { last: { email?: string; name?: string; ts?: number } } }).__wspaceGold?.last || null } catch {} }
               if (last) write(`data: ${JSON.stringify(last)}\n\n`)
+            }
+            if (!seq) {
+              try {
+                const db = await readDB()
+                const lastEv = Array.isArray(db.goldEvents) && db.goldEvents.length ? db.goldEvents.slice().sort((a, b) => b.createdAt - a.createdAt)[0] : null
+                if (lastEv && lastEv.createdAt && lastEv.createdAt !== lastTs) {
+                  lastTs = lastEv.createdAt
+                  const payload = { email: lastEv.email, name: lastEv.name, ts: lastEv.createdAt }
+                  write(`data: ${JSON.stringify(payload)}\n\n`)
+                }
+              } catch {}
             }
           } catch {}
           await new Promise(r => setTimeout(r, 1000))
