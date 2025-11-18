@@ -31,6 +31,7 @@ export default function PricingSection() {
   const [oroProcessing, setOroProcessing] = useState(false)
   const [oroFlash, setOroFlash] = useState(false)
   const [oroStatus, setOroStatus] = useState<{ ok?: boolean; error?: string } | null>(null)
+  const [goldTotal, setGoldTotal] = useState(0)
 
   const msg = (code?: string) => {
     switch (code) {
@@ -67,6 +68,21 @@ export default function PricingSection() {
     const onSess = () => { fetchUser() }
     window.addEventListener('user_session_changed', onSess)
     return () => window.removeEventListener('user_session_changed', onSess)
+  }, [])
+
+  useEffect(() => {
+    const fetchCount = async () => {
+      try {
+        const r = await fetch('/api/gold/events/recent?limit=1', { cache: 'no-store' })
+        const d = await r.json()
+        const total = typeof d?.total === 'number' ? d.total : 0
+        setGoldTotal(Math.max(0, Math.min(100, total)))
+      } catch {}
+    }
+    fetchCount()
+    const onGold = () => { setGoldTotal((x) => Math.min(100, x + 1)) }
+    window.addEventListener('gold_purchased', onGold as EventListener)
+    return () => window.removeEventListener('gold_purchased', onGold as EventListener)
   }, [])
 
   useEffect(() => {
@@ -216,7 +232,7 @@ export default function PricingSection() {
 
 
         {/* Cards */}
-        <div className="mt-10 grid gap-6 md:grid-cols-3">
+        <div className="mt-10 grid gap-6 md:grid-cols-2 justify-items-center w-fit mx-auto">
           {plans.map((plan) => (
             <div key={plan.id} className={`pricing-group pricing-group--${plan.variant}`} id={`section-${plan.variant}`}>
               <div className="pricing-group__label" aria-hidden>
@@ -235,6 +251,17 @@ export default function PricingSection() {
                   <span className={`price-value ${plan.id === "fundador-oro" ? "price-big" : ""}`}>{priceLabel(plan)}</span>
                   {plan.priceSuffix && <span className="price-suffix">{plan.priceSuffix}</span>}
                 </div>
+                {plan.variant === 'starter' && (
+                  <div className="mt-3">
+                    <div className="flex items-center justify-between text-xs md:text-sm text-cyan-100/80">
+                      <span>Fundadores disponibles</span>
+                      <span>{goldTotal} / 100</span>
+                    </div>
+                    <div className="mt-1 h-2.5 md:h-3 w-full rounded-full bg-neutral-700">
+                      <div className="h-full rounded-full bg-amber-400" style={{ width: `${Math.round((goldTotal / 100) * 100)}%` }} />
+                    </div>
+                  </div>
+                )}
                 {plan.variant === "starter" && user?.plan === 'oro' && (
                   <div className="success-chip mt-2">Ahora formas parte de la élite, felicidades {displayName || (user?.email || '')}</div>
                 )}
