@@ -36,6 +36,7 @@ export default function PricingSection() {
   const [goldEvents, setGoldEvents] = useState<{ email?: string; name?: string; createdAt?: number }[]>([])
   const [eventsRefreshing, setEventsRefreshing] = useState(false)
   const [lastEventsFetch, setLastEventsFetch] = useState<number | null>(null)
+  const lastAnnounceTsRef = React.useRef<number>(0)
 
   const msg = (code?: string) => {
     switch (code) {
@@ -120,6 +121,28 @@ export default function PricingSection() {
     fetchGoldEvents()
     const id = window.setInterval(() => fetchGoldEvents(), 30000)
     return () => window.clearInterval(id)
+  }, [])
+
+  useEffect(() => {
+    let es: EventSource | null = null
+    try {
+      es = new EventSource('/api/gold/stream')
+      es.onmessage = (e) => {
+        try {
+          const d = JSON.parse(e.data) as { email?: string; name?: string; ts?: number }
+          const ts = typeof d.ts === 'number' ? d.ts : Date.now()
+          if (ts && ts !== lastAnnounceTsRef.current) {
+            lastAnnounceTsRef.current = ts
+            setGoldEvents((prev) => {
+              const exists = prev.some(x => x.createdAt === ts && x.email === d.email)
+              const item = { email: d.email, name: d.name, createdAt: ts }
+              return exists ? prev : [item, ...prev].slice(0, 50)
+            })
+          }
+        } catch {}
+      }
+    } catch {}
+    return () => { try { es?.close() } catch {} }
   }, [])
 
   useEffect(() => {
@@ -463,8 +486,8 @@ export default function PricingSection() {
             <p className="mt-2 text-sm md:text-base text-cyan-200/80">Cuadro 20 × 5 con celdas premium</p>
           </div>
           <div className="mt-6 grid md:grid-cols-2 gap-8 items-start justify-items-center md:justify-items-start">
-            <div className="relative md:justify-self-start mx-auto md:ml-0 md:mr-auto rounded-3xl p-5 md:p-6 bg-neutral-950/70 border border-amber-400/35 shadow-[0_0_60px_rgba(255,200,0,0.25)] overflow-hidden">
-              <span aria-hidden className="absolute -inset-10 bg-gradient-to-r from-amber-400/12 via-yellow-300/12 to-orange-400/12 blur-3xl mix-blend-screen" />
+            <div className="relative md:justify-self-start mx-auto md:ml-0 md:mr-auto rounded-3xl p-5 md:p-6 bg-neutral-950/70 border border-amber-400/35 shadow-[0_0_40px_rgba(255,200,0,0.22)] overflow-hidden">
+              <span aria-hidden className="absolute -inset-8 bg-gradient-to-r from-amber-400/10 via-cyan-400/8 to-yellow-300/10 blur-2xl mix-blend-screen" />
               <span aria-hidden className="pointer-events-none absolute inset-0 ring-1 ring-amber-300/45 rounded-3xl" />
               <div className="grid place-items-center" style={{ gridTemplateColumns: 'repeat(20,minmax(0,1fr))' }}>
                 {Array.from({ length: 100 }).map((_, i) => (
@@ -502,15 +525,15 @@ export default function PricingSection() {
             </div>
             <div className="w-full max-w-xl md:justify-self-end">
               <div className="flex items-center justify-between">
-                <div className="text-sm md:text-base text-amber-100/90 font-semibold">Fundadores Oro (Validados)</div>
+                <div className="text-sm md:text-base bg-gradient-to-r from-amber-300 via-cyan-300 to-yellow-300 bg-clip-text text-transparent font-semibold">Fundadores Oro (Validados)</div>
                 <button
-                  className={clsx('inline-flex items-center px-3 py-1.5 rounded-md border text-xs md:text-sm', eventsRefreshing ? 'border-amber-400/40 bg-neutral-900/70 text-amber-200 opacity-70 cursor-not-allowed' : 'border-amber-400/40 bg-neutral-900/70 text-amber-200 hover:bg-neutral-800/80')}
+                  className={clsx('inline-flex items-center px-3 py-1.5 rounded-md border text-xs md:text-sm transition-colors', eventsRefreshing ? 'border-amber-400/40 bg-neutral-900/70 text-amber-200 opacity-70 cursor-not-allowed' : 'border-amber-400/40 bg-neutral-900/70 text-amber-200 hover:bg-neutral-800/80')}
                   onClick={() => { if (!eventsRefreshing) fetchGoldEvents() }}
                 >
                   Refresh
                 </button>
               </div>
-              <div className="mt-3 lux-card p-3 md:p-4 bg-neutral-950/70 border border-amber-400/30">
+              <div className="mt-3 p-3 md:p-4 rounded-2xl bg-gradient-to-br from-neutral-950 via-neutral-900 to-black border border-amber-400/30 shadow-[0_0_30px_rgba(56,189,248,0.15)]">
                 <div className="grid grid-cols-3 text-xs md:text-sm text-neutral-300">
                   <div>Nombre</div>
                   <div>Email</div>
@@ -520,9 +543,9 @@ export default function PricingSection() {
                   {goldEvents.length === 0 ? (
                     <div className="py-3 text-xs md:text-sm text-neutral-400">Sin registros</div>
                   ) : goldEvents.slice(0, 20).map((ev, idx) => (
-                    <div key={idx} className="py-2 grid grid-cols-3 items-center text-xs md:text-sm">
-                      <div className="text-neutral-200">{(ev.name && ev.name.trim()) ? ev.name.trim() : '—'}</div>
-                      <div className="text-neutral-300">{maskEmail(ev.email)}</div>
+                    <div key={idx} className="py-2 grid grid-cols-3 items-center text-xs md:text-sm hover:bg-neutral-900/60 rounded-md">
+                      <div className="text-amber-200">{(ev.name && ev.name.trim()) ? ev.name.trim() : '—'}</div>
+                      <div className="text-cyan-200/90">{maskEmail(ev.email)}</div>
                       <div className="text-neutral-400">{ev.createdAt ? new Date(ev.createdAt).toLocaleString() : '—'}</div>
                     </div>
                   ))}

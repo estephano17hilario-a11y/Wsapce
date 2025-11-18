@@ -6,6 +6,7 @@ export default function PerfPanel() {
   const [fps, setFps] = useState(0)
   const [cls, setCls] = useState<number | null>(null)
   const [longTasks, setLongTasks] = useState<number>(0)
+  const [hydrationWarnings, setHydrationWarnings] = useState<number>(0)
   const rafRef = useRef<number | null>(null)
   const lastRef = useRef<number>(0)
   const framesRef = useRef<number>(0)
@@ -47,11 +48,28 @@ export default function PerfPanel() {
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); try { po?.disconnect(); clsPO?.disconnect() } catch {} }
   }, [])
 
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'production') return
+    const ow = console.warn
+    const oe = console.error
+    const re = /hydration|didn’t match|didn't match|Text content does not match|Expected server HTML to contain/i
+    console.warn = (...args: unknown[]) => {
+      try { if (args.some(a => typeof a === 'string' && re.test(a))) setHydrationWarnings(v => v + 1) } catch {}
+      try { ow.apply(console, args as []) } catch {}
+    }
+    console.error = (...args: unknown[]) => {
+      try { if (args.some(a => typeof a === 'string' && re.test(a))) setHydrationWarnings(v => v + 1) } catch {}
+      try { oe.apply(console, args as []) } catch {}
+    }
+    return () => { console.warn = ow; console.error = oe }
+  }, [])
+
   return (
     <div className="fixed bottom-4 right-4 z-[60] px-3 py-2 rounded-xl border border-neutral-700/60 bg-neutral-900/80 text-cyan-200/90 text-xs shadow-xl backdrop-blur">
       <div>FPS: {fps}</div>
       <div>Long tasks: {longTasks}</div>
       <div>CLS: {cls ?? 0}</div>
+      <div>Hydration: {hydrationWarnings}</div>
     </div>
   )
 }
