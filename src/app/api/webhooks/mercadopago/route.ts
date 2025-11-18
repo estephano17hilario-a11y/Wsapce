@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { MercadoPagoConfig, Payment } from 'mercadopago'
-import { getUserById, upgradeUserToOro } from '@/lib/referralDB'
+import { getUserById, upgradeUserToOro, appendGoldEvent } from '@/lib/referralDB'
 import { kv } from '@vercel/kv'
 
 async function handlePayment(id: string) {
@@ -10,15 +10,21 @@ async function handlePayment(id: string) {
   const client = new MercadoPagoConfig({ accessToken })
   const payment = new Payment(client)
   try {
-    const info = await payment.get({ id }) as unknown as { status?: string; external_reference?: string }
+    const info = await payment.get({ id }) as unknown as { status?: string; external_reference?: string; metadata?: { uid?: string } }
     const status: string = info?.status || ''
     const ref: string | undefined = info?.external_reference
-    if (status === 'approved' && ref) {
-      const user = await getUserById(ref)
+    const metaUid: string = (info as unknown as { metadata?: { uid?: string } })?.metadata?.uid || ''
+    const payUid: string = (ref && ref !== 'anon') ? ref : (metaUid || '')
+    if (status === 'approved' && payUid) {
+      const user = await getUserById(payUid)
+      let updated = user
       if (user && user.plan !== 'oro') {
-        const updated = await upgradeUserToOro(ref)
+        updated = await upgradeUserToOro(payUid)
+      }
+      if (updated || user) {
+        try { await appendGoldEvent(payUid) } catch {}
         try {
-          const ev = { email: (updated?.email || user.email), name: (updated?.name || user.name || ''), ts: Date.now() }
+          const ev = { email: ((updated || user)?.email || ''), name: ((updated || user)?.name || ''), ts: Date.now() }
           await kv.set('wspace:gold:last_announce', ev)
           await kv.incr('wspace:gold:announce_seq')
           const g = (globalThis as unknown as { __wspaceGold?: { seq: number; last: unknown } })

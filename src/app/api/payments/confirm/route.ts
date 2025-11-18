@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { MercadoPagoConfig, Payment } from 'mercadopago'
 import { decodeSession } from '@/lib/auth'
-import { getUserById, upgradeUserToOro } from '@/lib/referralDB'
+import { getUserById, upgradeUserToOro, appendGoldEvent } from '@/lib/referralDB'
 import { kv } from '@vercel/kv'
 
 export async function GET(req: NextRequest) {
@@ -18,23 +18,29 @@ export async function GET(req: NextRequest) {
   const client = new MercadoPagoConfig({ accessToken })
   const payment = new Payment(client)
   try {
-    const info = await payment.get({ id }) as unknown as { status?: string; external_reference?: string }
+    const info = await payment.get({ id }) as unknown as { status?: string; external_reference?: string; metadata?: { uid?: string } }
     const status = info?.status || null
     const ref = info?.external_reference || null
+    const metaUid = (info as unknown as { metadata?: { uid?: string } })?.metadata?.uid || null
     let upgraded = false
-    if (status === 'approved' && ref && uid && ref === uid) {
-      const user = await getUserById(uid)
+    const payUid = (ref && ref !== 'anon') ? ref : (metaUid || null)
+    if (status === 'approved' && payUid) {
+      const user = await getUserById(payUid)
+      let updated = user
       if (user && user.plan !== 'oro') {
-        const updated = await upgradeUserToOro(uid)
+        updated = await upgradeUserToOro(payUid)
+        upgraded = true
+      }
+      if (updated || user) {
+        try { await appendGoldEvent(payUid) } catch {}
         try {
-          const ev = { email: (updated?.email || user.email), name: (updated?.name || user.name || ''), ts: Date.now() }
+          const ev = { email: ((updated || user)?.email || ''), name: ((updated || user)?.name || ''), ts: Date.now() }
           await kv.set('wspace:gold:last_announce', ev)
           await kv.incr('wspace:gold:announce_seq')
           const g = (globalThis as unknown as { __wspaceGold?: { seq: number; last: unknown } })
           const cur = g.__wspaceGold?.seq || 0
           g.__wspaceGold = { seq: cur + 1, last: ev }
         } catch {}
-        upgraded = true
       }
     }
     const res = new NextResponse(JSON.stringify({ status, upgraded }), { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'private, no-store' } })

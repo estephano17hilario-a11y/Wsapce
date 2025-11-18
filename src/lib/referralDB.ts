@@ -187,6 +187,15 @@ export async function upgradeUserToOro(userId: string): Promise<User | null> {
   return u
 }
 
+export async function appendGoldEvent(userId: string): Promise<void> {
+  const db = await readDB()
+  const u = db.users.find(x => x.id === userId)
+  if (!u) return
+  const ev: GoldEvent = { userId: u.id, email: u.email, name: u.name, createdAt: now() }
+  db.goldEvents.push(ev)
+  await writeDB(db)
+}
+
 
 
  

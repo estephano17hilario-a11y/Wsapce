@@ -1,9 +1,12 @@
 "use client"
 import { Suspense, useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 
 function VerifyPayment() {
   const sp = useSearchParams()
+  const router = useRouter()
   const [status, setStatus] = useState<string | null>(null)
   const [upgraded, setUpgraded] = useState(false)
   const [checked, setChecked] = useState(false)
@@ -28,6 +31,7 @@ function VerifyPayment() {
             window.setTimeout(async () => {
               try { window.dispatchEvent(new CustomEvent('gold_purchased', { detail: { email: ud?.user?.email, name: nm } })) } catch {}
               try { await fetch('/api/gold/announce', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: nm }) }) } catch {}
+              try { window.setTimeout(() => { try { router.replace('/#pricing') } catch {} }, 1000) } catch {}
             }, 1000)
           } catch {}
         }
@@ -44,6 +48,9 @@ function VerifyPayment() {
         <div className="mt-6 text-center">
           <div className="text-2xl md:text-4xl font-black tracking-tight wspace-cosmic-title">Ahora formas parte de la elite</div>
           <div className="mt-2 text-base md:text-lg text-cyan-200/85">Siéntete orgulloso</div>
+          <div className="mt-6">
+            <Link href="/#pricing" className="inline-block rounded px-4 py-2 bg-white text-black font-semibold">Volver a la web principal</Link>
+          </div>
         </div>
       )}
     </>
