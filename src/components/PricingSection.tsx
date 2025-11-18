@@ -38,19 +38,7 @@ export default function PricingSection() {
   const [lastEventsFetch, setLastEventsFetch] = useState<number | null>(null)
   const lastAnnounceTsRef = React.useRef<number>(0)
   const [hoverIndex, setHoverIndex] = useState<number | null>(null)
-  const GOLD_TEST_MODE = (() => {
-    try {
-      if (typeof window !== 'undefined') {
-        const sp = new URLSearchParams(window.location.search)
-        if (sp.get('gold_test') === '1') return true
-        try { if (localStorage.getItem('gold_test_enable') === '1') return true } catch {}
-      }
-    } catch {}
-    return (typeof process !== 'undefined' ? (process.env.NEXT_PUBLIC_GOLD_TEST_MODE === '1') : false)
-  })()
-  const [testGoldDone, setTestGoldDone] = useState<boolean>(() => {
-    try { return typeof window !== 'undefined' ? (sessionStorage.getItem('gold_test_done') === '1') : false } catch { return false }
-  })
+  
 
   const msg = (code?: string) => {
     switch (code) {
@@ -409,31 +397,6 @@ export default function PricingSection() {
                       disabled={oroProcessing}
                       onClick={async () => {
                         if (plan.variant === 'starter') {
-                          if (GOLD_TEST_MODE && !testGoldDone) {
-                            try {
-                              setOroProcessing(true)
-                              setOroStatus(null)
-                              setOroFlash(true)
-                              setTimeout(() => setOroFlash(false), 900)
-                              try {
-                                const overlay = document.createElement('div')
-                                overlay.className = 'web-burst web-burst--gold'
-                                document.body.appendChild(overlay)
-                                window.setTimeout(() => { try { overlay.remove() } catch {} }, 1200)
-                              } catch {}
-                              const nm = (displayName && displayName.trim()) ? displayName.trim() : (user?.email || '')
-                              try { window.dispatchEvent(new CustomEvent('gold_purchased', { detail: { email: user?.email, name: nm } })) } catch {}
-                              try { await fetch('/api/gold/announce', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: nm }) }) } catch {}
-                              setUser((u) => (u ? { ...u, plan: 'oro' } : u))
-                              try { if (user) localStorage.setItem('wspace_auth', JSON.stringify({ ...user, plan: 'oro' })) } catch {}
-                              setTestGoldDone(true)
-                              try { sessionStorage.setItem('gold_test_done', '1') } catch {}
-                              setOroStatus({ ok: true })
-                            } catch {}
-                            finally {
-                              // Continuar con el flujo normal (redirigir) aunque estemos en prueba
-                            }
-                          }
                           try {
                             setOroProcessing(true)
                             setOroStatus(null)
