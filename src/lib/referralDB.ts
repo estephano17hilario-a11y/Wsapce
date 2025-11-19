@@ -14,6 +14,28 @@ const dataDirEnv = process.env.WS_DATA_DIR || process.env.WSPACE_DATA_DIR || ''
 const dataDir = dataDirEnv && dataDirEnv.trim() ? path.resolve(dataDirEnv.trim()) : (process.env.NODE_ENV === 'production' ? path.join('/tmp', 'wspace_data') : path.join(process.cwd(), 'data'))
 const dataFile = path.join(dataDir, 'referrals.json')
 const useKV = !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN)
+const redisUrlEnv = process.env.REDIS_URL || process.env.UPSTASH_REDIS_URL || process.env.UPSTASH_REDIS_REST_URL || ''
+const useRedis = !!redisUrlEnv
+
+type RedisClient = { get: (k: string) => Promise<string | null>; set: (k: string, v: string) => Promise<void> }
+let redisClientPromise: Promise<RedisClient | null> | null = null
+async function getRedis(): Promise<RedisClient | null> {
+  if (!useRedis) return null
+  try { const g = (globalThis as unknown as { __wspaceRedis?: RedisClient }); if (g.__wspaceRedis) return g.__wspaceRedis } catch {}
+  if (!redisClientPromise) {
+    redisClientPromise = (async () => {
+      try {
+        const mod = await import('redis') as unknown as { createClient: (opts: { url: string }) => { connect: () => Promise<void>; on: (ev: string, fn: (...args: unknown[]) => void) => void; get: (k: string) => Promise<string | null>; set: (k: string, v: string) => Promise<void> } }
+        const client = mod.createClient({ url: redisUrlEnv })
+        try { client.on('error', () => {}) } catch {}
+        await client.connect()
+        try { (globalThis as unknown as { __wspaceRedis?: RedisClient }).__wspaceRedis = client as unknown as RedisClient } catch {}
+        return client as unknown as RedisClient
+      } catch { return null }
+    })()
+  }
+  try { return await redisClientPromise } catch { return null }
+}
 
 async function ensureFile() {
   try {
@@ -78,6 +100,17 @@ export async function readDB(): Promise<DB> {
       return initial
     } catch {}
   }
+  const redis = await getRedis()
+  if (redis) {
+    try {
+      const raw = await redis.get('wspace:referrals')
+      if (raw) {
+        const r = JSON.parse(raw) as DB
+        if (!Array.isArray(r.goldEvents)) (r as unknown as DB).goldEvents = []
+        return r
+      }
+    } catch {}
+  }
   await ensureFile()
   let parsed: DB
   try {
@@ -115,11 +148,16 @@ export async function writeDB(db: DB) {
   if (useKV) {
     try { await kv.set('wspace:referrals', db); kvOk = true } catch {}
   }
+  let redisOk = false
+  const redis = await getRedis()
+  if (redis) {
+    try { await redis.set('wspace:referrals', JSON.stringify(db)); redisOk = true } catch {}
+  }
   try {
     await fs.mkdir(dataDir, { recursive: true })
     await fs.writeFile(dataFile, JSON.stringify(db, null, 2), 'utf8')
   } catch {}
-  if (!kvOk && !useKV) {
+  if (!kvOk && !redisOk && !useKV) {
     try {
       const fallbackDir = path.join(process.cwd(), 'data')
       await fs.mkdir(fallbackDir, { recursive: true })
