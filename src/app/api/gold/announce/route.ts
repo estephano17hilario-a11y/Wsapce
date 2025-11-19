@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { decodeSession } from '@/lib/auth'
-import { getUserById, appendGoldEvent } from '@/lib/referralDB'
+import { getUserById } from '@/lib/referralDB'
 import { kv } from '@vercel/kv'
 
 export async function POST(req: NextRequest) {
@@ -24,6 +24,5 @@ export async function POST(req: NextRequest) {
     const cur = g.__wspaceGold?.seq || 0
     g.__wspaceGold = { seq: cur + 1, last: ev }
   } catch {}
-  try { await appendGoldEvent(user.id) } catch {}
   return NextResponse.json({ ok: true })
 }

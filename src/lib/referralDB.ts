@@ -6,7 +6,7 @@ type Plan = 'bronce' | 'plata' | 'oro'
 
 export type User = { id: string; email: string; plan: Plan; createdAt: number; name?: string }
 
-type GoldEvent = { userId: string; email: string; name?: string; createdAt: number }
+type GoldEvent = { userId: string; email: string; name?: string; createdAt: number; paymentId?: string }
 
 type DB = { users: User[]; goldEvents: GoldEvent[]; config: { ttlDays: number; inviteLimit: number; plataThreshold: number } }
 
@@ -180,18 +180,23 @@ export async function upgradeUserToOro(userId: string): Promise<User | null> {
   if (!u) return null
   if (u.plan !== 'oro') {
     u.plan = 'oro'
-    const ev: GoldEvent = { userId: u.id, email: u.email, name: u.name, createdAt: now() }
-    db.goldEvents.push(ev)
     await writeDB(db)
   }
   return u
 }
 
-export async function appendGoldEvent(userId: string): Promise<void> {
+export async function appendGoldEventForPayment(userId: string, paymentId?: string): Promise<void> {
   const db = await readDB()
   const u = db.users.find(x => x.id === userId)
   if (!u) return
-  const ev: GoldEvent = { userId: u.id, email: u.email, name: u.name, createdAt: now() }
+  if (paymentId) {
+    const exists = db.goldEvents.some(e => e.paymentId === paymentId)
+    if (exists) return
+  } else {
+    const lastForUser = db.goldEvents.slice().reverse().find(e => e.userId === userId)
+    if (lastForUser && (now() - lastForUser.createdAt) < 30000) return
+  }
+  const ev: GoldEvent = { userId: u.id, email: u.email, name: u.name, createdAt: now(), paymentId }
   db.goldEvents.push(ev)
   await writeDB(db)
 }
@@ -213,7 +218,15 @@ export async function appendGoldEvent(userId: string): Promise<void> {
 export async function getRecentGoldEvents(limit = 10, since?: number) {
   const db = await readDB()
   const events = db.goldEvents.slice().sort((a, b) => b.createdAt - a.createdAt)
-  const filtered = typeof since === 'number' ? events.filter(e => e.createdAt > since) : events
+  const dedup: GoldEvent[] = []
+  const seen = new Set<string>()
+  for (const e of events) {
+    const key = e.paymentId ? `pid:${e.paymentId}` : `u:${e.userId}:${e.createdAt}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    dedup.push(e)
+  }
+  const filtered = typeof since === 'number' ? dedup.filter(e => e.createdAt > since) : dedup
   return filtered.slice(0, Math.max(1, limit))
 }
 

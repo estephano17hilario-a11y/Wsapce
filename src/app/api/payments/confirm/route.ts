@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { MercadoPagoConfig, Payment } from 'mercadopago'
 import { decodeSession } from '@/lib/auth'
-import { getUserById, upgradeUserToOro, appendGoldEvent } from '@/lib/referralDB'
+import { getUserById, upgradeUserToOro, appendGoldEventForPayment } from '@/lib/referralDB'
 import { kv } from '@vercel/kv'
 
 export async function GET(req: NextRequest) {
@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
         upgraded = true
       }
       if (updated || user) {
-        try { await appendGoldEvent(payUid) } catch {}
+        try { await appendGoldEventForPayment(payUid, id || undefined) } catch {}
         try {
           const ev = { email: ((updated || user)?.email || ''), name: ((updated || user)?.name || ''), ts: Date.now() }
           await kv.set('wspace:gold:last_announce', ev)

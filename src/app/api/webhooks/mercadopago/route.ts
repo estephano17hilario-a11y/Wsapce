@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { MercadoPagoConfig, Payment } from 'mercadopago'
-import { getUserById, upgradeUserToOro, appendGoldEvent } from '@/lib/referralDB'
+import { getUserById, upgradeUserToOro, appendGoldEventForPayment } from '@/lib/referralDB'
 import { kv } from '@vercel/kv'
 
 async function handlePayment(id: string) {
@@ -22,7 +22,7 @@ async function handlePayment(id: string) {
         updated = await upgradeUserToOro(payUid)
       }
       if (updated || user) {
-        try { await appendGoldEvent(payUid) } catch {}
+        try { await appendGoldEventForPayment(payUid, id) } catch {}
         try {
           const ev = { email: ((updated || user)?.email || ''), name: ((updated || user)?.name || ''), ts: Date.now() }
           await kv.set('wspace:gold:last_announce', ev)
