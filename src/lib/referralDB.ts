@@ -45,16 +45,7 @@ async function getRedis(): Promise<RedisClient | null> {
   try { return await redisClientPromise } catch { return null }
 }
 
-type CacheEntry<T> = { v: T; ts: number }
-type MemCache = { byEmail: Map<string, CacheEntry<User>>; byId: Map<string, CacheEntry<User>>; referrals: CacheEntry<DB> | null; recentGold: Map<string, CacheEntry<GoldEvent[]>>; goldTotal: CacheEntry<number> | null }
-function getMem(): MemCache {
-  const g = globalThis as unknown as { __wspaceMem?: MemCache }
-  if (!g.__wspaceMem) g.__wspaceMem = { byEmail: new Map(), byId: new Map(), referrals: null, recentGold: new Map(), goldTotal: null }
-  return g.__wspaceMem
-}
-const mem = getMem()
-const nowMs = () => Date.now()
-function fresh<T>(e: CacheEntry<T> | null | undefined, ttl: number): T | null { return e && (nowMs() - e.ts) < ttl ? e.v : null }
+ 
 
 async function ensureFile() {
   try {
@@ -81,8 +72,6 @@ async function ensureFile() {
 }
 
 export async function readDB(): Promise<DB> {
-  const cached = fresh(mem.referrals, 15000)
-  if (cached) return cached
   if (useKV) {
     try {
       const r = await kv.get<DB>('wspace:referrals')
@@ -118,7 +107,6 @@ export async function readDB(): Promise<DB> {
       }
       const initial: DB = seed || { users: [], goldEvents: [], config: { ttlDays: 90, inviteLimit: 500, plataThreshold: 5 } }
       await kv.set('wspace:referrals', initial)
-      mem.referrals = { v: initial, ts: nowMs() }
       return initial
     } catch {}
   }
@@ -129,7 +117,6 @@ export async function readDB(): Promise<DB> {
       if (raw) {
         const r = JSON.parse(raw) as DB
         if (!Array.isArray(r.goldEvents)) (r as unknown as DB).goldEvents = []
-        mem.referrals = { v: r, ts: nowMs() }
         return r
       }
     } catch {}
@@ -163,7 +150,6 @@ export async function readDB(): Promise<DB> {
   if (!Array.isArray(parsed.goldEvents)) parsed.goldEvents = []
   if (!parsed.config) parsed.config = { ttlDays: 90, inviteLimit: 500, plataThreshold: 5 }
   if (typeof parsed.config.plataThreshold !== 'number') parsed.config.plataThreshold = 5
-  mem.referrals = { v: parsed, ts: nowMs() }
   return parsed
 }
 
@@ -181,7 +167,6 @@ export async function writeDB(db: DB) {
     await fs.mkdir(dataDir, { recursive: true })
     await fs.writeFile(dataFile, JSON.stringify(db, null, 2), 'utf8')
   } catch {}
-  mem.referrals = { v: db, ts: nowMs() }
   if (!kvOk && !redisOk && !useKV) {
     try {
       const fallbackDir = path.join(process.cwd(), 'data')
@@ -208,10 +193,6 @@ export function isValidEmail(e: string) {
 
 export async function getUserByEmail(email: string) {
   const k = email.toLowerCase()
-  {
-    const c = fresh(mem.byEmail.get(k), 8000)
-    if (c) return c
-  }
   if (useRedis) {
     const redis = await getRedis()
     if (redis) {
@@ -221,37 +202,23 @@ export async function getUserByEmail(email: string) {
         if (!id) return null
         const raw = await redis.get('wspace:user:' + id)
         const u = raw ? JSON.parse(raw) as User : null
-        if (u) { mem.byEmail.set(k, { v: u, ts: nowMs() }); mem.byId.set(u.id, { v: u, ts: nowMs() }) }
         return u
       } catch { return null }
     }
   }
   const db = await readDB()
-  const u = db.users.find(u => u.email.toLowerCase() === k) || null
-  if (u) { mem.byEmail.set(k, { v: u, ts: nowMs() }); mem.byId.set(u.id, { v: u, ts: nowMs() }) }
-  return u
+  return db.users.find(u => u.email.toLowerCase() === k) || null
 }
 
 export async function getUserById(id: string) {
-  {
-    const c = fresh(mem.byId.get(id), 8000)
-    if (c) return c
-  }
   if (useRedis) {
     const redis = await getRedis()
     if (redis) {
-      try {
-        const raw = await redis.get('wspace:user:' + id)
-        const u = raw ? JSON.parse(raw) as User : null
-        if (u) { mem.byId.set(id, { v: u, ts: nowMs() }); mem.byEmail.set(u.email.toLowerCase(), { v: u, ts: nowMs() }) }
-        return u
-      } catch { return null }
+      try { const raw = await redis.get('wspace:user:' + id); return raw ? JSON.parse(raw) as User : null } catch { return null }
     }
   }
   const db = await readDB()
-  const u = db.users.find(u => u.id === id) || null
-  if (u) { mem.byId.set(id, { v: u, ts: nowMs() }); mem.byEmail.set(u.email.toLowerCase(), { v: u, ts: nowMs() }) }
-  return u
+  return db.users.find(u => u.id === id) || null
 }
 
 export async function createUser(email: string): Promise<User> {
@@ -265,13 +232,11 @@ export async function createUser(email: string): Promise<User> {
         const raw = await redis.get('wspace:user:' + existsId)
         const fallback: User = { id: existsId, email, plan: 'bronce', createdAt: now() }
         const u: User = raw ? (JSON.parse(raw) as User) : fallback
-        mem.byEmail.set(k, { v: u, ts: nowMs() }); mem.byId.set(u.id, { v: u, ts: nowMs() })
         return u
       }
       const user: User = { id: genId(), email, plan: 'bronce', createdAt: now() }
       await redis.set('wspace:user:' + user.id, JSON.stringify(user))
       await redis.set(idxKey, user.id)
-      mem.byEmail.set(k, { v: user, ts: nowMs() }); mem.byId.set(user.id, { v: user, ts: nowMs() })
       return user
     }
   }
@@ -281,7 +246,6 @@ export async function createUser(email: string): Promise<User> {
   const user: User = { id: genId(), email, plan: 'bronce', createdAt: now() }
   db.users.push(user)
   await writeDB(db)
-  mem.byEmail.set(k, { v: user, ts: nowMs() }); mem.byId.set(user.id, { v: user, ts: nowMs() })
   return user
 }
 
@@ -293,7 +257,6 @@ export async function upgradeUserToPlata(userId: string): Promise<User | null> {
       if (!raw) return null
       const u = JSON.parse(raw) as User
       if (u.plan === 'bronce') { u.plan = 'plata'; await redis.set('wspace:user:' + userId, JSON.stringify(u)) }
-      mem.byId.set(userId, { v: u, ts: nowMs() }); mem.byEmail.set(u.email.toLowerCase(), { v: u, ts: nowMs() })
       return u
     }
   }
@@ -301,7 +264,6 @@ export async function upgradeUserToPlata(userId: string): Promise<User | null> {
   const u = db.users.find(x => x.id === userId)
   if (!u) return null
   if (u.plan === 'bronce') { u.plan = 'plata'; await writeDB(db) }
-  mem.byId.set(userId, { v: u, ts: nowMs() }); mem.byEmail.set(u.email.toLowerCase(), { v: u, ts: nowMs() })
   return u
 }
 
@@ -313,7 +275,6 @@ export async function upgradeUserToOro(userId: string): Promise<User | null> {
       if (!raw) return null
       const u = JSON.parse(raw) as User
       if (u.plan !== 'oro') { u.plan = 'oro'; await redis.set('wspace:user:' + userId, JSON.stringify(u)) }
-      mem.byId.set(userId, { v: u, ts: nowMs() }); mem.byEmail.set(u.email.toLowerCase(), { v: u, ts: nowMs() })
       return u
     }
   }
@@ -321,7 +282,6 @@ export async function upgradeUserToOro(userId: string): Promise<User | null> {
   const u = db.users.find(x => x.id === userId)
   if (!u) return null
   if (u.plan !== 'oro') { u.plan = 'oro'; await writeDB(db) }
-  mem.byId.set(userId, { v: u, ts: nowMs() }); mem.byEmail.set(u.email.toLowerCase(), { v: u, ts: nowMs() })
   return u
 }
 
@@ -347,7 +307,6 @@ export async function appendGoldEventForPayment(userId: string, paymentId?: stri
       try { await redis.set('wspace:gold:last_announce', JSON.stringify({ email: u.email, name: u.name, ts: ev.createdAt })) } catch {}
       try { await redis.incr('wspace:gold:announce_seq') } catch {}
       try { const g = (globalThis as unknown as { __wspaceGold?: { seq: number; last: unknown } }); const cur = g.__wspaceGold?.seq || 0; g.__wspaceGold = { seq: cur + 1, last: { email: u.email, name: u.name, ts: ev.createdAt } } } catch {}
-      mem.recentGold.clear(); mem.goldTotal = null
       return
     }
   }
@@ -364,7 +323,6 @@ export async function appendGoldEventForPayment(userId: string, paymentId?: stri
   const ev: GoldEvent = { userId: u.id, email: u.email, name: u.name, createdAt: now(), paymentId }
   db.goldEvents.push(ev)
   await writeDB(db)
-  mem.recentGold.clear(); mem.goldTotal = null
 }
 
 
@@ -382,20 +340,13 @@ export async function appendGoldEventForPayment(userId: string, paymentId?: stri
  
 
 export async function getRecentGoldEvents(limit = 10, since?: number) {
-  const cacheKey = `${Math.max(1, limit)}|${typeof since === 'number' ? since : ''}`
-  {
-    const c = fresh(mem.recentGold.get(cacheKey), 5000)
-    if (c) return c
-  }
   if (useRedis) {
     const redis = await getRedis()
     if (redis) {
       try {
         const raw = await redis.lRange('wspace:gold:events', 0, Math.max(0, limit - 1))
         const arr = raw.map(x => { try { return JSON.parse(x) as GoldEvent } catch { return null } }).filter(Boolean) as GoldEvent[]
-        const out = typeof since === 'number' ? arr.filter(e => e.createdAt > since) : arr
-        mem.recentGold.set(cacheKey, { v: out, ts: nowMs() })
-        return out
+        return typeof since === 'number' ? arr.filter(e => e.createdAt > since) : arr
       } catch { return [] }
     }
   }
@@ -410,24 +361,16 @@ export async function getRecentGoldEvents(limit = 10, since?: number) {
     dedup.push(e)
   }
   const filtered = typeof since === 'number' ? dedup.filter(e => e.createdAt > since) : dedup
-  const out = filtered.slice(0, Math.max(1, limit))
-  mem.recentGold.set(cacheKey, { v: out, ts: nowMs() })
-  return out
+  return filtered.slice(0, Math.max(1, limit))
 }
 
 export async function getGoldEventsTotal(): Promise<number> {
-  {
-    const c = fresh(mem.goldTotal, 5000)
-    if (c !== null) return c
-  }
   if (useRedis) {
     const redis = await getRedis()
-    if (redis) { try { const n = await redis.lLen('wspace:gold:events'); mem.goldTotal = { v: n, ts: nowMs() }; return n } catch { return 0 } }
+    if (redis) { try { return await redis.lLen('wspace:gold:events') } catch { return 0 } }
   }
   const db = await readDB()
-  const n = Array.isArray(db.goldEvents) ? db.goldEvents.length : 0
-  mem.goldTotal = { v: n, ts: nowMs() }
-  return n
+  return Array.isArray(db.goldEvents) ? db.goldEvents.length : 0
 }
 
 export async function updateUserName(userId: string, name: string): Promise<User | null> {
@@ -439,6 +382,5 @@ export async function updateUserName(userId: string, name: string): Promise<User
     u.name = clean
     await writeDB(db)
   }
-  mem.byId.set(userId, { v: u, ts: nowMs() }); mem.byEmail.set(u.email.toLowerCase(), { v: u, ts: nowMs() })
   return u
 }
