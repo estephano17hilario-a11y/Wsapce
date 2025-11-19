@@ -117,7 +117,7 @@ export default function ProfileCircle({ inlineName }: { inlineName?: string }) {
   return (
     <div className={`profile-anchor`}>
       <button className={`profile-circle ${planClass} ${flash ? 'profile-flash' : ''} ${loading ? 'is-loading' : ''} ${error ? 'profile-error' : ''}`} onClick={() => setOpen((o) => !o)}>
-        <span className="profile-initial">{initial}</span>
+        <span className="profile-initial" suppressHydrationWarning>{initial}</span>
       </button>
       {open && (
         <div className="profile-panel">

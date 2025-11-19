@@ -38,7 +38,7 @@ function VerifyPayment() {
       } catch {}
       finally { setChecked(true) }
     })()
-  }, [sp])
+  }, [sp, router])
 
   return (
     <>
