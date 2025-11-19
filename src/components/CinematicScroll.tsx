@@ -539,7 +539,7 @@ export default function CinematicScroll() {
               <p className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl md:text-3xl text-white [text-shadow:0_0_12px_rgba(255,255,255,0.85),0_0_6px_rgba(255,255,255,0.6)]">
                 Una que no entienda de
               </p>
-              <h1 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-8xl md:text-[10rem] font-black tracking-tight bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent cinematic-text [text-shadow:0_0_22px_rgba(56,189,248,0.9),0_0_10px_rgba(56,189,248,0.7)]">
+              <h1 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-6xl sm:text-7xl md:text-8xl lg:text-[10rem] font-black tracking-tight bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent cinematic-text [text-shadow:0_0_22px_rgba(56,189,248,0.9),0_0_10px_rgba(56,189,248,0.7)]">
                 límites
               </h1>
             </div>
@@ -562,7 +562,7 @@ export default function CinematicScroll() {
               <p className="absolute left-1/2 top-[calc(50%-320px)] md:top-[calc(50%-420px)] lg:top-[calc(50%-480px)] -translate-x-1/2 -translate-y-1/2 text-2xl md:text-3xl text-white opacity-95 [text-shadow:0_0_14px_rgba(255,255,255,0.85),0_0_6px_rgba(255,255,255,0.6)]">
                 para construir
               </p>
-              <h1 className="absolute left-1/2 top-[calc(50%+6px)] md:top-[calc(50%+8px)] -translate-x-1/2 -translate-y-1/2 text-7xl md:text-9xl font-black tracking-tight bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent cinematic-text [text-shadow:0_0_22px_rgba(56,189,248,0.9),0_0_10px_rgba(56,189,248,0.7)]">
+              <h1 className="absolute left-1/2 top-[calc(50%+6px)] md:top-[calc(50%+8px)] -translate-x-1/2 -translate-y-1/2 text-6xl md:text-8xl lg:text-9xl font-black tracking-tight bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent cinematic-text [text-shadow:0_0_22px_rgba(56,189,248,0.9),0_0_10px_rgba(56,189,248,0.7)]">
                 tu imperio
               </h1>
             </div>
@@ -580,7 +580,7 @@ export default function CinematicScroll() {
             </div>
 
             <div className="relative text-center max-w-3xl">
-              <h1 className="cta-title wspace-cosmic-title text-7xl md:text-9xl font-extrabold" aria-label="WSPACE">
+              <h1 className="cta-title wspace-cosmic-title text-6xl md:text-8xl lg:text-9xl font-extrabold" aria-label="WSPACE">
                 <span className="wspace-letter">W</span>
                 <span className="wspace-letter">S</span>
                 <span className="wspace-letter">P</span>

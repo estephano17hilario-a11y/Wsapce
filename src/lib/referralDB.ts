@@ -263,7 +263,8 @@ export async function createUser(email: string): Promise<User> {
       const existsId = await redis.get(idxKey)
       if (existsId) {
         const raw = await redis.get('wspace:user:' + existsId)
-        const u = raw ? JSON.parse(raw) as User : { id: existsId, email, plan: 'bronce', createdAt: now() }
+        const fallback: User = { id: existsId, email, plan: 'bronce', createdAt: now() }
+        const u: User = raw ? (JSON.parse(raw) as User) : fallback
         mem.byEmail.set(k, { v: u, ts: nowMs() }); mem.byId.set(u.id, { v: u, ts: nowMs() })
         return u
       }

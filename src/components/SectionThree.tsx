@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import type React from 'react'
 import { createPortal } from 'react-dom'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -192,9 +193,9 @@ export default function SectionThree() {
           <div ref={col2Ref} className="relative lux-card hover-tilt float-soft p-6">
             <div className="absolute -inset-4 -z-10 gradient-ring" />
             {/* Lienzo cósmico interactivo (Canvas API, no HTML grid) */}
-            <div className="flex items-center justify-center">
-              <PixelCanvas width={360} height={240} explodeSignal={explodeTick} active={active} />
-            </div>
+            <RespCanvasHost refEl={col2Ref}>
+              {(w) => <PixelCanvas width={w} height={Math.round(w * (240/360))} explodeSignal={explodeTick} active={active} />}
+            </RespCanvasHost>
             <div className="mt-4 flex justify-center relative">
               {/* Overlay global rojo (sin límites), solo primer clic */}
               {webExplosionFxActive && createPortal(<div aria-hidden className="web-burst web-burst--red" />, document.body)}
@@ -242,9 +243,9 @@ export default function SectionThree() {
           <div ref={col3Ref} className="relative lux-card hover-tilt float-soft p-6">
             <div className="absolute -inset-4 -z-10 gradient-ring" />
             {/* Lienzo cósmico pintable por celdas (mockup 2 sin destrucción) */}
-            <div className="flex items-center justify-center">
-              <PixelCanvas width={360} height={240} paintable showShip={false} spawnFlagSignal={flagSpawnTick} active={active} />
-            </div>
+            <RespCanvasHost refEl={col3Ref}>
+              {(w) => <PixelCanvas width={w} height={Math.round(w * (240/360))} paintable showShip={false} spawnFlagSignal={flagSpawnTick} active={active} />}
+            </RespCanvasHost>
             <div className="mt-4 flex justify-center">
               <button
             className={`btn-glow-once btn-glow-once--subtle ${flagFxActive ? 'btn-glow-once--subtle-active' : ''} px-4 py-2 text-xs md:text-sm uppercase tracking-widest rounded-md border border-cyan-500/30 ring-1 ring-cyan-300/10 bg-neutral-900/80 hover:bg-neutral-800 text-white shadow-sm`}
@@ -307,4 +308,21 @@ export default function SectionThree() {
       </div>
     </section>
   )
+}
+function RespCanvasHost({ refEl, children }: { refEl: React.RefObject<HTMLElement | null>; children: (w: number) => React.ReactNode }) {
+  const [w, setW] = useState<number>(360)
+  useEffect(() => {
+    const calc = () => {
+      const el = refEl.current
+      const rectW = el ? el.getBoundingClientRect().width : window.innerWidth
+      const inner = Math.max(240, Math.min(360, Math.floor(rectW - 24)))
+      setW(inner)
+    }
+    calc()
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(calc) : null
+    if (ro && refEl.current) ro.observe(refEl.current)
+    window.addEventListener('resize', calc)
+    return () => { window.removeEventListener('resize', calc); ro?.disconnect() }
+  }, [refEl])
+  return <div className="flex items-center justify-center w-full">{children(w)}</div>
 }
