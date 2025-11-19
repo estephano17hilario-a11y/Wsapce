@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getRecentGoldEvents, readDB } from '@/lib/referralDB'
+import { getRecentGoldEvents, getGoldEventsTotal } from '@/lib/referralDB'
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url)
@@ -8,8 +8,7 @@ export async function GET(req: NextRequest) {
   const limit = limitParam ? Math.max(1, Math.min(50, parseInt(limitParam))) : 10
   const since = sinceParam ? parseInt(sinceParam) : undefined
   const events = await getRecentGoldEvents(limit, Number.isFinite(since as number) ? since : undefined)
-  const db = await readDB()
-  const total = Array.isArray(db.goldEvents) ? db.goldEvents.length : 0
+  const total = await getGoldEventsTotal()
   return new NextResponse(JSON.stringify({ ok: true, events, total }), {
     headers: {
       'Content-Type': 'application/json',

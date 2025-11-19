@@ -346,7 +346,21 @@ export async function getRecentGoldEvents(limit = 10, since?: number) {
       try {
         const raw = await redis.lRange('wspace:gold:events', 0, Math.max(0, limit - 1))
         const arr = raw.map(x => { try { return JSON.parse(x) as GoldEvent } catch { return null } }).filter(Boolean) as GoldEvent[]
-        return typeof since === 'number' ? arr.filter(e => e.createdAt > since) : arr
+        const out = typeof since === 'number' ? arr.filter(e => e.createdAt > since) : arr
+        if (out.length > 0) return out
+        // Fallback: si Redis no tiene eventos aún, usar DB
+        // Esto evita vacíos cuando Redis fue inicializado recientemente
+        const db = await readDB()
+        const events = db.goldEvents.slice().sort((a, b) => b.createdAt - a.createdAt)
+        const dedup: GoldEvent[] = []
+        const seen = new Set<string>()
+        for (const e of events) {
+          const key = e.paymentId ? `pid:${e.paymentId}` : `u:${e.userId}:${e.createdAt}`
+          if (seen.has(key)) continue
+          seen.add(key)
+          dedup.push(e)
+        }
+        return dedup.slice(0, Math.max(1, limit))
       } catch { return [] }
     }
   }
