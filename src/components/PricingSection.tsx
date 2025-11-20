@@ -296,7 +296,7 @@ export default function PricingSection() {
   }
 
   return (
-  <section id="pricing" className="relative w-full pt-14 md:pt-18 pb-20 md:pb-24 px-6">
+  <section id="pricing" className="relative w-full pt-10 md:pt-18 pb-14 md:pb-24 px-6">
     <div className="relative max-w-7xl mx-auto pricing">
       <div className="text-center">
         <h2 className="text-3xl md:text-5xl font-black tracking-tight shine-text">
@@ -516,16 +516,16 @@ export default function PricingSection() {
             </div>
           ))}
         </div>
-        <div className="mt-14">
+        <div className="mt-10 md:mt-14">
           <div className="text-center">
             <h3 className="text-2xl md:text-4xl font-black tracking-tight shine-text">Zona de Captura</h3>
             <p className="mt-2 text-sm md:text-base text-cyan-200/80">Cuadro 20 × 5 con celdas premium</p>
           </div>
-          <div className="mt-6 grid md:grid-cols-2 gap-8 items-start justify-items-center md:justify-items-start">
-            <div className="relative md:justify-self-start mx-auto md:ml-0 md:mr-auto rounded-3xl p-5 md:p-6 bg-neutral-950/70 border border-amber-400/35 shadow-[0_0_40px_rgba(255,200,0,0.22)] overflow-hidden">
+          <div className="mt-4 grid md:grid-cols-2 gap-6 md:gap-8 items-start justify-items-center md:justify-items-start">
+            <div className="relative md:justify-self-start mx-auto md:ml-0 md:mr-auto w-full max-w-[90vw] md:max-w-[900px] rounded-3xl p-5 md:p-6 bg-neutral-950/70 border border-amber-400/35 shadow-[0_0_40px_rgba(255,200,0,0.22)] overflow-hidden">
               <span aria-hidden className="absolute -inset-8 bg-gradient-to-r from-amber-400/10 via-cyan-400/8 to-yellow-300/10 blur-2xl mix-blend-screen" />
               <span aria-hidden className="pointer-events-none absolute inset-0 ring-1 ring-amber-300/45 rounded-3xl" />
-              <div className="grid gap-[2px] place-items-center" style={{ gridTemplateColumns: 'repeat(20,minmax(0,1fr))' }}>
+              <div className="grid gap-[2px] place-items-center w-full" style={{ gridTemplateColumns: 'repeat(20,minmax(0,1fr))' }}>
                 {Array.from({ length: 100 }).map((_, i) => {
                   const occ = goldEvents[i]
                   const has = !!occ
