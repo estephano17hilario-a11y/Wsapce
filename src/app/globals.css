@@ -1317,7 +1317,7 @@ body {
   position: absolute; left: -30%; top: 0; width: 30%; height: 100%;
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
   filter: blur(0.6px);
-  animation: btnShimmer 5000ms ease-in-out infinite;
+  animation: btnShimmer 8000ms ease-in-out infinite;
   pointer-events: none;
 }
 
@@ -1767,7 +1767,7 @@ body {
   background: radial-gradient(120px 120px at 25% 60%, rgba(253, 224, 71, 0.35), transparent 60%),
               radial-gradient(160px 160px at 80% 20%, rgba(245, 158, 11, 0.30), transparent 60%);
   mix-blend-mode: screen; filter: blur(20px); opacity: .55;
-  animation: ctaLights 18s ease-in-out infinite;
+  animation: ctaLights 28s ease-in-out infinite;
 }
 .pricing-card--starter .pricing-cta:hover {
   background: linear-gradient(90deg, rgba(250, 204, 21, 0.36), rgba(245, 158, 11, 0.32));
@@ -1786,7 +1786,7 @@ body {
   background: radial-gradient(120px 120px at 25% 60%, rgba(226, 232, 240, 0.35), transparent 60%),
               radial-gradient(160px 160px at 80% 20%, rgba(148, 163, 184, 0.30), transparent 60%);
   mix-blend-mode: screen; filter: blur(20px); opacity: .55;
-  animation: ctaLights 8s ease-in-out infinite;
+  animation: ctaLights 28s ease-in-out infinite;
 }
 .pricing-card--creator .pricing-cta:hover {
   background: linear-gradient(90deg, rgba(226, 232, 240, 0.34), rgba(148, 163, 184, 0.30));
@@ -1805,7 +1805,7 @@ body {
   background: radial-gradient(120px 120px at 25% 60%, rgba(205, 127, 50, 0.35), transparent 60%),
               radial-gradient(160px 160px at 80% 20%, rgba(171, 89, 33, 0.30), transparent 60%);
   mix-blend-mode: screen; filter: blur(20px); opacity: .55;
-  animation: ctaLights 8s ease-in-out infinite;
+  animation: ctaLights 28s ease-in-out infinite;
 }
 .pricing-card--enterprise .pricing-cta:hover {
   background: linear-gradient(90deg, rgba(205, 127, 50, 0.34), rgba(171, 89, 33, 0.30));
@@ -2216,7 +2216,7 @@ body {
   mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
   mask-composite: exclude;
 }
-.cta-border-wave:hover::after { opacity: .9; animation: waveSpin 1.2s ease-out; }
+.cta-border-wave:hover::after { opacity: .9; animation: waveSpin 2.4s ease-out; }
 @keyframes waveSpin { to { transform: rotate(240deg) } }
 
 .cta-orbits {
@@ -2239,7 +2239,7 @@ body {
     radial-gradient(circle at 70% 70%, rgba(34,211,238,0.22), transparent 60%);
   filter: blur(10px) saturate(110%);
   transform: translate(-50%, -50%) rotate(0deg) translateX(40%);
-  animation: orbitCW 34s linear infinite;
+  animation: orbitCW 54s linear infinite;
 }
 .cta-orbits::after {
   content: '';
@@ -2254,7 +2254,7 @@ body {
     radial-gradient(circle at 30% 70%, rgba(124,181,255,0.22), transparent 60%);
   filter: blur(10px) saturate(110%);
   transform: translate(-50%, -50%) rotate(0deg) translateX(-38%);
-  animation: orbitCCW 42s linear infinite;
+  animation: orbitCCW 68s linear infinite;
 }
 @keyframes orbitCW { to { transform: translate(-50%, -50%) rotate(360deg) translateX(40%); } }
 @keyframes orbitCCW { to { transform: translate(-50%, -50%) rotate(-360deg) translateX(-38%); } }
@@ -2272,7 +2272,7 @@ body {
     radial-gradient(circle at 70% 70%, rgba(245,158,11,0.18), transparent 60%);
   filter: blur(10px) saturate(110%);
   transform: translate(-50%, -50%) rotate(0deg) translateX(36%);
-  animation: orbitCW 38s linear infinite;
+  animation: orbitCW 60s linear infinite;
 }
 .cta-orbits.cta-orbits--gold::after {
   content: '';
@@ -2287,6 +2287,6 @@ body {
     radial-gradient(circle at 30% 70%, rgba(234,179,8,0.18), transparent 60%);
   filter: blur(9px) saturate(110%);
   transform: translate(-50%, -50%) rotate(0deg) translateX(-34%);
-  animation: orbitCCW 46s linear infinite;
+  animation: orbitCCW 72s linear infinite;
 }
 .pricing > .grid { justify-items: center; }

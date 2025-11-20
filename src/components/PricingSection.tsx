@@ -340,14 +340,14 @@ export default function PricingSection() {
                       <span>{foundersCount} / 100</span>
                     </div>
                     <div className="mt-1 h-2.5 md:h-3 w-full rounded-full bg-neutral-700">
-                      <div className="h-full rounded-full bg-amber-400" style={{ width: `${foundersCount}%` }} />
+                      <div className="h-full rounded-full" style={{ width: `${foundersCount}%`, background: 'linear-gradient(90deg, rgba(253,224,71,0.95) 0%, rgba(34,211,238,0.92) 100%)' }} />
                     </div>
                   </div>
                 )}
                 {plan.variant === "starter" && user?.plan === 'oro' && (
                   <div className="success-chip mt-2">Ahora formas parte de la élite, felicidades {displayName || (user?.email || '')}</div>
                 )}
-                {plan.variant === "enterprise" && (
+                {plan.variant === "enterprise" && (!user ? (
                   <div className="pricing-email">
                     <input
                       type="email"
@@ -395,16 +395,18 @@ export default function PricingSection() {
                     >
                       {bronzeLoading ? 'Registrando…' : plan.ctaLabel}
                     </button>
-                    
                     {bronzeStatus?.error && <div className="alert-bad mt-2">{bronzeStatus.error}</div>}
                     {bronzeStatus?.ok && (
                       <div className="success-chip mt-2">Registro completado</div>
                     )}
-                    {user && (
-                      <div className="success-chip mt-2">Ya te has registrado: <span className="text-cyan-200/90">{user.email}</span></div>
-                    )}
                   </div>
-                )}
+                ) : (
+                  <div className="mt-3 p-3 md:p-4 rounded-2xl bg-gradient-to-br from-neutral-950 via-neutral-900 to-black border border-amber-400/30 shadow-[0_0_30px_rgba(56,189,248,0.15)]">
+                    <div className="text-sm md:text-base text-amber-100">Te registraste con éxito</div>
+                    <div className="mt-1 text-xs md:text-sm text-cyan-200/90">{user.email}</div>
+                    <div className="mt-1 text-xs md:text-sm text-neutral-300">Estate al tanto de nuevas directivas, soldado</div>
+                  </div>
+                ))}
                 {plan.variant !== "enterprise" && (
                   <div className="mt-3">
                     <button
