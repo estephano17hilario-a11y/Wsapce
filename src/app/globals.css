@@ -1609,6 +1609,7 @@ body {
   background: linear-gradient(90deg, #fde047, #f59e0b);
   -webkit-background-clip: text; background-clip: text; color: transparent;
   text-shadow: 0 0 10px rgba(250, 204, 21, 0.25);
+  font-size: 22px;
 }
 .pricing-card--creator .pricing-card__title {
   background: linear-gradient(90deg, #e2e8f0, #9ca3af);
@@ -1824,8 +1825,9 @@ body {
 .pricing-card--starter .pricing-section__title { color: #fef3c7; }
 .pricing-card--creator .pricing-section__title { color: #e2e8f0; }
 .pricing-card--enterprise .pricing-section__title { color: #fff7ed; }
-.pricing-list { display: grid; gap: 9px; }
-.pricing-list__item { display: flex; align-items: center; gap: 10px; color: #94a3b8; font-size: 13px; }
+.pricing-list { display: grid; gap: 9px; position: relative; overflow: hidden; }
+.pricing-list__item { display: flex; align-items: center; gap: 10px; color: #e2e8f0; font-size: 13px; text-shadow: 0 0 6px rgba(255,255,255,0.08), 0 0 18px rgba(34,211,238,0.06); }
+.pricing-list::after { content: ""; position: absolute; inset: -10% -12%; pointer-events: none; background: radial-gradient(140px 140px at 20% 60%, rgba(255,255,255,0.06), transparent 60%), radial-gradient(160px 160px at 80% 20%, rgba(34,211,238,0.08), transparent 62%); filter: blur(12px); mix-blend-mode: screen; opacity: .45; }
 .pricing-list__item--off { color: #64748b; opacity: .65; }
 .feature-mark { font-size: 16px; line-height: 1; }
 .feature-text-off { text-decoration: line-through; }

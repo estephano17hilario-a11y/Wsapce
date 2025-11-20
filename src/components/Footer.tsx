@@ -6,18 +6,10 @@ export default function Footer() {
   return (
     <footer className="site-footer relative w-full px-6 pt-10 md:pt-12 pb-0">
       <div className="max-w-7xl mx-auto">
-        <div className="grid gap-8 md:grid-cols-3">
+        <div className="grid gap-8 md:grid-cols-2">
           <div className="footer-col lux-card p-6">
             <h3 className="footer-heading shine-text">WSPACE</h3>
             <p className="footer-text">Un imperio forjado en el caos. Construido por Fundadores. Hecho para la guerra.</p>
-          </div>
-          <div className="footer-col lux-card p-6">
-            <h3 className="footer-heading shine-text">REDES</h3>
-            <div className="social-icons">
-              <a href="#" className="social-icon" aria-label="Discord"><span className="social-icon__label">DC</span></a>
-              <a href="#" className="social-icon" aria-label="Twitter"><span className="social-icon__label">TW</span></a>
-              <a href="#" className="social-icon" aria-label="TikTok"><span className="social-icon__label">TT</span></a>
-            </div>
           </div>
           <div className="footer-col lux-card p-6">
             <h3 className="footer-heading shine-text">CONTACTO</h3>
