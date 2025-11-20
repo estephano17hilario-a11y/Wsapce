@@ -40,6 +40,7 @@ export default function PricingSection() {
   const [lastEventsFetch, setLastEventsFetch] = useState<number | null>(null)
   const lastAnnounceTsRef = React.useRef<number>(0)
   const [hoverIndex, setHoverIndex] = useState<number | null>(null)
+  const [infoIndex, setInfoIndex] = useState<number | null>(null)
   
 
   const msg = (code?: string) => {
@@ -524,7 +525,7 @@ export default function PricingSection() {
             <div className="relative md:justify-self-start mx-auto md:ml-0 md:mr-auto rounded-3xl p-5 md:p-6 bg-neutral-950/70 border border-amber-400/35 shadow-[0_0_40px_rgba(255,200,0,0.22)] overflow-hidden">
               <span aria-hidden className="absolute -inset-8 bg-gradient-to-r from-amber-400/10 via-cyan-400/8 to-yellow-300/10 blur-2xl mix-blend-screen" />
               <span aria-hidden className="pointer-events-none absolute inset-0 ring-1 ring-amber-300/45 rounded-3xl" />
-              <div className="grid place-items-center" style={{ gridTemplateColumns: 'repeat(20,minmax(0,1fr))' }}>
+              <div className="grid gap-[2px] place-items-center" style={{ gridTemplateColumns: 'repeat(20,minmax(0,1fr))' }}>
                 {Array.from({ length: 100 }).map((_, i) => {
                   const occ = goldEvents[i]
                   const has = !!occ
@@ -533,7 +534,7 @@ export default function PricingSection() {
                       key={i}
                       className={
                         clsx(
-                          'relative w-7 h-7 md:w-8 md:h-8 rounded-xl border bg-neutral-900/70 shadow-sm overflow-hidden transition-transform',
+                          'relative w-full aspect-square rounded-xl border bg-neutral-900/70 shadow-sm overflow-hidden transition-transform',
                           'hover:scale-[1.01]',
                           has ? 'border-amber-400/60 ring-2 ring-amber-300/60 bg-amber-500/10' : (captureCells[i] ? 'border-amber-400/60 ring-2 ring-amber-300/60 bg-amber-500/10' : 'border-neutral-700/60')
                         )
@@ -541,7 +542,7 @@ export default function PricingSection() {
                       onMouseEnter={() => setHoverIndex(i)}
                       onMouseLeave={() => setHoverIndex((v) => (v === i ? null : v))}
                       onClick={() => {
-                        if (has) return
+                        if (has) { setInfoIndex((v) => v === i ? null : i); return }
                         setCaptureCells((prev) => {
                           const next = prev.slice()
                           next[i] = !next[i]
@@ -553,7 +554,7 @@ export default function PricingSection() {
                       {has ? (
                         <div className="absolute inset-0 flex items-center justify-center">
                           <div
-                            className="w-6 h-6 md:w-7 md:h-7 rounded-full bg-neutral-900/90 text-amber-100 text-xs md:text-sm font-bold flex items-center justify-center border-2"
+                            className="w-5/6 h-5/6 rounded-full bg-neutral-900/90 text-amber-100 text-[10px] md:text-xs font-bold flex items-center justify-center border-2"
                             style={{ borderColor: colorFor(occ?.name || null, occ?.email || null) }}
                           >
                             {initialFor(occ?.name || null, occ?.email || null)}
@@ -573,6 +574,16 @@ export default function PricingSection() {
                   )
                 })}
               </div>
+              {infoIndex !== null && goldEvents[infoIndex] && (
+                <div className="absolute left-1/2 top-3 -translate-x-1/2 z-20 rounded-md border border-amber-400/40 bg-neutral-900/95 text-amber-50 px-3 py-2 text-xs md:text-sm shadow-xl">
+                  <div className="font-semibold">{(goldEvents[infoIndex]?.name && goldEvents[infoIndex]?.name?.trim()) ? goldEvents[infoIndex]?.name?.trim() : '—'}</div>
+                  <div className="text-cyan-200/90">{maskEmail(goldEvents[infoIndex]?.email)}</div>
+                  <div className="text-neutral-400">{goldEvents[infoIndex]?.createdAt ? new Date(goldEvents[infoIndex]!.createdAt!).toLocaleString() : '—'}</div>
+                  <div className="mt-2 text-right">
+                    <button type="button" className="inline-flex items-center px-2 py-1 rounded-sm border border-amber-400/40 bg-neutral-800/80 text-amber-200 hover:bg-neutral-700/80" onClick={() => setInfoIndex(null)}>Cerrar</button>
+                  </div>
+                </div>
+              )}
               <div className="mt-4 flex items-center justify-between">
                 <div className="text-xs md:text-sm text-amber-100/80">Fundadores colocados: {Math.min(100, goldEvents.length)} / 100</div>
                 <button
