@@ -529,8 +529,8 @@ export default function PricingSection() {
           ))}
         </div>
         <div className="mt-2 md:mt-4">
-          <div className="text-center text-amber-200/80 text-sm md:text-base">Espacios de emperadores</div>
-          <div className="mt-4 grid md:grid-cols-2 gap-6 md:gap-8 items-start justify-items-center md:justify-items-start">
+          <div className="text-center text-sm md:text-base bg-gradient-to-r from-amber-300 via-cyan-300 to-yellow-300 bg-clip-text text-transparent font-semibold opacity-90">Espacios de fundadores</div>
+          <div className="mt-6 md:mt-8 grid md:grid-cols-2 gap-6 md:gap-8 items-start justify-items-center md:justify-items-start">
             <div className="relative md:justify-self-start mx-auto md:ml-0 md:mr-auto w-full max-w-[90vw] md:max-w-[900px] rounded-3xl p-5 md:p-6 bg-neutral-950/70 border border-amber-400/35 shadow-[0_0_40px_rgba(255,200,0,0.22)] overflow-hidden">
               <span aria-hidden className="absolute -inset-8 bg-gradient-to-r from-amber-400/10 via-cyan-400/8 to-yellow-300/10 blur-2xl mix-blend-screen" />
               <span aria-hidden className="pointer-events-none absolute inset-0 ring-1 ring-amber-300/45 rounded-3xl" />
@@ -604,8 +604,7 @@ export default function PricingSection() {
               </div>
             </div>
             <div className="w-full max-w-xl md:justify-self-end">
-              <div className="flex items-center justify-between">
-                <div className="text-sm md:text-base bg-gradient-to-r from-amber-300 via-cyan-300 to-yellow-300 bg-clip-text text-transparent font-semibold">Fundadores Oro (Validados)</div>
+              <div className="flex items-center justify-end">
                 <button
                   className={clsx('inline-flex items-center px-3 py-1.5 rounded-md border text-xs md:text-sm transition-colors', eventsRefreshing ? 'border-amber-400/40 bg-neutral-900/70 text-amber-200 opacity-70 cursor-not-allowed' : 'border-amber-400/40 bg-neutral-900/70 text-amber-200 hover:bg-neutral-800/80')}
                   onClick={() => { if (!eventsRefreshing) fetchGoldEvents() }}
