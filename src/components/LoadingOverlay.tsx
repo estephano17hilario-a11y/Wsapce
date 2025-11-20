@@ -221,7 +221,26 @@ export default function LoadingOverlay() {
                   <button
                     type="button"
                     className="btn-modern-primary w-full"
-                    onClick={() => { setLoginOpen(true); setLoginEmail(savedEmail || ''); setLoginError(null); setLoginOk(false) }}
+                    onClick={async () => {
+                      if (loginLoading) return
+                      setLoginError(null)
+                      setLoginOk(false)
+                      setLoginLoading(true)
+                      try {
+                        const ok = true
+                        try {
+                          const url = new URL(window.location.href)
+                          url.hash = 'pricing'
+                          history.replaceState({}, '', url.toString())
+                        } catch {}
+                        document.documentElement.style.overflow = prevHtmlOverflowRef.current || ""
+                        document.body.style.overflow = prevBodyOverflowRef.current || ""
+                        setVisible(false)
+                        try { const el = document.getElementById('pricing'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }) } catch {}
+                        if (ok) setLoginOk(true)
+                      } catch {}
+                      finally { setLoginLoading(false) }
+                    }}
                   >
                     Entrar por cuenta <span className="ml-1 blur-soft">{savedEmail || 'detectada'}</span>
                   </button>
@@ -278,7 +297,7 @@ export default function LoadingOverlay() {
           </div>
           <div className="absolute left-4 bottom-3 text-white/70 text-xs md:text-sm">Wspace</div>
           {loginOpen && (
-            <div className="absolute inset-0 z-[10000] modern-modal-backdrop">
+            <div className="fixed inset-0 z-[10000] modern-modal-backdrop grid place-items-center">
               <div className="modern-modal w-[92%] max-w-sm p-5">
                 <div className="text-center text-lg font-bold">Inicia sesión</div>
                 <input type="email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} placeholder="Tu Gmail" className="modern-input mt-4 w-full" aria-label="Tu Gmail" />
