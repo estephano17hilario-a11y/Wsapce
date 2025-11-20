@@ -134,7 +134,7 @@ export default function SectionThree() {
           <div ref={col1Ref} className="relative lux-card hover-tilt p-6">
             <div className="absolute -inset-4 -z-10 gradient-ring" />
             <div className="flex items-center justify-center">
-              <div className="war-chat w-[420px] h-[280px] rounded-lg border border-cyan-900/40 ring-1 ring-cyan-300/10 shadow-xl overflow-hidden bg-black/70">
+              <div className="war-chat w-full max-w-[420px] h-[280px] rounded-lg border border-cyan-900/40 ring-1 ring-cyan-300/10 shadow-xl overflow-hidden bg-black/70">
               <div className="war-chat-header">
                 <span className="war-chat-channel">Canal: #CLAN_ALFA</span>
                 <span className="war-chat-status">(3/50 EN LÍNEA)</span>
