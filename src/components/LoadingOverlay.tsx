@@ -314,28 +314,28 @@ export default function LoadingOverlay() {
                     setLoginError(null)
                     setLoginOk(false)
                     setLoginLoading(true)
-                    try {
-                      const r = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: loginEmail, password: loginPassword }) })
-                      const d = await r.json()
-                      if (!r.ok) { setLoginError(d.error || 'error'); return }
-                      setLoginOk(true)
-                      try { localStorage.setItem('wspace_auth', JSON.stringify(d.user)) } catch {}
-                      try { localStorage.setItem('wspace_email', d.user?.email || loginEmail) } catch {}
-                      try { window.dispatchEvent(new CustomEvent('user_session_changed')) } catch {}
                       try {
-                        const url = new URL(window.location.href)
-                        url.hash = 'pricing'
-                        history.replaceState({}, '', url.toString())
-                      } catch {}
-                      setLoginOpen(false)
-                      document.documentElement.style.overflow = prevHtmlOverflowRef.current || ""
-                      document.body.style.overflow = prevBodyOverflowRef.current || ""
-                      setVisible(false)
-                      try {
-                        const el = document.getElementById('pricing')
-                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                      } catch {}
-                    } catch { setLoginError('network_error') }
+                        const r = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: loginEmail, password: loginPassword }) })
+                        const d = await r.json()
+                        if (!r.ok) { setLoginError(d.error || 'error'); return }
+                        setLoginOk(true)
+                        try { localStorage.setItem('wspace_auth', JSON.stringify(d.user)) } catch {}
+                        try { localStorage.setItem('wspace_email', d.user?.email || loginEmail) } catch {}
+                        try { window.dispatchEvent(new CustomEvent('user_session_changed')) } catch {}
+                        try {
+                          const url = new URL(window.location.href)
+                          url.hash = 'wspace-start'
+                          history.replaceState({}, '', url.toString())
+                        } catch {}
+                        setLoginOpen(false)
+                        document.documentElement.style.overflow = prevHtmlOverflowRef.current || ""
+                        document.body.style.overflow = prevBodyOverflowRef.current || ""
+                        setVisible(false)
+                        try {
+                          const el = document.getElementById('wspace-start')
+                          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                        } catch {}
+                      } catch { setLoginError('network_error') }
                     finally { setLoginLoading(false) }
                   }}>Entrar</button>
                 </div>
