@@ -1675,7 +1675,7 @@ body {
 /* Color del precio por variante */
 .pricing-card--starter .price-value { color: #fde047; }
 .pricing-card--creator .price-value { color: #e5e7eb; }
-.pricing-card--enterprise .price-value { color: #f59e0b; }
+.pricing-card--enterprise .price-value { color: #f59e0b; font-size: 24px; }
 .price-suffix { font-size: 12px; color: #94a3b8; }
 
 /* Paletas de nebulosa por variante (oro/plata/bronce) */

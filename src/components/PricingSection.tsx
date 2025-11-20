@@ -35,9 +35,9 @@ export default function PricingSection() {
   const [oroFlash, setOroFlash] = useState(false)
   const [oroStatus, setOroStatus] = useState<{ ok?: boolean; error?: string } | null>(null)
   
-  const [captureCells, setCaptureCells] = useState<boolean[]>(() => Array.from({ length: 100 }, () => false))
+  const [captureCells, setCaptureCells] = useState<boolean[]>(() => Array.from({ length: 50 }, () => false))
   const [goldEvents, setGoldEvents] = useState<{ email?: string; name?: string; createdAt?: number }[]>([])
-  const foundersCount = useMemo(() => Math.min(100, goldEvents.length), [goldEvents.length])
+  const foundersCount = useMemo(() => Math.min(50, goldEvents.length), [goldEvents.length])
   const [eventsRefreshing, setEventsRefreshing] = useState(false)
   const [lastEventsFetch, setLastEventsFetch] = useState<number | null>(null)
   const lastAnnounceTsRef = React.useRef<number>(0)
@@ -353,10 +353,10 @@ export default function PricingSection() {
                   <div className="mt-3">
                     <div className="flex items-center justify-between text-xs md:text-sm text-cyan-100/80">
                       <span>Fundadores disponibles</span>
-                      <span>{foundersCount} / 100</span>
+                      <span>{foundersCount} / 50</span>
                     </div>
                     <div className="mt-1 h-2.5 md:h-3 w-full rounded-full bg-neutral-700">
-                      <div className="h-full rounded-full" style={{ width: `${foundersCount}%`, background: 'linear-gradient(90deg, rgba(253,224,71,0.95) 0%, rgba(34,211,238,0.92) 100%)' }} />
+                      <div className="h-full rounded-full" style={{ width: `${Math.min(100, Math.round((foundersCount / 50) * 100))}%`, background: 'linear-gradient(90deg, rgba(253,224,71,0.95) 0%, rgba(34,211,238,0.92) 100%)' }} />
                     </div>
                   </div>
                 )}
@@ -521,6 +521,9 @@ export default function PricingSection() {
 
                 <div className="pricing-section">
                   <h4 className="pricing-section__title">{plan.featuresTitle}</h4>
+                  {plan.id === "fundador-oro" && (
+                    <div className="text-amber-100 text-sm mb-2">Plazas disponibles: {Math.max(0, 50 - foundersCount)}</div>
+                  )}
                   <ul className="pricing-list">
                     {plan.features.map((f, idx) => (
                       <li key={`${plan.id}-feat-${idx}`} className={clsx('pricing-list__item', !f.ok && 'pricing-list__item--off')}>
@@ -541,8 +544,8 @@ export default function PricingSection() {
             <div className="relative md:justify-self-start mx-auto md:ml-0 md:mr-auto w-full max-w-[90vw] md:max-w-[900px] rounded-3xl p-5 md:p-6 bg-neutral-950/70 border border-amber-400/35 shadow-[0_0_40px_rgba(255,200,0,0.22)] overflow-hidden">
               <span aria-hidden className="absolute -inset-8 bg-gradient-to-r from-amber-400/10 via-cyan-400/8 to-yellow-300/10 blur-2xl mix-blend-screen" />
               <span aria-hidden className="pointer-events-none absolute inset-0 ring-1 ring-amber-300/45 rounded-3xl" />
-              <div className="grid gap-[2px] place-items-center w-full" style={{ gridTemplateColumns: 'repeat(20,minmax(0,1fr))' }}>
-                {Array.from({ length: 100 }).map((_, i) => {
+              <div className="grid gap-[2px] place-items-center w-full" style={{ gridTemplateColumns: 'repeat(10,minmax(0,1fr))' }}>
+                {Array.from({ length: 50 }).map((_, i) => {
                   const occ = goldEvents[i]
                   const has = !!occ
                   return (
@@ -600,15 +603,15 @@ export default function PricingSection() {
                   </div>
                 </div>
               )}
-              <div className="mt-4 flex items-center justify-between">
-                <div className="text-xs md:text-sm text-amber-100/80">Fundadores colocados: {Math.min(100, goldEvents.length)} / 100</div>
+                <div className="mt-4 flex items-center justify-between">
+                <div className="text-xs md:text-sm text-amber-100/80">Fundadores colocados: {foundersCount} / 50</div>
                 <button
                   className="inline-flex items-center px-3 py-1.5 rounded-md border border-amber-400/40 bg-neutral-900/70 text-amber-200 text-xs md:text-sm hover:bg-neutral-800/80"
-                  onClick={() => setCaptureCells(Array.from({ length: 100 }, () => false))}
+                  onClick={() => setCaptureCells(Array.from({ length: 50 }, () => false))}
                 >
                   Reiniciar
                 </button>
-              </div>
+                </div>
             </div>
             <div className="w-full max-w-xl md:justify-self-end">
               <div className="flex items-center justify-end">

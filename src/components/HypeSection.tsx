@@ -26,7 +26,7 @@ export default function HypeSection() {
         </h2>
         <div className="title-underline" />
         <p className="mt-3 text-center text-sm md:text-base text-cyan-200/80">
-          Próximas features agrupadas por tipo — una sola rejilla épica, con distintivos por categoría.
+          Features agrupadas por tipo — una sola rejilla épica, con distintivos por categoría.
         </p>
 
         <div className="mt-14">
@@ -70,7 +70,7 @@ export default function HypeSection() {
                   <span className="cat-badge cat-secreto">Secreto</span>
                   <div className="flex flex-col items-center gap-2">
                     <span className="feature-icon text-2xl md:text-3xl tilt-icon">[❓]</span>
-                    <span className="text-lg md:text-xl font-extrabold uppercase tracking-wide shine-text tilt-title">FEATURE SECRETA (20/11)</span>
+                    <span className="text-lg md:text-xl font-extrabold uppercase tracking-wide shine-text tilt-title">FEATURE SECRETA (25/11)</span>
                     <span className="text-[10px] md:text-xs font-bold hype-secret-badge tilt-badge">BRILLA</span>
                   </div>
                   <div className="mt-2 flex items-center justify-center gap-2">
