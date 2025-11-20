@@ -58,30 +58,28 @@ export default function ProfileCircle({ inlineName }: { inlineName?: string }) {
         prevPlanRef.current = newPlan
         
       } else {
-        let email: string | null = null
-        try { email = JSON.parse(localStorage.getItem('wspace_auth') || 'null')?.email || null } catch {}
-        if (!email) { try { email = localStorage.getItem('wspace_email') || null } catch {} }
-        if (email) {
-          try {
-            const lr = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) })
-            const ld = await lr.json()
-            if (lr.ok && ld?.user) {
-              queueMicrotask(() => setUser(ld.user))
-              try { localStorage.setItem('wspace_auth', JSON.stringify(ld.user)) } catch {}
+        try {
+          const uLocal = JSON.parse(localStorage.getItem('wspace_auth') || 'null') as User | null
+          if (uLocal && uLocal.email) {
+            queueMicrotask(() => setUser(uLocal))
+            setLoading(false)
+            const newPlan2: "bronce" | "plata" | "oro" | "guest" = uLocal?.plan ? uLocal.plan : "guest"
+            if (prevPlanRef.current && prevPlanRef.current !== newPlan2) {
+              setFlash(true)
+              window.setTimeout(() => setFlash(false), 1200)
+            }
+            prevPlanRef.current = newPlan2
+          } else {
+            let email: string | null = null
+            try { email = localStorage.getItem('wspace_email') || null } catch {}
+            if (email) {
+              // No intentamos login sin contraseña; mantenemos estado sin bloquear
               setLoading(false)
-              const newPlan2: "bronce" | "plata" | "oro" | "guest" = ld.user?.plan ? ld.user.plan : "guest"
-              if (prevPlanRef.current && prevPlanRef.current !== newPlan2) {
-                setFlash(true)
-                window.setTimeout(() => setFlash(false), 1200)
-              }
-              prevPlanRef.current = newPlan2
             } else {
               setLoading(false)
             }
-          } catch { setLoading(false) }
-        } else {
-          setLoading(false)
-        }
+          }
+        } catch { setLoading(false) }
       }
     } catch { setLoading(false) }
   }
