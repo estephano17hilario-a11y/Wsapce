@@ -7,6 +7,7 @@ export default function PerfPanel() {
   const [cls, setCls] = useState<number | null>(null)
   const [longTasks, setLongTasks] = useState<number>(0)
   const [hydrationWarnings, setHydrationWarnings] = useState<number>(0)
+  const [lastHydrationMessage, setLastHydrationMessage] = useState('')
   const rafRef = useRef<number | null>(null)
   const lastRef = useRef<number>(0)
   const framesRef = useRef<number>(0)
@@ -54,11 +55,17 @@ export default function PerfPanel() {
     const oe = console.error
     const re = /hydration|didn’t match|didn't match|Text content does not match|Expected server HTML to contain/i
     console.warn = (...args: unknown[]) => {
-      try { if (args.some(a => typeof a === 'string' && re.test(a))) setHydrationWarnings(v => v + 1) } catch {}
+      try {
+        const hit = args.find(a => typeof a === 'string' && re.test(a as string)) as string | undefined
+        if (hit) { setHydrationWarnings(v => v + 1); const s = String(hit); setLastHydrationMessage(s.length > 180 ? s.slice(0,180) : s) }
+      } catch {}
       try { ow.apply(console, args as []) } catch {}
     }
     console.error = (...args: unknown[]) => {
-      try { if (args.some(a => typeof a === 'string' && re.test(a))) setHydrationWarnings(v => v + 1) } catch {}
+      try {
+        const hit = args.find(a => typeof a === 'string' && re.test(a as string)) as string | undefined
+        if (hit) { setHydrationWarnings(v => v + 1); const s = String(hit); setLastHydrationMessage(s.length > 180 ? s.slice(0,180) : s) }
+      } catch {}
       try { oe.apply(console, args as []) } catch {}
     }
     return () => { console.warn = ow; console.error = oe }
@@ -70,6 +77,7 @@ export default function PerfPanel() {
       <div>Long tasks: {longTasks}</div>
       <div>CLS: {cls ?? 0}</div>
       <div>Hydration: {hydrationWarnings}</div>
+      <div>Hydration last: {lastHydrationMessage || '—'}</div>
     </div>
   )
 }
