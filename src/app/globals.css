@@ -20,6 +20,18 @@ body {
   color: #ffffff;
 }
 
+/* Mobile: asegurar pantalla completa sin barras negras laterales */
+@supports (height: 100svh) {
+  .svh-full {
+    height: 100svh;
+  }
+}
+
+/* Evitar zoom táctil que genera letterboxing */
+@media (hover: none) and (pointer: coarse) {
+  html, body { touch-action: manipulation; }
+}
+
 .modern-modal-backdrop {
   position: fixed;
   inset: 0;
