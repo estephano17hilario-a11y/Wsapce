@@ -1,22 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { getUserByEmail } from '@/lib/referralDB'
+import { isValidEmail, verifyLogin, getUserByEmail } from '@/lib/referralDB'
 import { encodeSession } from '@/lib/auth'
 
-function validEmail(e: string) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) }
-
 export async function POST(req: NextRequest) {
-  const body = await req.json().catch(() => ({})) as { email?: string }
+  const body = await req.json().catch(() => ({})) as { email?: string; password?: string }
   const email = (body.email || '').trim().toLowerCase()
-  if (!validEmail(email)) return NextResponse.json({ error: 'email_invalid' }, { status: 400 })
-  const user = await getUserByEmail(email)
-  if (!user) return NextResponse.json({ error: 'user_not_found' }, { status: 404 })
+  const password = (body.password || '').trim()
+  if (!isValidEmail(email)) return NextResponse.json({ error: 'email_invalid' }, { status: 400 })
+  if (!password) return NextResponse.json({ error: 'password_required' }, { status: 400 })
+  const user = await verifyLogin(email, password)
+  if (!user) {
+    const exists = await getUserByEmail(email)
+    return NextResponse.json({ error: exists ? 'password_incorrect' : 'user_not_found' }, { status: exists ? 401 : 404 })
+  }
   const store = await cookies()
   store.set('wspace_sess', encodeSession(user.id), { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
   store.set('wspace_uid', user.id, { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
   store.set('wspace_email', user.email, { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
   store.set('wspace_plan', user.plan, { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
-  return NextResponse.json({ ok: true, user })
+  return NextResponse.json({ ok: true, user }, { headers: { 'Cache-Control': 'private, no-store' } })
 }
 
 export async function GET() { return new NextResponse(null, { status: 405 }) }

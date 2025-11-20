@@ -25,6 +25,8 @@ export default function PricingSection() {
   const [user, setUser] = useState<{ id: string; email: string; plan: "bronce" | "plata" | "oro" } | null>(null)
   const [displayName, setDisplayName] = useState<string>("")
   const [bronzeEmail, setBronzeEmail] = useState("")
+  const [bronzePassword, setBronzePassword] = useState("")
+  const [bronzeShowPwd, setBronzeShowPwd] = useState(false)
   const [bronzeStatus, setBronzeStatus] = useState<{ ok?: boolean; error?: string } | null>(null)
   const [bronzeLoading, setBronzeLoading] = useState(false)
   const [bronzeFlash] = useState(false)
@@ -355,13 +357,30 @@ export default function PricingSection() {
                       value={bronzeEmail}
                       onChange={(e) => setBronzeEmail(e.target.value)}
                     />
+                    <div className="mt-2 flex items-center gap-2">
+                      <input
+                        type={bronzeShowPwd ? 'text' : 'password'}
+                        className="pricing-email__input flex-1"
+                        placeholder="Crea una contraseña"
+                        aria-label="Crea una contraseña"
+                        value={bronzePassword}
+                        onChange={(e) => setBronzePassword(e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        className="btn-modern-secondary px-3 py-2 text-xs md:text-sm"
+                        onClick={() => setBronzeShowPwd(v => !v)}
+                      >
+                        {bronzeShowPwd ? 'Ocultar' : 'Ver'}
+                      </button>
+                    </div>
                     <button
                       className={`pricing-cta cta-secondary mt-3 ${bronzeLoading ? 'btn-loading' : ''}`}
                       onClick={async () => {
                         setBronzeStatus(null)
                         setBronzeLoading(true)
                         try {
-                          const res = await fetch('/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: bronzeEmail }) })
+                          const res = await fetch('/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: bronzeEmail, password: bronzePassword }) })
                           const data = await res.json()
                           if (!res.ok) { setBronzeStatus({ error: msg(data.error) }); return }
                           setBronzeStatus({ ok: true })

@@ -1,10 +1,11 @@
 import { promises as fs } from 'fs'
 import path from 'path'
 import { kv } from '@vercel/kv'
+import crypto from 'crypto'
 
 type Plan = 'bronce' | 'plata' | 'oro'
 
-export type User = { id: string; email: string; plan: Plan; createdAt: number; name?: string }
+export type User = { id: string; email: string; plan: Plan; createdAt: number; name?: string; passwordHash?: string }
 
 type GoldEvent = { userId: string; email: string; name?: string; createdAt: number; paymentId?: string }
 
@@ -397,4 +398,39 @@ export async function updateUserName(userId: string, name: string): Promise<User
     await writeDB(db)
   }
   return u
+}
+
+export function hashPassword(raw: string) {
+  return crypto.createHash('sha256').update(raw).digest('hex')
+}
+
+export async function setUserPasswordByEmail(email: string, raw: string): Promise<User | null> {
+  const u = await getUserByEmail(email)
+  if (!u) return null
+  const hashed = hashPassword(raw)
+  if (useRedis) {
+    const redis = await getRedis()
+    if (redis) {
+      try {
+        const curRaw = await redis.get('wspace:user:' + u.id)
+        const cur = curRaw ? JSON.parse(curRaw) as User : u
+        cur.passwordHash = hashed
+        await redis.set('wspace:user:' + u.id, JSON.stringify(cur))
+        return cur
+      } catch { }
+    }
+  }
+  const db = await readDB()
+  const ref = db.users.find(x => x.id === u.id)
+  if (!ref) return null
+  ref.passwordHash = hashed
+  await writeDB(db)
+  return ref
+}
+
+export async function verifyLogin(email: string, raw: string): Promise<User | null> {
+  const u = await getUserByEmail(email)
+  if (!u || !u.passwordHash) return null
+  const hashed = hashPassword(raw)
+  return u.passwordHash === hashed ? u : null
 }

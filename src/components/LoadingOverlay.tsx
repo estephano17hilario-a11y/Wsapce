@@ -21,6 +21,8 @@ export default function LoadingOverlay() {
   const typedAtRef = useRef<number>(0)
   const [loginOpen, setLoginOpen] = useState(false)
   const [loginEmail, setLoginEmail] = useState('')
+  const [loginPassword, setLoginPassword] = useState('')
+  const [loginShowPwd, setLoginShowPwd] = useState(false)
   const [loginLoading, setLoginLoading] = useState(false)
   const [loginError, setLoginError] = useState<string | null>(null)
   const [loginOk, setLoginOk] = useState(false)
@@ -219,39 +221,7 @@ export default function LoadingOverlay() {
                   <button
                     type="button"
                     className="btn-modern-primary w-full"
-                    onClick={async () => {
-                      if (loginLoading) return
-                      setLoginError(null)
-                      setLoginOk(false)
-                      setLoginLoading(true)
-                      try {
-                        let ok = false
-                        if (hasCookieSession) {
-                          ok = true
-                        } else if (savedEmail) {
-                          const r = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: savedEmail }) })
-                          const d = await r.json()
-                          if (r.ok) {
-                            ok = true
-                            try { localStorage.setItem('wspace_auth', JSON.stringify(d.user)) } catch {}
-                            try { localStorage.setItem('wspace_email', d.user?.email || savedEmail) } catch {}
-                            try { window.dispatchEvent(new CustomEvent('user_session_changed')) } catch {}
-                          } else {
-                            setLoginError(d?.error || 'error')
-                          }
-                        }
-                        if (ok) {
-                          const url = new URL(window.location.href)
-                          url.hash = 'pricing'
-                          history.replaceState({}, '', url.toString())
-                        }
-                      } catch {}
-                      document.documentElement.style.overflow = prevHtmlOverflowRef.current || ""
-                      document.body.style.overflow = prevBodyOverflowRef.current || ""
-                      setVisible(false)
-                      try { const el = document.getElementById('pricing'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }) } catch {}
-                      setLoginOk(true)
-                    }}
+                    onClick={() => { setLoginOpen(true); setLoginEmail(savedEmail || ''); setLoginError(null); setLoginOk(false) }}
                   >
                     Entrar por cuenta <span className="ml-1 blur-soft">{savedEmail || 'detectada'}</span>
                   </button>
@@ -312,6 +282,10 @@ export default function LoadingOverlay() {
               <div className="modern-modal w-[92%] max-w-sm p-5">
                 <div className="text-center text-lg font-bold">Inicia sesión</div>
                 <input type="email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} placeholder="Tu Gmail" className="modern-input mt-4 w-full" aria-label="Tu Gmail" />
+                <div className="mt-3 flex items-center gap-2">
+                  <input type={loginShowPwd ? 'text' : 'password'} value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} placeholder="Tu contraseña" className="modern-input w-full" aria-label="Tu contraseña" />
+                  <button type="button" className="btn-modern-secondary px-3 py-1.5 text-xs md:text-sm" onClick={() => setLoginShowPwd(v => !v)}>{loginShowPwd ? 'Ocultar' : 'Ver'}</button>
+                </div>
                 {loginError && <div className="mt-2 text-xs text-red-400">{loginError}</div>}
                 {loginOk && <div className="mt-2 text-xs text-emerald-300">Sesión iniciada</div>}
                 <div className="mt-4 flex items-center justify-end gap-2">
@@ -322,7 +296,7 @@ export default function LoadingOverlay() {
                     setLoginOk(false)
                     setLoginLoading(true)
                     try {
-                      const r = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: loginEmail }) })
+                      const r = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: loginEmail, password: loginPassword }) })
                       const d = await r.json()
                       if (!r.ok) { setLoginError(d.error || 'error'); return }
                       setLoginOk(true)
