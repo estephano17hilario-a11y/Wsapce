@@ -209,16 +209,16 @@ export default function LoadingOverlay() {
   return (
     <>
       {visible && (
-        <div className="fixed inset-0 z-[9999] bg-black text-white flex items-center justify-center">
+        <div className="fixed inset-0 z-[9999] modern-modal-backdrop text-white grid place-items-center">
           <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true" />
-          <div className="relative w-full max-w-lg md:max-w-xl mx-auto p-6 md:p-7 rounded-2xl bg-black/60 border border-white/10 shadow-lg">
+          <div className="modern-modal w-full max-w-lg md:max-w-xl">
             {accountDetected ? (
               <div className="mt-2">
                 <div className="text-center text-lg md:text-xl font-semibold">Cuenta detectada</div>
                 <div className="mt-4 grid gap-3">
                   <button
                     type="button"
-                    className="w-full rounded-md bg-neutral-100 text-black font-bold py-3.5 md:py-4 text-base hover:bg-white/90"
+                    className="btn-modern-primary w-full"
                     onClick={async () => {
                       if (loginLoading) return
                       setLoginError(null)
@@ -257,7 +257,7 @@ export default function LoadingOverlay() {
                   </button>
                   <button
                     type="button"
-                    className="w-full rounded-md border border-neutral-600 bg-neutral-900/70 text-neutral-200 font-semibold py-3.5 md:py-4 text-base hover:bg-neutral-800/80"
+                    className="btn-modern-secondary w-full"
                     onClick={() => { setLoginOpen(true); setLoginError(null); setLoginOk(false) }}
                   >
                     Entrar por otra cuenta
@@ -272,7 +272,7 @@ export default function LoadingOverlay() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Escribe tu nombre"
-                  className="mt-4 w-full rounded-md bg-neutral-900/70 border border-neutral-700 px-4 py-3 text-base focus:outline-none focus:ring-1 focus:ring-cyan-400"
+                  className="modern-input mt-4 w-full"
                   aria-label="Nombre"
                   autoFocus
                   maxLength={80}
@@ -282,8 +282,8 @@ export default function LoadingOverlay() {
             )}
             <div className="mt-1 text-xs md:text-sm text-neutral-400">(luego descubriras el porqué)</div>
             <div className="mt-4">
-              <div className="h-2.5 md:h-3 w-full rounded-full bg-neutral-700">
-                <div className="h-full rounded-full bg-cyan-400" style={{ width: `${Math.round(uiProgress * 100)}%` }} />
+              <div className="progress-track-modern">
+                <div className="progress-fill-modern" style={{ width: `${Math.round(uiProgress * 100)}%` }} />
               </div>
               <div className="mt-2 text-sm md:text-base text-neutral-300">Precargando… {Math.round(uiProgress * 100)}%</div>
             </div>
@@ -293,7 +293,7 @@ export default function LoadingOverlay() {
             {!accountDetected && ready && (
               <button
                 type="button"
-                className="mt-6 w-full rounded-md bg-neutral-100 text-black font-bold py-3.5 md:py-4 text-base hover:bg-white/90"
+                className="btn-modern-primary w-full mt-6"
                 onClick={start}
               >
                 ¿Comenzamos?
@@ -302,21 +302,21 @@ export default function LoadingOverlay() {
             {!accountDetected && (
               <div className="mt-6 text-center">
                 <span className="text-xs md:text-sm text-neutral-300">¿ya tienes cuenta?</span>
-                <button type="button" className="ml-2 inline-flex items-center px-3 py-1.5 rounded-md border border-cyan-400/40 bg-neutral-900/70 text-cyan-200 text-xs md:text-sm hover:bg-neutral-800/80" onClick={() => { setLoginOpen(true); setLoginError(null); setLoginOk(false) }}>Iniciar sesión</button>
+                <button type="button" className="ml-2 btn-modern-secondary inline-flex items-center text-xs md:text-sm" onClick={() => { setLoginOpen(true); setLoginError(null); setLoginOk(false) }}>Iniciar sesión</button>
               </div>
             )}
           </div>
           <div className="absolute left-4 bottom-3 text-white/70 text-xs md:text-sm">Wspace</div>
           {loginOpen && (
-            <div className="absolute inset-0 z-[10000] grid place-items-center bg-black/60">
-              <div className="lux-card p-5 w-[92%] max-w-sm bg-neutral-900/80 border border-cyan-400/30">
+            <div className="absolute inset-0 z-[10000] modern-modal-backdrop">
+              <div className="modern-modal w-[92%] max-w-sm p-5">
                 <div className="text-center text-lg font-bold">Inicia sesión</div>
-                <input type="email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} placeholder="Tu Gmail" className="mt-4 w-full rounded-md bg-neutral-900 border border-neutral-700 px-4 py-3 text-base focus:outline-none focus:ring-1 focus:ring-cyan-400" aria-label="Tu Gmail" />
+                <input type="email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} placeholder="Tu Gmail" className="modern-input mt-4 w-full" aria-label="Tu Gmail" />
                 {loginError && <div className="mt-2 text-xs text-red-400">{loginError}</div>}
                 {loginOk && <div className="mt-2 text-xs text-emerald-300">Sesión iniciada</div>}
                 <div className="mt-4 flex items-center justify-end gap-2">
-                  <button type="button" className="px-3 py-1.5 rounded-md text-xs md:text-sm bg-neutral-800 text-white" onClick={() => setLoginOpen(false)}>Cerrar</button>
-                  <button type="button" className={`px-3 py-1.5 rounded-md text-xs md:text-sm ${loginLoading ? 'opacity-60 cursor-not-allowed' : 'bg-cyan-500 text-black hover:bg-cyan-400'}`} onClick={async () => {
+                  <button type="button" className="btn-modern-secondary px-3 py-1.5 text-xs md:text-sm" onClick={() => setLoginOpen(false)}>Cerrar</button>
+                  <button type="button" className={`btn-modern-primary px-3 py-1.5 text-xs md:text-sm ${loginLoading ? 'opacity-60 cursor-not-allowed' : ''}`} onClick={async () => {
                     if (loginLoading) return
                     setLoginError(null)
                     setLoginOk(false)
