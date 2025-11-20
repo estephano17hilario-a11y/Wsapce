@@ -230,13 +230,13 @@ export default function LoadingOverlay() {
                         const ok = true
                         try {
                           const url = new URL(window.location.href)
-                          url.hash = 'pricing'
+                          url.hash = 'wspace-start'
                           history.replaceState({}, '', url.toString())
                         } catch {}
                         document.documentElement.style.overflow = prevHtmlOverflowRef.current || ""
                         document.body.style.overflow = prevBodyOverflowRef.current || ""
                         setVisible(false)
-                        try { const el = document.getElementById('pricing'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }) } catch {}
+                        try { const el = document.getElementById('wspace-start'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }) } catch {}
                         if (ok) setLoginOk(true)
                       } catch {}
                       finally { setLoginLoading(false) }

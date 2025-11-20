@@ -137,7 +137,7 @@ export default function PricingSection() {
 
   useEffect(() => {
     fetchGoldEvents()
-    const id = window.setInterval(() => fetchGoldEvents(), 30000)
+    const id = window.setInterval(() => fetchGoldEvents(), 60000)
     return () => window.clearInterval(id)
   }, [])
 
