@@ -260,7 +260,7 @@ export default function PricingSection() {
       {
         id: "fundador-oro",
         name: "FUNDADOR DE ORO",
-        priceMonthly: 1.0,
+        priceMonthly: 4.99,
         priceSuffix: "",
         limitsTitle: "",
         featuresTitle: "TU VENTAJA",
@@ -274,7 +274,7 @@ export default function PricingSection() {
           { text: "tu nombre en el leaderboard (a vista de todos)", ok: true },
           { text: "cuando entres: ‘[nombre] se ha conectado’ (solo 50)", ok: true },
         ],
-        ctaLabel: "¡FUNDADOR DE ORO ($1.00)!",
+        ctaLabel: "¡FUNDADOR DE ORO ($4.99)!",
         variant: "starter",
       },
     ],
@@ -473,7 +473,7 @@ export default function PricingSection() {
                             const MP = (window as unknown as { MercadoPago?: MPCtor }).MercadoPago!
                             const mp = new MP(pub as string, { locale: 'es-PE' })
                             const checkout = mp.checkout({ preference: { id: preferenceId } })
-                            checkout.render({ container: '#mp-checkout-gold', label: 'Pagar $1.00 USD' })
+                            checkout.render({ container: '#mp-checkout-gold', label: 'Pagar $4.99 USD' })
                             setOroStatus({ ok: true })
                           } catch {}
                           finally { setOroProcessing(false) }

@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
   try {
     const result = await preference.create({
       body: {
-        items: [{ id: 'wspace_gold_pack', title, unit_price: 1.0, quantity: 1, currency_id: 'USD' }],
+        items: [{ id: 'wspace_gold_pack', title, unit_price: 4.99, quantity: 1, currency_id: 'USD' }],
         back_urls: {
           success: `${origin}/success`,
           failure: `${origin}/pending`,
