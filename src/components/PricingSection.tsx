@@ -23,6 +23,7 @@ type Plan = {
 
 export default function PricingSection() {
   const [user, setUser] = useState<{ id: string; email: string; plan: "bronce" | "plata" | "oro" } | null>(null)
+  const [userChecked, setUserChecked] = useState(false)
   const [displayName, setDisplayName] = useState<string>("")
   const [bronzeEmail, setBronzeEmail] = useState("")
   const [bronzePassword, setBronzePassword] = useState("")
@@ -74,6 +75,16 @@ export default function PricingSection() {
     } catch {}
   }
   useEffect(() => { fetchUser() }, [])
+  useEffect(() => {
+    try {
+      const hasWin = typeof window !== 'undefined'
+      const raw = hasWin ? localStorage.getItem('wspace_auth') : null
+      if (raw) {
+        try { const u = JSON.parse(raw) as { id: string; email: string; plan: 'bronce' | 'plata' | 'oro' } | null; if (u && u.email) setUser(u) } catch {}
+      }
+    } catch {}
+    setUserChecked(true)
+  }, [])
   
   useEffect(() => {
     const onSess = () => { fetchUser() }
@@ -352,7 +363,14 @@ export default function PricingSection() {
                 {plan.variant === "starter" && user?.plan === 'oro' && (
                   <div className="success-chip mt-2">Ahora formas parte de la élite, felicidades {displayName || 'Comandante'}</div>
                 )}
-                {plan.variant === "enterprise" && (!user ? (
+                {plan.variant === "enterprise" && (user ? (
+                  <div className="mt-3 p-3 md:p-4 rounded-2xl bg-gradient-to-br from-neutral-950 via-neutral-900 to-black border border-amber-400/30 shadow-[0_0_30px_rgba(56,189,248,0.15)]">
+                    <div className="text-sm md:text-base text-amber-100">Te registraste con éxito</div>
+                    <div className="mt-1 text-xs md:text-sm text-emerald-200/90">{displayName || '—'}</div>
+                    <div className="mt-1 text-[11px] md:text-xs text-cyan-200/90">{user.email}</div>
+                    <div className="mt-1 text-xs md:text-sm text-neutral-300">Estate al tanto de nuevas directivas, soldado</div>
+                  </div>
+                ) : (userChecked ? (
                   <div className="pricing-email">
                     <input
                       type="email"
@@ -405,14 +423,7 @@ export default function PricingSection() {
                       <div className="success-chip mt-2">Registro completado</div>
                     )}
                   </div>
-                ) : (
-                  <div className="mt-3 p-3 md:p-4 rounded-2xl bg-gradient-to-br from-neutral-950 via-neutral-900 to-black border border-amber-400/30 shadow-[0_0_30px_rgba(56,189,248,0.15)]">
-                    <div className="text-sm md:text-base text-amber-100">Te registraste con éxito</div>
-                    <div className="mt-1 text-xs md:text-sm text-emerald-200/90">{displayName || '—'}</div>
-                    <div className="mt-1 text-[11px] md:text-xs text-cyan-200/90">{user.email}</div>
-                    <div className="mt-1 text-xs md:text-sm text-neutral-300">Estate al tanto de nuevas directivas, soldado</div>
-                  </div>
-                ))}
+                ) : null))}
                 {plan.variant !== "enterprise" && (
                   <div className="mt-3">
                     <button
@@ -513,7 +524,7 @@ export default function PricingSection() {
                   <ul className="pricing-list">
                     {plan.features.map((f, idx) => (
                       <li key={`${plan.id}-feat-${idx}`} className={clsx('pricing-list__item', !f.ok && 'pricing-list__item--off')}>
-                        <span className="feature-mark" aria-hidden>{f.ok ? '✅' : '❌'}</span>
+                        <span className="feature-mark" aria-hidden>{f.ok ? '✅' : '🔒'}</span>
                         <span className={clsx(!f.ok && 'feature-text-off')}>{f.text}</span>
                       </li>
                     ))}
