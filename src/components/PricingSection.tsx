@@ -33,9 +33,10 @@ export default function PricingSection() {
   const [oroProcessing, setOroProcessing] = useState(false)
   const [oroFlash, setOroFlash] = useState(false)
   const [oroStatus, setOroStatus] = useState<{ ok?: boolean; error?: string } | null>(null)
-  const [goldTotal, setGoldTotal] = useState(0)
+  
   const [captureCells, setCaptureCells] = useState<boolean[]>(() => Array.from({ length: 100 }, () => false))
   const [goldEvents, setGoldEvents] = useState<{ email?: string; name?: string; createdAt?: number }[]>([])
+  const foundersCount = useMemo(() => Math.min(100, goldEvents.length), [goldEvents.length])
   const [eventsRefreshing, setEventsRefreshing] = useState(false)
   const [lastEventsFetch, setLastEventsFetch] = useState<number | null>(null)
   const lastAnnounceTsRef = React.useRef<number>(0)
@@ -80,20 +81,7 @@ export default function PricingSection() {
     return () => window.removeEventListener('user_session_changed', onSess)
   }, [])
 
-  useEffect(() => {
-    const fetchCount = async () => {
-      try {
-        const r = await fetch('/api/gold/events/recent?limit=1', { cache: 'no-store' })
-        const d = await r.json()
-        const total = typeof d?.total === 'number' ? d.total : 0
-        setGoldTotal(Math.max(0, Math.min(1000, total)))
-      } catch {}
-    }
-    fetchCount()
-    const onGold = () => { setGoldTotal((x) => Math.min(1000, x + 1)) }
-    window.addEventListener('gold_purchased', onGold as EventListener)
-    return () => window.removeEventListener('gold_purchased', onGold as EventListener)
-  }, [])
+  
 
   const maskEmail = (e?: string | null) => {
     if (!e) return '—'
@@ -156,7 +144,7 @@ export default function PricingSection() {
               const item = { email: d.email, name: d.name, createdAt: ts }
               return exists ? prev : [item, ...prev].slice(0, 50)
             })
-            setGoldTotal((x) => Math.min(1000, x + 1))
+            
           }
         } catch {}
       }
@@ -349,10 +337,10 @@ export default function PricingSection() {
                   <div className="mt-3">
                     <div className="flex items-center justify-between text-xs md:text-sm text-cyan-100/80">
                       <span>Fundadores disponibles</span>
-                      <span>{goldTotal} / 1000</span>
+                      <span>{foundersCount} / 100</span>
                     </div>
                     <div className="mt-1 h-2.5 md:h-3 w-full rounded-full bg-neutral-700">
-                      <div className="h-full rounded-full bg-amber-400" style={{ width: `${Math.min(100, Math.round((goldTotal / 1000) * 100))}%` }} />
+                      <div className="h-full rounded-full bg-amber-400" style={{ width: `${foundersCount}%` }} />
                     </div>
                   </div>
                 )}
@@ -530,7 +518,7 @@ export default function PricingSection() {
         </div>
         <div className="mt-2 md:mt-4">
           <div className="text-center text-sm md:text-base bg-gradient-to-r from-amber-300 via-cyan-300 to-yellow-300 bg-clip-text text-transparent font-semibold opacity-90">Espacios de fundadores</div>
-          <div className="mt-6 md:mt-8 grid md:grid-cols-2 gap-6 md:gap-8 items-start justify-items-center md:justify-items-start">
+          <div className="mt-10 md:mt-12 grid md:grid-cols-2 gap-6 md:gap-8 items-start justify-items-center md:justify-items-start">
             <div className="relative md:justify-self-start mx-auto md:ml-0 md:mr-auto w-full max-w-[90vw] md:max-w-[900px] rounded-3xl p-5 md:p-6 bg-neutral-950/70 border border-amber-400/35 shadow-[0_0_40px_rgba(255,200,0,0.22)] overflow-hidden">
               <span aria-hidden className="absolute -inset-8 bg-gradient-to-r from-amber-400/10 via-cyan-400/8 to-yellow-300/10 blur-2xl mix-blend-screen" />
               <span aria-hidden className="pointer-events-none absolute inset-0 ring-1 ring-amber-300/45 rounded-3xl" />
