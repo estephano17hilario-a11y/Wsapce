@@ -38,12 +38,14 @@ export default function SectionThree() {
   const [explosionDone, setExplosionDone] = useState(false)
   const [guardDialogOpen, setGuardDialogOpen] = useState(false)
   const [active, setActive] = useState(false)
+  const [displayName, setDisplayName] = useState<string>("")
 
   const handleSend = () => {
     const text = inputRef.current?.innerText || ''
     const clean = text.trim()
     if (!clean) return
-    setChatMessages((prev) => [...prev, { actor: '[lider]:', text: clean, you: true }])
+    const actor = `[${(displayName && displayName.trim()) ? displayName.trim() : 'TÚ'}]:`
+    setChatMessages((prev) => [...prev, { actor, text: clean, you: true }])
     if (inputRef.current) {
       inputRef.current.innerText = ''
     }
@@ -86,6 +88,21 @@ export default function SectionThree() {
       tl.scrollTrigger?.kill()
       tl.kill()
     }
+  }, [])
+
+  useEffect(() => {
+    try {
+      const n = typeof window !== 'undefined' ? (localStorage.getItem('wspace_name') || '') : ''
+      const id = window.setTimeout(() => setDisplayName(n), 0)
+      return () => { window.clearTimeout(id) }
+    } catch {}
+    const onName = (e: Event) => {
+      const detail = (e as unknown as { detail?: { name?: string } }).detail
+      const nm = (detail?.name || '').trim()
+      window.requestAnimationFrame(() => setDisplayName(nm))
+    }
+    window.addEventListener('user_name_set', onName as EventListener)
+    return () => window.removeEventListener('user_name_set', onName as EventListener)
   }, [])
 
   useEffect(() => {
@@ -141,7 +158,7 @@ export default function SectionThree() {
               </div>
               <div ref={chatBodyRef} className="war-chat-body">
                 <div className="war-chat-msg"><span className="war-chat-actor">[Soldado_X]:</span><span className="war-chat-text">Aquí en <span className="war-chat-coords">12932,2353</span></span><span className="war-chat-goto">IR A UBICACIÓN</span></div>
-                <div className="war-chat-msg"><span className="war-chat-actor you">[TÚ_Comandante]:</span><span className="war-chat-text">¡Entendido! ¡Enviando Píxel Bomba!</span></div>
+                <div className="war-chat-msg"><span className="war-chat-actor you">[{(displayName && displayName.trim()) ? displayName.trim() : 'TÚ'}]:</span><span className="war-chat-text">¡Entendido! ¡Enviando Píxel Bomba!</span></div>
                 {chatMessages.map((m, i) => (
                   <div key={`chat-${i}`} className={`war-chat-msg ${m.system ? 'system' : ''}`}>
                     {m.actor && (

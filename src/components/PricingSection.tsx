@@ -325,7 +325,7 @@ export default function PricingSection() {
                   clsx(
                     `pricing-card pricing-card--${plan.variant} lux-card${plan.variant === 'enterprise' && bronzeFlash ? ' bronze-flash' : ''}`,
                     plan.variant === 'starter' && 'relative',
-                    plan.variant === 'enterprise' && 'px-4 py-3 md:px-5 md:py-4'
+                    plan.variant === 'enterprise' && 'px-3 py-2 md:px-4 md:py-3'
                   )
                 }
               >
@@ -339,8 +339,8 @@ export default function PricingSection() {
                   <div className="corner-badge">{plan.ribbon}</div>
                 )}
 
-              <div className={clsx('pricing-card__inner', plan.variant === 'enterprise' && 'py-3 md:py-4')}>
-                <h3 className={clsx('pricing-card__title', plan.variant === 'enterprise' && 'text-base md:text-lg')}>{plan.name}</h3>
+              <div className={clsx('pricing-card__inner', plan.variant === 'enterprise' && 'py-2 md:py-3')}>
+                <h3 className={clsx('pricing-card__title', plan.variant === 'enterprise' && 'text-sm md:text-base')}>{plan.name}</h3>
                 <div className="pricing-card__price">
                   <span className={`price-value ${plan.id === "fundador-oro" ? "price-big" : ""}`}>{priceLabel(plan)}</span>
                   {plan.priceSuffix && <span className="price-suffix">{plan.priceSuffix}</span>}

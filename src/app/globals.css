@@ -1317,7 +1317,7 @@ body {
   position: absolute; left: -30%; top: 0; width: 30%; height: 100%;
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
   filter: blur(0.6px);
-  animation: btnShimmer 2600ms ease-in-out infinite;
+  animation: btnShimmer 5000ms ease-in-out infinite;
   pointer-events: none;
 }
 
@@ -1601,6 +1601,8 @@ body {
 }
 
 .pricing-card__inner { padding: 18px 18px 22px; position: relative; z-index: 1; }
+.pricing-card--enterprise .pricing-card__inner { padding: 10px 12px 12px; }
+.pricing-card--enterprise .pricing-card__title { font-size: 16px; margin-top: 18px; }
 .pricing-card__title { margin-top: 28px; font-weight: 700; font-size: 20px; color: #e5e7eb; text-align: center; }
 /* Títulos por variante con gradiente y brillo */
 .pricing-card--starter .pricing-card__title {
@@ -1765,7 +1767,7 @@ body {
   background: radial-gradient(120px 120px at 25% 60%, rgba(253, 224, 71, 0.35), transparent 60%),
               radial-gradient(160px 160px at 80% 20%, rgba(245, 158, 11, 0.30), transparent 60%);
   mix-blend-mode: screen; filter: blur(20px); opacity: .55;
-  animation: ctaLights 8s ease-in-out infinite;
+  animation: ctaLights 18s ease-in-out infinite;
 }
 .pricing-card--starter .pricing-cta:hover {
   background: linear-gradient(90deg, rgba(250, 204, 21, 0.36), rgba(245, 158, 11, 0.32));
@@ -2016,7 +2018,7 @@ body {
     radial-gradient(160px 140px at 80% 20%, rgba(34,211,238,0.22), transparent 60%),
     conic-gradient(from 160deg at 50% 40%, rgba(255,255,255,0.05), rgba(253,224,71,0.10), rgba(255,255,255,0.05), rgba(34,211,238,0.10), rgba(255,255,255,0.05));
   mix-blend-mode: screen; filter: blur(14px) saturate(118%); opacity: .55;
-  animation: ctaAmbient 18s ease-in-out infinite;
+  animation: ctaAmbient 28s ease-in-out infinite;
 }
 .cta-ambient::after {
   content: '';
@@ -2039,7 +2041,7 @@ body {
     radial-gradient(140px 140px at 86% 40%, rgba(34,211,238,0.16), transparent 62%),
     linear-gradient(180deg, rgba(255,255,255,0.04), transparent 70%);
   filter: blur(10px); opacity: .55; mix-blend-mode: screen;
-  animation: ctaSoft 14s ease-in-out infinite;
+  animation: ctaSoft 24s ease-in-out infinite;
 }
 @keyframes ctaSoft {
   0% { transform: translate3d(0,0,0) }
@@ -2214,7 +2216,7 @@ body {
   mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
   mask-composite: exclude;
 }
-.cta-border-wave:hover::after { opacity: .9; animation: waveSpin 0.4s ease-out; }
+.cta-border-wave:hover::after { opacity: .9; animation: waveSpin 1.2s ease-out; }
 @keyframes waveSpin { to { transform: rotate(240deg) } }
 
 .cta-orbits {
@@ -2237,7 +2239,7 @@ body {
     radial-gradient(circle at 70% 70%, rgba(34,211,238,0.22), transparent 60%);
   filter: blur(10px) saturate(110%);
   transform: translate(-50%, -50%) rotate(0deg) translateX(40%);
-  animation: orbitCW 20s linear infinite;
+  animation: orbitCW 34s linear infinite;
 }
 .cta-orbits::after {
   content: '';
@@ -2252,7 +2254,7 @@ body {
     radial-gradient(circle at 30% 70%, rgba(124,181,255,0.22), transparent 60%);
   filter: blur(10px) saturate(110%);
   transform: translate(-50%, -50%) rotate(0deg) translateX(-38%);
-  animation: orbitCCW 24s linear infinite;
+  animation: orbitCCW 42s linear infinite;
 }
 @keyframes orbitCW { to { transform: translate(-50%, -50%) rotate(360deg) translateX(40%); } }
 @keyframes orbitCCW { to { transform: translate(-50%, -50%) rotate(-360deg) translateX(-38%); } }
@@ -2270,7 +2272,7 @@ body {
     radial-gradient(circle at 70% 70%, rgba(245,158,11,0.18), transparent 60%);
   filter: blur(10px) saturate(110%);
   transform: translate(-50%, -50%) rotate(0deg) translateX(36%);
-  animation: orbitCW 22s linear infinite;
+  animation: orbitCW 38s linear infinite;
 }
 .cta-orbits.cta-orbits--gold::after {
   content: '';
@@ -2285,6 +2287,6 @@ body {
     radial-gradient(circle at 30% 70%, rgba(234,179,8,0.18), transparent 60%);
   filter: blur(9px) saturate(110%);
   transform: translate(-50%, -50%) rotate(0deg) translateX(-34%);
-  animation: orbitCCW 26s linear infinite;
+  animation: orbitCCW 46s linear infinite;
 }
 .pricing > .grid { justify-items: center; }
