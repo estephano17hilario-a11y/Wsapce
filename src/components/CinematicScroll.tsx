@@ -226,7 +226,7 @@ export default function CinematicScroll() {
       // Imagen: fade in + zoom-out (más agresivo)
       .fromTo(img3,
         { opacity: 0.8, scale: 3.6, transformOrigin: 'center center' },
-        { opacity: 1, scale: 0.12, duration: 3.0, ease: 'none' },
+        { opacity: 1, scale: 1.0, duration: 3.0, ease: 'none' },
         "-=0.4"
       )
       .to({}, { duration: 0.6 })
@@ -432,12 +432,19 @@ export default function CinematicScroll() {
   }, [lockScroll]);
 
   useEffect(() => {
+    const setVh = () => { try { document.documentElement.style.setProperty('--vh', `${window.innerHeight}px`) } catch {} }
+    setVh()
+    window.addEventListener('resize', setVh)
+    return () => window.removeEventListener('resize', setVh)
+  }, [])
+
+  useEffect(() => {
     const id = setTimeout(() => setShowScrollHint(true), 1200)
     return () => clearTimeout(id)
   }, [])
 
   return (
-    <section ref={mainContainerRef} className="relative w-full h-[100svh] overflow-hidden" id="cinematic-zone">
+    <section ref={mainContainerRef} className="relative w-full h-[100svh] overflow-hidden" id="cinematic-zone" style={{ minHeight: '100dvh', height: 'var(--vh)' }}>
       {/* Contenedor fijo para todas las escenas */}
       <div className="fixed inset-0 w-full h-[100svh]">
         {showScrollHint && (
@@ -509,7 +516,7 @@ export default function CinematicScroll() {
             src="/tierra para implementar - copia - copia.webp"
             alt="Despegue de la Tierra"
             fill
-            className="object-contain object-center scene-image"
+            className="object-cover object-center scene-image"
             loading="lazy"
             sizes="100vw"
             quality={95}
