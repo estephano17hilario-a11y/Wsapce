@@ -1826,6 +1826,9 @@ body {
 .pricing-card--enterprise .pricing-section__title { color: #fff7ed; }
 .pricing-list { display: grid; gap: 9px; }
 .pricing-list__item { display: flex; align-items: center; gap: 10px; color: #94a3b8; font-size: 13px; }
+.pricing-list__item--off { color: #64748b; opacity: .65; }
+.feature-mark { font-size: 16px; line-height: 1; }
+.feature-text-off { text-decoration: line-through; }
 .check {
   width: 18px; height: 18px; border-radius: 9999px; flex: none;
   background: radial-gradient(circle at 50% 50%, rgba(34,211,238,0.8), rgba(168,85,247,0.8));

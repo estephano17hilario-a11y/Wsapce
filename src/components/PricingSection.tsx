@@ -15,7 +15,7 @@ type Plan = {
   featuresTitle: string
   limitsTitle: string
   limits: string[]
-  features: string[]
+  features: { text: string; ok: boolean }[]
   ctaLabel: string
   variant: "starter" | "creator" | "enterprise"
   ribbon?: string
@@ -235,9 +235,13 @@ export default function PricingSection() {
         featuresTitle: "TU VENTAJA",
         limits: [],
         features: [
-          "✅ ¡ACCESO ESTÁNDAR: 8 HORAS ANTES!",
-          "✅ ¡ENTRA ANTES QUE EL PÚBLICO GENERAL!",
-          "✅ Insignia de BRONCE",
+          { text: "acceso estándar 8 horas anticipadas", ok: true },
+          { text: "insignia de bronce", ok: true },
+          { text: "banner de bronce de preregistro", ok: true },
+          { text: "+skins de píxeles", ok: false },
+          { text: "acceso a VIP en discord", ok: false },
+          { text: "tu nombre en el leaderboard", ok: false },
+          { text: "cada vez que entres, tu entrada será anunciada", ok: false },
         ],
         ctaLabel: "Solo me registro...",
         variant: "enterprise",
@@ -251,12 +255,13 @@ export default function PricingSection() {
         featuresTitle: "TU VENTAJA",
         limits: [],
         features: [
-          "✅ ¡ACCESO PRIORITARIO: 48 HORAS ANTES!",
-          "✅ ¡CONQUISTA EL LIENZO VIRGEN! ¡SÉ REY!",
-          "✅ Insignia de ORO [ETERNA] (¡Que brille!)",
-          "✅ Skin de Píxel Dorado",
-          "✅ Discord de Élite (Acceso VIP)",
-          "✅ Tu nombre en el Leaderboard",
+          { text: "acceso fundador +48 horas anticipadas", ok: true },
+          { text: "insignia de fundador (solo existen 50)", ok: true },
+          { text: "banner de fundador (exclusivo)", ok: true },
+          { text: "+25 skins píxeles (legendarios)", ok: true },
+          { text: "acceso a VIP en discord", ok: true },
+          { text: "tu nombre en el leaderboard (a vista de todos)", ok: true },
+          { text: "cuando entres: ‘[nombre] se ha conectado’ (solo 50)", ok: true },
         ],
         ctaLabel: "¡FUNDADOR DE ORO ($1.00)!",
         variant: "starter",
@@ -345,7 +350,7 @@ export default function PricingSection() {
                   </div>
                 )}
                 {plan.variant === "starter" && user?.plan === 'oro' && (
-                  <div className="success-chip mt-2">Ahora formas parte de la élite, felicidades {displayName || (user?.email || '')}</div>
+                  <div className="success-chip mt-2">Ahora formas parte de la élite, felicidades {displayName || 'Comandante'}</div>
                 )}
                 {plan.variant === "enterprise" && (!user ? (
                   <div className="pricing-email">
@@ -403,7 +408,8 @@ export default function PricingSection() {
                 ) : (
                   <div className="mt-3 p-3 md:p-4 rounded-2xl bg-gradient-to-br from-neutral-950 via-neutral-900 to-black border border-amber-400/30 shadow-[0_0_30px_rgba(56,189,248,0.15)]">
                     <div className="text-sm md:text-base text-amber-100">Te registraste con éxito</div>
-                    <div className="mt-1 text-xs md:text-sm text-cyan-200/90">{user.email}</div>
+                    <div className="mt-1 text-xs md:text-sm text-emerald-200/90">{displayName || '—'}</div>
+                    <div className="mt-1 text-[11px] md:text-xs text-cyan-200/90">{user.email}</div>
                     <div className="mt-1 text-xs md:text-sm text-neutral-300">Estate al tanto de nuevas directivas, soldado</div>
                   </div>
                 ))}
@@ -505,10 +511,10 @@ export default function PricingSection() {
                 <div className="pricing-section">
                   <h4 className="pricing-section__title">{plan.featuresTitle}</h4>
                   <ul className="pricing-list">
-                    {plan.features.map((item) => (
-                      <li key={item} className="pricing-list__item">
-                        <span className="check" aria-hidden />
-                        <span>{item}</span>
+                    {plan.features.map((f, idx) => (
+                      <li key={`${plan.id}-feat-${idx}`} className={clsx('pricing-list__item', !f.ok && 'pricing-list__item--off')}>
+                        <span className="feature-mark" aria-hidden>{f.ok ? '✅' : '❌'}</span>
+                        <span className={clsx(!f.ok && 'feature-text-off')}>{f.text}</span>
                       </li>
                     ))}
                   </ul>
