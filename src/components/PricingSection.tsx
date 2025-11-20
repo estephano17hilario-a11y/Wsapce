@@ -250,7 +250,7 @@ export default function PricingSection() {
           { text: "insignia de bronce", ok: true },
           { text: "banner de bronce de preregistro", ok: true },
           { text: "+skins de píxeles", ok: false },
-          { text: "acceso a VIP en discord", ok: false },
+          { text: "grupo VIP en Wspace", ok: false },
           { text: "tu nombre en el leaderboard", ok: false },
           { text: "cada vez que entres, tu entrada será anunciada", ok: false },
         ],
@@ -270,7 +270,7 @@ export default function PricingSection() {
           { text: "insignia de fundador (solo existen 50)", ok: true },
           { text: "banner de fundador (exclusivo)", ok: true },
           { text: "+25 skins píxeles (legendarios)", ok: true },
-          { text: "acceso a VIP en discord", ok: true },
+          { text: "grupo VIP en Wspace", ok: true },
           { text: "tu nombre en el leaderboard (a vista de todos)", ok: true },
           { text: "cuando entres: ‘[nombre] se ha conectado’ (solo 50)", ok: true },
         ],
@@ -329,7 +329,7 @@ export default function PricingSection() {
                   clsx(
                     `pricing-card pricing-card--${plan.variant} lux-card${plan.variant === 'enterprise' && bronzeFlash ? ' bronze-flash' : ''}`,
                     plan.variant === 'starter' && 'relative',
-                    plan.variant === 'enterprise' && 'px-3 py-2 md:px-4 md:py-3 min-h-[640px] md:min-h-[720px]'
+                    plan.variant === 'enterprise' && 'px-2 py-1.5 md:px-3 md:py-2 min-h-[440px] md:min-h-[480px]'
                   )
                 }
               >
@@ -343,7 +343,7 @@ export default function PricingSection() {
                   <div className="corner-badge">{plan.ribbon}</div>
                 )}
 
-              <div className={clsx('pricing-card__inner', plan.variant === 'enterprise' && 'py-2 md:py-3 h-full')}>
+              <div className={clsx('pricing-card__inner', plan.variant === 'enterprise' && 'py-1 md:py-2')}>
                 <h3 className={clsx('pricing-card__title', plan.variant === 'enterprise' && 'text-sm md:text-base')}>{plan.name}</h3>
                 <div className="pricing-card__price">
                   <span className={`price-value ${plan.id === "fundador-oro" ? "price-big" : ""}`}>{priceLabel(plan)}</span>
