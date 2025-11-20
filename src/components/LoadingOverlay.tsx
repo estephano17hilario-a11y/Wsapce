@@ -236,7 +236,13 @@ export default function LoadingOverlay() {
                         document.documentElement.style.overflow = prevHtmlOverflowRef.current || ""
                         document.body.style.overflow = prevBodyOverflowRef.current || ""
                         setVisible(false)
-                        try { const el = document.getElementById('wspace-start'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }) } catch {}
+                        try {
+                          const el = document.getElementById('wspace-start')
+                          if (el) {
+                            const y = el.getBoundingClientRect().top + window.scrollY - 64
+                            window.scrollTo({ top: y, behavior: 'smooth' })
+                          }
+                        } catch {}
                         if (ok) setLoginOk(true)
                       } catch {}
                       finally { setLoginLoading(false) }
@@ -333,7 +339,10 @@ export default function LoadingOverlay() {
                         setVisible(false)
                         try {
                           const el = document.getElementById('wspace-start')
-                          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                          if (el) {
+                            const y = el.getBoundingClientRect().top + window.scrollY - 64
+                            window.scrollTo({ top: y, behavior: 'smooth' })
+                          }
                         } catch {}
                       } catch { setLoginError('network_error') }
                     finally { setLoginLoading(false) }
