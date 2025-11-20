@@ -321,14 +321,26 @@ export default function PricingSection() {
                 {variantLabel(plan.variant)}
               </div>
               <article
-                className={`pricing-card pricing-card--${plan.variant} lux-card${plan.variant === 'enterprise' && bronzeFlash ? ' bronze-flash' : ''}`}
+                className={
+                  clsx(
+                    `pricing-card pricing-card--${plan.variant} lux-card${plan.variant === 'enterprise' && bronzeFlash ? ' bronze-flash' : ''}`,
+                    plan.variant === 'starter' && 'relative',
+                    plan.variant === 'enterprise' && 'px-4 py-3 md:px-5 md:py-4'
+                  )
+                }
               >
-              {plan.ribbon && (
-                <div className="corner-badge">{plan.ribbon}</div>
+              {plan.variant === 'starter' && (
+                <>
+                  <span aria-hidden className="absolute -inset-6 rounded-3xl bg-gradient-to-r from-amber-400/20 via-yellow-300/10 to-cyan-400/20 blur-2xl opacity-50 animate-pulse" />
+                  <span aria-hidden className="absolute inset-0 rounded-3xl ring-2 ring-amber-300/25 animate-pulse" />
+                </>
               )}
+                {plan.ribbon && (
+                  <div className="corner-badge">{plan.ribbon}</div>
+                )}
 
-              <div className="pricing-card__inner">
-                <h3 className="pricing-card__title">{plan.name}</h3>
+              <div className={clsx('pricing-card__inner', plan.variant === 'enterprise' && 'py-3 md:py-4')}>
+                <h3 className={clsx('pricing-card__title', plan.variant === 'enterprise' && 'text-base md:text-lg')}>{plan.name}</h3>
                 <div className="pricing-card__price">
                   <span className={`price-value ${plan.id === "fundador-oro" ? "price-big" : ""}`}>{priceLabel(plan)}</span>
                   {plan.priceSuffix && <span className="price-suffix">{plan.priceSuffix}</span>}
@@ -517,6 +529,7 @@ export default function PricingSection() {
           ))}
         </div>
         <div className="mt-2 md:mt-4">
+          <div className="text-center text-amber-200/80 text-sm md:text-base">Espacios de emperadores</div>
           <div className="mt-4 grid md:grid-cols-2 gap-6 md:gap-8 items-start justify-items-center md:justify-items-start">
             <div className="relative md:justify-self-start mx-auto md:ml-0 md:mr-auto w-full max-w-[90vw] md:max-w-[900px] rounded-3xl p-5 md:p-6 bg-neutral-950/70 border border-amber-400/35 shadow-[0_0_40px_rgba(255,200,0,0.22)] overflow-hidden">
               <span aria-hidden className="absolute -inset-8 bg-gradient-to-r from-amber-400/10 via-cyan-400/8 to-yellow-300/10 blur-2xl mix-blend-screen" />
