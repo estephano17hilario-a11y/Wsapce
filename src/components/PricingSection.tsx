@@ -516,11 +516,7 @@ export default function PricingSection() {
             </div>
           ))}
         </div>
-        <div className="mt-10 md:mt-14">
-          <div className="text-center">
-            <h3 className="text-2xl md:text-4xl font-black tracking-tight shine-text">Zona de Captura</h3>
-            <p className="mt-2 text-sm md:text-base text-cyan-200/80">Cuadro 20 × 5 con celdas premium</p>
-          </div>
+        <div className="mt-2 md:mt-4">
           <div className="mt-4 grid md:grid-cols-2 gap-6 md:gap-8 items-start justify-items-center md:justify-items-start">
             <div className="relative md:justify-self-start mx-auto md:ml-0 md:mr-auto w-full max-w-[90vw] md:max-w-[900px] rounded-3xl p-5 md:p-6 bg-neutral-950/70 border border-amber-400/35 shadow-[0_0_40px_rgba(255,200,0,0.22)] overflow-hidden">
               <span aria-hidden className="absolute -inset-8 bg-gradient-to-r from-amber-400/10 via-cyan-400/8 to-yellow-300/10 blur-2xl mix-blend-screen" />
