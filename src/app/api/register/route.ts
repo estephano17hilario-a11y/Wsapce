@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
 import { createUser, getUserByEmail, isValidEmail, getUserById } from '@/lib/referralDB'
 import { encodeSession } from '@/lib/auth'
 
