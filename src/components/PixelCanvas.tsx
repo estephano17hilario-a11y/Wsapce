@@ -20,6 +20,7 @@ type PixelCanvasProps = {
 export default function PixelCanvas({ width = 420, height = 300, explodeSignal = 0, paintable = false, showShip = true, spawnFlagSignal = 0, active = true }: PixelCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const startExplosionRef = useRef<(() => void) | null>(null)
+  const captureLoggedRef = useRef(false)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -669,7 +670,13 @@ export default function PixelCanvas({ width = 420, height = 300, explodeSignal =
         const maxByBounds = (Math.hypot(farX, farY) / Math.max(s, 0.0001)) * 0.547 - strokeComp
         const targetMax = Math.max(captureWave.r0, Math.min(captureWave.max, maxByBounds))
         captureWave.r = captureWave.r0 + (targetMax - captureWave.r0) * e
-        if (p >= 1) captureWave.locked = true
+        if (p >= 1) {
+          captureWave.locked = true
+          if (!captureLoggedRef.current) {
+            captureLoggedRef.current = true
+            try { const ev = new CustomEvent('pixel-capture-finished'); document.dispatchEvent(ev) } catch {}
+          }
+        }
       }
       const grad = ctx.createRadialGradient(x, y, captureWave.r * 0.28, x, y, captureWave.r)
       grad.addColorStop(0, 'rgba(59,130,246,0.60)')

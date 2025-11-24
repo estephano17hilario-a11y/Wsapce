@@ -39,6 +39,8 @@ export default function SectionThree() {
   const [guardDialogOpen, setGuardDialogOpen] = useState(false)
   const [active, setActive] = useState(false)
   const [displayName, setDisplayName] = useState<string>("")
+  const [explosionLogShown, setExplosionLogShown] = useState(false)
+  const [captureLogShown, setCaptureLogShown] = useState(false)
 
   const handleSend = () => {
     const text = inputRef.current?.innerText || ''
@@ -87,6 +89,17 @@ export default function SectionThree() {
     return () => {
       tl.scrollTrigger?.kill()
       tl.kill()
+    }
+  }, [])
+
+  useEffect(() => {
+    const onExplosion = () => setExplosionLogShown(true)
+    const onCapture = () => setCaptureLogShown(true)
+    document.addEventListener('pixel-explosion-finished', onExplosion as EventListener)
+    document.addEventListener('pixel-capture-finished', onCapture as EventListener)
+    return () => {
+      document.removeEventListener('pixel-explosion-finished', onExplosion as EventListener)
+      document.removeEventListener('pixel-capture-finished', onCapture as EventListener)
     }
   }, [])
 
@@ -250,6 +263,9 @@ export default function SectionThree() {
                 {explosionFxActive && <span aria-hidden className="once-burst once-burst--purple" />}
               </button>
             </div>
+            {explosionLogShown && (
+              <div className="mt-2 text-xs md:text-sm text-cyan-200/80">mira en el chat</div>
+            )}
             <h3 className="mt-6 text-white text-2xl md:text-3xl font-extrabold">ARSENAL DE CONQUISTA</h3>
             <p className="mt-3 text-gray-300 leading-relaxed text-base md:text-lg">
               ¿Píxeles normales? Ni hablar. Despliega Píxeles Bomba para reventar sus defensas. Usa Caballos de Troya para infiltrarte. Esto no es arte, es dominio.
@@ -316,6 +332,9 @@ export default function SectionThree() {
                 </div>
               )}
             </div>
+            {captureLogShown && (
+              <div className="mt-2 text-xs md:text-sm text-cyan-200/80">mira en el chat</div>
+            )}
             <h3 className="mt-6 text-white text-2xl md:text-3xl font-extrabold">GUERRA DE GUERRILLAS 24/7</h3>
             <p className="mt-3 text-gray-300 leading-relaxed text-base md:text-lg">
               Forma bandos de guerrilla. Libra una guerra constante. En Wspace, el imperio nunca duerme. ¿Crees que puedes descansar?
