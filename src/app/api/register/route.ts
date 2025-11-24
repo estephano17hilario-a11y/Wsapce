@@ -1,26 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { createUser, getUserByEmail, setUserPasswordByEmail } from '@/lib/referralDB'
+import { createUser, getUserByEmail, isValidEmail, getUserById } from '@/lib/referralDB'
 import { encodeSession } from '@/lib/auth'
 
-function validEmail(e: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)
-}
-
 export async function POST(req: NextRequest) {
-  const body = await req.json().catch(() => ({})) as { email?: string; password?: string }
+  let body: { email?: string; password?: string } = {}
+  try { body = await req.json() } catch {}
   const email = (body.email || '').trim().toLowerCase()
-  const password = (body.password || '').trim()
-  if (!validEmail(email)) return NextResponse.json({ error: 'email_invalid' }, { status: 400 })
-
+  if (!email || !isValidEmail(email)) {
+    return NextResponse.json({ error: 'email_invalid' }, { status: 400 })
+  }
   const existing = await getUserByEmail(email)
-  if (existing) return NextResponse.json({ error: 'user_exists' }, { status: 409 })
-  const user = await createUser(email)
-  if (password) { try { await setUserPasswordByEmail(email, password) } catch {} }
-  const store = await cookies()
-  store.set('wspace_sess', encodeSession(user.id), { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
-  store.set('wspace_uid', user.id, { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
-  store.set('wspace_email', user.email, { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
-  store.set('wspace_plan', user.plan, { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
-  return NextResponse.json({ ok: true, user }, { headers: { 'Cache-Control': 'private, no-store' } })
+  if (existing) {
+    const res = NextResponse.json({ error: 'user_exists' }, { status: 409 })
+    try {
+      res.cookies.set('wspace_email', email, { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
+      res.cookies.set('wspace_plan', existing.plan || 'bronce', { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
+      res.cookies.set('wspace_sess', encodeSession(existing.id), { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
+      res.cookies.set('wspace_uid', existing.id, { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
+    } catch {}
+    return res
+  }
+  const created = await createUser(email)
+  const user = await getUserById(created.id)
+  const res = NextResponse.json({ ok: true, user })
+  try {
+    res.cookies.set('wspace_email', email, { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
+    res.cookies.set('wspace_plan', (user?.plan || 'bronce'), { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
+    res.cookies.set('wspace_sess', encodeSession(created.id), { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
+    res.cookies.set('wspace_uid', created.id, { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' })
+  } catch {}
+  return res
 }
+
+export async function GET() { return new NextResponse(null, { status: 405 }) }

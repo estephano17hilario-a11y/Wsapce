@@ -19,7 +19,7 @@ export default function Footer() {
         </div>
         <div className="footer-bottom mt-4 text-center">
           <div className="footer-divider mx-auto mb-3" />
-          <p className="footer-copy">© 2025 WSPACE.LIVE - Todos los derechos reservados por el Arquitecto.</p>
+          <p className="footer-copy">© 2025 WSPACE.LIVE - Todos los derechos reservados.</p>
         </div>
       </div>
     </footer>
