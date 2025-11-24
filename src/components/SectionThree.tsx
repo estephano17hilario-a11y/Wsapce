@@ -39,8 +39,8 @@ export default function SectionThree() {
   const [guardDialogOpen, setGuardDialogOpen] = useState(false)
   const [active, setActive] = useState(false)
   const [displayName, setDisplayName] = useState<string>("")
-  const [explosionLogShown, setExplosionLogShown] = useState(false)
-  const [captureLogShown, setCaptureLogShown] = useState(false)
+  const [explosionLogVisible, setExplosionLogVisible] = useState(false)
+  const [captureLogVisible, setCaptureLogVisible] = useState(false)
 
   const handleSend = () => {
     const text = inputRef.current?.innerText || ''
@@ -93,13 +93,25 @@ export default function SectionThree() {
   }, [])
 
   useEffect(() => {
-    const onExplosion = () => setExplosionLogShown(true)
-    const onCapture = () => setCaptureLogShown(true)
+    let expTimer: number | null = null
+    let capTimer: number | null = null
+    const onExplosion = () => {
+      setExplosionLogVisible(true)
+      if (expTimer) { window.clearTimeout(expTimer) }
+      expTimer = window.setTimeout(() => setExplosionLogVisible(false), 5000)
+    }
+    const onCapture = () => {
+      setCaptureLogVisible(true)
+      if (capTimer) { window.clearTimeout(capTimer) }
+      capTimer = window.setTimeout(() => setCaptureLogVisible(false), 5000)
+    }
     document.addEventListener('pixel-explosion-finished', onExplosion as EventListener)
     document.addEventListener('pixel-capture-finished', onCapture as EventListener)
     return () => {
       document.removeEventListener('pixel-explosion-finished', onExplosion as EventListener)
       document.removeEventListener('pixel-capture-finished', onCapture as EventListener)
+      if (expTimer) window.clearTimeout(expTimer)
+      if (capTimer) window.clearTimeout(capTimer)
     }
   }, [])
 
@@ -263,8 +275,10 @@ export default function SectionThree() {
                 {explosionFxActive && <span aria-hidden className="once-burst once-burst--purple" />}
               </button>
             </div>
-            {explosionLogShown && (
-              <div className="mt-2 text-xs md:text-sm text-cyan-200/80">(mira en el chat)</div>
+            {explosionLogVisible && (
+              <div className={`mt-2 text-sm md:text-base font-semibold text-cyan-100 bg-cyan-950/40 border border-cyan-500/40 ring-1 ring-cyan-300/20 rounded-md px-3 py-2 shadow transition-opacity duration-500 ${explosionLogVisible ? 'opacity-100' : 'opacity-0'}`}>
+                (mira en el chat)
+              </div>
             )}
             <h3 className="mt-6 text-white text-2xl md:text-3xl font-extrabold">ARSENAL DE CONQUISTA</h3>
             <p className="mt-3 text-gray-300 leading-relaxed text-base md:text-lg">
@@ -332,8 +346,10 @@ export default function SectionThree() {
                 </div>
               )}
             </div>
-            {captureLogShown && (
-              <div className="mt-2 text-xs md:text-sm text-cyan-200/80">(mira en el chat)</div>
+            {captureLogVisible && (
+              <div className={`mt-2 text-sm md:text-base font-semibold text-cyan-100 bg-cyan-950/40 border border-cyan-500/40 ring-1 ring-cyan-300/20 rounded-md px-3 py-2 shadow transition-opacity duration-500 ${captureLogVisible ? 'opacity-100' : 'opacity-0'}`}>
+                (mira en el chat)
+              </div>
             )}
             <h3 className="mt-6 text-white text-2xl md:text-3xl font-extrabold">GUERRA DE GUERRILLAS 24/7</h3>
             <p className="mt-3 text-gray-300 leading-relaxed text-base md:text-lg">

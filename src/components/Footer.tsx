@@ -12,8 +12,6 @@ export default function Footer() {
             <p className="footer-text">Un imperio forjado en el caos. Construido por Fundadores. Hecho para la guerra.</p>
           </div>
           <div className="footer-col lux-card p-6">
-            <h3 className="footer-heading shine-text">CONTACTO</h3>
-            <p className="footer-text">Contacto de Guerra (Empresas):</p>
             <a href="mailto:contac.wspace.live@gmail.com" className="footer-link">contac.wspace.live@gmail.com</a>
           </div>
         </div>
