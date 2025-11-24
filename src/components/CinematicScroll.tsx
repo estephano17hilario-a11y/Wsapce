@@ -471,7 +471,7 @@ export default function CinematicScroll() {
           />
           <div ref={text1Ref} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full px-6 opacity-0 pointer-events-none">
             <div className="relative text-center text-white">
-              <h1 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl sm:text-5xl md:text-8xl leading-normal font-extrabold py-2 bg-gradient-to-r from-red-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent cinematic-text text-center">
+              <h1 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-3xl sm:text-5xl md:text-8xl leading-normal font-extrabold py-2 bg-gradient-to-r from-red-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent cinematic-text text-center">
                 <span className="block whitespace-nowrap">forma la historia que</span>
                 <span className="block whitespace-nowrap">siempre quisistes tener</span>
               </h1>

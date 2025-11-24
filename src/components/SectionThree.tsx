@@ -264,7 +264,7 @@ export default function SectionThree() {
               </button>
             </div>
             {explosionLogShown && (
-              <div className="mt-2 text-xs md:text-sm text-cyan-200/80">mira en el chat</div>
+              <div className="mt-2 text-xs md:text-sm text-cyan-200/80">(mira en el chat)</div>
             )}
             <h3 className="mt-6 text-white text-2xl md:text-3xl font-extrabold">ARSENAL DE CONQUISTA</h3>
             <p className="mt-3 text-gray-300 leading-relaxed text-base md:text-lg">
@@ -333,7 +333,7 @@ export default function SectionThree() {
               )}
             </div>
             {captureLogShown && (
-              <div className="mt-2 text-xs md:text-sm text-cyan-200/80">mira en el chat</div>
+              <div className="mt-2 text-xs md:text-sm text-cyan-200/80">(mira en el chat)</div>
             )}
             <h3 className="mt-6 text-white text-2xl md:text-3xl font-extrabold">GUERRA DE GUERRILLAS 24/7</h3>
             <p className="mt-3 text-gray-300 leading-relaxed text-base md:text-lg">
