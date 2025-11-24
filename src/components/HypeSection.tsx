@@ -70,7 +70,7 @@ export default function HypeSection() {
                   <span className="cat-badge cat-secreto">Secreto</span>
                   <div className="flex flex-col items-center gap-2">
                     <span className="feature-icon text-2xl md:text-3xl tilt-icon">[❓]</span>
-                    <span className="text-lg md:text-xl font-extrabold uppercase tracking-wide shine-text tilt-title">FEATURE SECRETA (25/11)</span>
+                    <span className="text-lg md:text-xl font-extrabold uppercase tracking-wide shine-text tilt-title">FEATURE SECRETA (30/11)</span>
                     <span className="text-[10px] md:text-xs font-bold hype-secret-badge tilt-badge">BRILLA</span>
                   </div>
                   <div className="mt-2 flex items-center justify-center gap-2">
