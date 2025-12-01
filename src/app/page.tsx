@@ -1,12 +1,12 @@
 import dynamic from 'next/dynamic'
 const CinematicScroll = dynamic(() => import('@/components/CinematicScroll'))
-const CosmicBackground = dynamic(() => import('@/components/CosmicBackground'))
+const CosmicBackground = dynamic(() => import('@/components/CosmicBackground'), { ssr: false })
 const SectionThree = dynamic(() => import('@/components/SectionThree'))
 import HypeSectionClient from '@/components/HypeSectionClient'
 const WarmupHeroSection = dynamic(() => import('@/components/WarmupHeroSection'))
 import PricingSectionClient from '@/components/PricingSectionClient'
 const Footer = dynamic(() => import('@/components/Footer'))
-const PerfPanel = dynamic(() => import('@/components/PerfPanel'))
+const PerfPanel = dynamic(() => import('@/components/PerfPanel'), { ssr: false })
 
 export default function Home() {
   return (

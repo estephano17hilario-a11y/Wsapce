@@ -5,7 +5,9 @@ import type React from 'react'
 import { createPortal } from 'react-dom'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import PixelCanvas from '@/components/PixelCanvas'
+import dynamic from 'next/dynamic'
+
+const PixelCanvas = dynamic(() => import('@/components/PixelCanvas'), { ssr: false })
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger)

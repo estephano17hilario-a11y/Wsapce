@@ -20,6 +20,20 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Wspace - El Viaje Cinematográfico",
   description: "Una experiencia narrativa inmersiva inspirada en GTA 6. Viaja desde lo personal hasta Andrómeda.",
+  openGraph: {
+    title: "Wspace - El Viaje Cinematográfico",
+    description: "Una experiencia narrativa inmersiva inspirada en GTA 6. Viaja desde lo personal hasta Andrómeda.",
+    url: "https://wspace.app",
+    siteName: "Wspace",
+    locale: "es_ES",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Wspace - El Viaje Cinematográfico",
+    description: "Una experiencia narrativa inmersiva inspirada en GTA 6.",
+  },
+  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
 };
 
 export default function RootLayout({
